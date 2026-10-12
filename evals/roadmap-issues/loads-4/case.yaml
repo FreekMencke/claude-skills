@@ -1,0 +1,14 @@
+schema_version: "1.1"
+name: roadmap-issues-loads-4
+tags: [roadmap-issues, should-load]
+description: "Single cross-repo follow-up: covered by the body but not the description until #3."
+execution:
+  prompt: "This PR needs a matching change in osrs-tracker-api. Open a follow-up issue there that a fresh session can pick up."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?roadmap-issues"'

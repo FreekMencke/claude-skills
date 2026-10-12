@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: roadmap-issues-skips-3
+tags: [roadmap-issues, near-miss]
+description: "Near miss: a single issue, not a roadmap."
+execution:
+  prompt: "Draft a bug report for the crash when exporting CSV with an empty table."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?roadmap-issues"'
+    min: 0
+    max: 0
+    arm: both

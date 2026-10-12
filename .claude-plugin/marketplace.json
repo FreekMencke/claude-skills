@@ -3,6 +3,7 @@
   "owner": {
     "name": "Freek Mencke"
   },
+  "description": "Freek Mencke's personal Claude Code skills, as one plugin",
   "plugins": [
     {
       "name": "freek-skills",

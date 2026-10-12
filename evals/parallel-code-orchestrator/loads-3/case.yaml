@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: parallel-code-orchestrator-loads-3
+tags: [parallel-code-orchestrator, should-load]
+execution:
+  prompt: "This refactor touches the data layer, the UI and the tests independently. Split it into pieces and run them in parallel."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?parallel-code-orchestrator"'
