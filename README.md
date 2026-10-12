@@ -96,5 +96,9 @@ Trigger rates (runs that loaded the skill / skipped it, 3 runs per case, Opus 5.
 | `refresh-md-files` | 9/9 | 9/9 | 2026-10-12 |
 | `skill-workshop` | 9/9 | 9/9 | 2026-10-12 |
 | `claude-kb-lookup` | 9/9 | 9/9 | 2026-10-12 |
+| `roadmap-issues` after #3 (5 should-load, 4 near-miss cases) | 15/15 | 12/12 | 2026-10-12 |
+| `roadmap-issues` `loads-4`, `loads-5` (single cross-repo follow-up) after #3 | 6/6 | | 2026-10-12 |
+| `refresh-md-files` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
+| `skill-workshop` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
 
 Add a row with the new date when you rerun after a change, and keep the old rows for comparison.
