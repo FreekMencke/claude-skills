@@ -109,6 +109,7 @@ Read the whole skill, then research online as in step 4: the official documentat
 - **Guesswork**: a check based on what is usual instead of on the repo flags deliberate choices as faults.
 - **Name and description**: they match the behaviour, contain the words that should load it, and follow step 6.
 - **Overlap**: read the descriptions of the sibling skills and the installed plugin skills. A request that fits two descriptions needs a boundary line in one or both.
+- **Argument placeholders**: Claude Code replaces `$ARGUMENTS`, `$0`, `$1`… with the arguments whenever a skill is called with any, including inside code blocks and dollar amounts. Write `$(0)` in awk and amounts as "0.05 USD".
 - **Duplication**: rules copied from elsewhere.
 - **Terminology** that differs from the vocabulary in step 8 or from its sibling skills.
 - **Padding**: explanations the model does not need.
