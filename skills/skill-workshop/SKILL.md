@@ -1,13 +1,13 @@
 ---
 name: "skill-workshop"
-description: "Write a new skill, or audit and improve an existing one, by grounding it in real material and researching online for official documentation, similar published skills and existing solutions to the same problem. Use when asked to create, draft, review, audit, research, compare, tighten, align or fix a skill or a SKILL.md. For benchmarked test runs of a skill, use skill-creator instead."
+description: "Write a new skill, or audit and improve an existing one, grounded in real material and online research: official docs, similar published skills and existing solutions. Use when asked to create, draft, review, audit, research, compare, tighten, align or fix a skill or a SKILL.md. For measured trigger or benchmark runs, use claude plugin eval or skill-creator instead."
 ---
 
 # Skill workshop
 
 A skill is read by a fresh session with no context, which follows it literally. Write and audit for that reader.
 
-This skill works by reading, researching online, checking and comparing. For measured test runs (with-and-without comparisons, trigger-rate tuning), use `skill-creator`.
+This skill works by reading, researching online, checking and comparing. For measured runs, use `claude plugin eval` (trigger cases and with-and-without comparisons for a plugin or skills folder) or `skill-creator` (benchmarks, description tuning). `/skill-doctor` shows each loaded skill's context cost and how often it is invoked, not whether it triggers correctly.
 
 To review an existing skill, go to "Auditing a skill".
 
@@ -53,7 +53,13 @@ Check every command, API call, path, flag and platform behaviour in the draft ag
 
 ### 6. Name and description
 
-The description decides whether the skill loads. State what it does and when to use it, in the third person, using the words the user would type and every verb the skill supports. Stay under 1,024 characters. The name says what the skill does; when the behaviour changes, check the name still fits.
+The description decides whether the skill loads. State what it does and when to use it, in the third person, using the words the user would type and every verb the skill supports. The name says what the skill does; when the behaviour changes, check the name still fits.
+
+- **Length.** 1,024 characters is the hard limit for upload to claude.ai and the API. Claude Code truncates a listing entry at 1,536 and drops whole descriptions when the listing is over budget, and every character is paid on every turn. Aim for about 400.
+- **Use case first.** Truncation cuts the end, so the main use case goes in the first sentence.
+- **Outcome, not steps.** Never summarise the workflow's steps or their order; a session may follow the summary and skip the body.
+- **Boundaries.** When a sibling skill shares vocabulary, end with a one-line "Not for X: use Y" that names it.
+- **Frontmatter.** A skill that is also uploaded to claude.ai keeps to `name` and `description`; claude.ai syncs only those two. Claude Code-only fields such as `when_to_use` or `paths` are for skills that live only in Claude Code.
 
 ### 7. Measure and trim
 
@@ -101,7 +107,8 @@ Read the whole skill, then research online as in step 4: the official documentat
 - **Missing gate**: a public or irreversible action with no go-ahead.
 - **Order and recovery**: a step that needs what a later step provides; no path for a run that stopped halfway.
 - **Guesswork**: a check based on what is usual instead of on the repo flags deliberate choices as faults.
-- **Name and description**: they match the behaviour and contain the words that should load it.
+- **Name and description**: they match the behaviour, contain the words that should load it, and follow step 6.
+- **Overlap**: read the descriptions of the sibling skills and the installed plugin skills. A request that fits two descriptions needs a boundary line in one or both.
 - **Duplication**: rules copied from elsewhere.
 - **Terminology** that differs from the vocabulary in step 8 or from its sibling skills.
 - **Padding**: explanations the model does not need.

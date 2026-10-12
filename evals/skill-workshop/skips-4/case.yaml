@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: skill-workshop-skips-4
+tags: [skill-workshop, near-miss]
+description: "Near miss: measured trigger runs belong to claude plugin eval (#3)."
+execution:
+  prompt: "Run the trigger evals in evals/ for the deploy skill and tell me the load rate."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?skill-workshop"'
+    min: 0
+    max: 0
+    arm: both
