@@ -7,7 +7,7 @@ on it. [Check](#check) covers the CI workflow and the trigger evals in `evals/`.
 | Skill | What it does |
 |---|---|
 | `roadmap-issues` | Create, audit or refresh a GitHub roadmap issue with ordered sub-issues and blocked-by links |
-| `parallel-code-orchestrator` | Split a large coding task over parallel subagents, then integrate, verify and review |
+| `parallel-code-orchestrator` | Split a large coding task or roadmap issue over parallel subagents |
 | `refresh-md-files` | Audit `.md` docs for gaps, ambiguity and stale content |
 | `skill-workshop` | Write or audit a skill, grounded in real material and published examples |
 | `claude-kb-lookup` | Answer questions on using Claude efficiently from the claude-kb knowledge base, citing entry IDs |
@@ -100,5 +100,6 @@ Trigger rates (runs that loaded the skill / skipped it, 3 runs per case, Opus 5.
 | `roadmap-issues` `loads-4`, `loads-5` (single cross-repo follow-up) after #3 | 6/6 | | 2026-10-12 |
 | `refresh-md-files` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
 | `skill-workshop` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
+| `parallel-code-orchestrator` after #4 (trigger-only description) | 9/9 | 9/9 | 2026-10-12 |
 
 Add a row with the new date when you rerun after a change, and keep the old rows for comparison.
