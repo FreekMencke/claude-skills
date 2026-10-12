@@ -20,6 +20,7 @@ A new skill goes in `local-skills/skills/` when it reads local files or uses Cla
 | `skill-workshop` | `freek-skills` | Write or audit a skill, grounded in real material and published examples |
 | `claude-kb-lookup` | `freek-local-skills` | Answer questions on using Claude efficiently from the claude-kb knowledge base, citing entry IDs |
 | `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it |
+| `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with the 2026-10 baseline |
 
 ## Install
 
