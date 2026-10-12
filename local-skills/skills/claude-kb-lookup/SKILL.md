@@ -24,8 +24,10 @@ Then read `/home/fremen/repos/claude-kb/INDEX.md` in full, once per session. Its
 Pick the IDs from Quick answers or the index, usually one to four. Print each entry with its file and line:
 
 ```bash
-cd /home/fremen/repos/claude-kb && for id in ORCH-005 TOK-036; do awk -v id="$id" '$0 ~ "^## \\[" id "\\]" {p=1; print FILENAME ":" FNR; print; next} p && /^## / {exit} p' kb-*.md; done
+cd /home/fremen/repos/claude-kb && for id in ORCH-005 TOK-036; do awk -v id="$id" '$(0) ~ "^## \\[" id "\\]" {p=1; print FILENAME ":" FNR; print; next} p && /^## / {exit} p' kb-*.md; done
 ```
+
+Keep `$(0)`: Claude Code replaces a literal dollar-zero in a skill with the first argument when one is passed.
 
 - An entry that says "Merged into X": read X instead.
 - Follow a `Related:` ID only when the entry doesn't answer the question.
