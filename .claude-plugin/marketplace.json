@@ -7,7 +7,7 @@
     {
       "name": "freek-skills",
       "source": "./",
-      "description": "Personal Claude Code skills: roadmap issues, parallel orchestration, doc audits and skill writing"
+      "description": "Personal Claude Code skills: roadmap issues, parallel orchestration, doc audits, skill writing and knowledge-base lookup"
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "freek-skills",
-  "description": "Personal Claude Code skills: roadmap issues, parallel orchestration, doc audits and skill writing",
+  "description": "Personal Claude Code skills: roadmap issues, parallel orchestration, doc audits, skill writing and knowledge-base lookup",
   "author": {
     "name": "Freek Mencke"
   },

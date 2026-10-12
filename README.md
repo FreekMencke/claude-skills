@@ -9,6 +9,7 @@ plugin names can't start with `claude-`) and a marketplace, so `claude plugin va
 | `parallel-code-orchestrator` | Split a large coding task over parallel subagents, then integrate, verify and review |
 | `refresh-md-files` | Audit `.md` docs for gaps, ambiguity and stale content |
 | `skill-workshop` | Write or audit a skill, grounded in real material and published examples |
+| `claude-kb-lookup` | Answer questions on using Claude efficiently from the claude-kb knowledge base, citing entry IDs |
 
 ## Install
 
@@ -47,7 +48,8 @@ Why not claude.ai only: desktop sessions in WSL don't load claude.ai account ski
 ## claude.ai copies
 
 Chat, Cowork and desktop Local sessions still get these skills from claude.ai. After changing a skill here, upload its
-folder as a ZIP on claude.ai so the copies don't drift. Synced skills only carry standard frontmatter (`name`,
+folder as a ZIP on claude.ai so the copies don't drift. Don't upload `claude-kb-lookup`: it reads a local clone of
+claude-kb at `/home/fremen/repos/claude-kb` and has nothing to read on claude.ai. Synced skills only carry standard frontmatter (`name`,
 `description`), so don't add Claude Code-only fields such as `when_to_use` or `paths` while claude.ai is a channel.
 
 The terminal CLI lists each skill twice: once as a personal skill and once as `anthropic-skills:<name>`.
