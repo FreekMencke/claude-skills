@@ -1,0 +1,51 @@
+# Brief template
+
+Fill in every section for each subagent. Keep the sections every unit shares (Rules, Decisions, Limits) word for word the same and before the per-unit details where you can: identical prefixes are cheaper to cache.
+
+```
+## Task
+<one-paragraph goal>
+<roadmap child: "Implement owner/repo#N. Read it and the roadmap
+owner/repo#M (gh issue view, or gh api repos/<owner>/<repo>/issues/<n>).">
+<wave 2 onwards: "First merge branch <integration branch> into yours.">
+
+## Rules
+Load the repo's skill (<name>) before writing anything.
+<worktree gaps from step 3: where to install dependencies, the absolute
+path to sibling repos>
+<when an earlier wave changed CLAUDE.md or .claude/rules/: "Your CLAUDE.md
+is loaded from the main checkout and is out of date: <what changed>.">
+
+## Scope
+You may edit: <owned files>
+Read but do not edit: <paths>
+Nothing else, including <the shared files from step 3>. Needed changes
+outside your scope: report them, don't make them.
+
+## Decisions already made
+<the shared decisions from step 4, word for word>
+<what the roadmap defers or dropped>
+
+## Verify
+Run: <the done-when command, then the verify command or subset>.
+Fix failures you caused. Already failing, ignore: <list>
+
+## Limits
+Commit on your worktree branch with normal signing. No push, deploy,
+publish, dev server, issue edits, or anything that changes remote state.
+Don't spawn subagents except read-only Explore searches.
+Context budget: about <N>k tokens. When you get close, stop at a clean
+point: commit, write <path>/HANDOFF.md (goal and done-when, state,
+approach and what was dropped, commands, data formats, remaining work,
+pitfalls) and report STATUS: HANDOFF.
+
+## Report, under 20 lines; the diff is the detail
+STATUS: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED | HANDOFF
+- Branch, and files changed with one line each
+- Verify commands and results
+- The entry each shared file needs (changelog line, doc row)
+- Decisions you made that another unit might also have faced
+- Concerns, out-of-scope changes needed, or what blocks you
+```
+
+For a HANDOFF continuation, the brief is "Continue from <path>/HANDOFF.md" plus the original brief's Scope, Decisions, Verify and Limits.
