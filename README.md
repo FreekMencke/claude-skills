@@ -67,7 +67,13 @@ claude plugin validate local-skills
 
 The root check covers the marketplace and `freek-skills`, but not the skills inside `local-skills/`.
 
-It doesn't flag unknown frontmatter keys, so check by hand that the skills in `skills/` keep to `name` and `description`.
+It doesn't flag unknown frontmatter keys, so `scripts/check-frontmatter.py` checks that each `skills/*/SKILL.md` keeps
+to `name` and `description` (both present, nothing else). CI runs it, and a `PostToolUse` hook in `.claude/settings.json`
+runs it after Claude edits one of those files in a session here. Locally:
+
+```bash
+python3 scripts/check-frontmatter.py
+```
 
 ### Trigger evals
 

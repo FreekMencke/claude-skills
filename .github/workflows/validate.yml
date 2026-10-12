@@ -17,6 +17,9 @@ jobs:
         with:
           node-version: 22
       # validate needs no credentials. Evals aren't run here: they spend model calls (see README "Check").
+      # validate doesn't flag unknown frontmatter keys; skills/ keeps to name and description (README "Check").
+      - name: skills/ frontmatter
+        run: python3 scripts/check-frontmatter.py
       - run: npm install -g @anthropic-ai/claude-code
       # Strict, except for the missing version, which is left out on purpose so installs track commits.
       # The marketplace check at the root doesn't look inside local-skills/, so validate that plugin too.
