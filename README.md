@@ -1,7 +1,8 @@
 # claude-skills
 
 Source of truth for my personal Claude Code skills. The repo is laid out as a skills-dir plugin (`freek-skills`;
-plugin names can't start with `claude-`) and a marketplace, so `claude plugin validate .` and `claude plugin eval .` work on it.
+plugin names can't start with `claude-`) and a marketplace, so `claude plugin validate .` and `claude plugin eval .` work
+on it. [Check](#check) covers the CI workflow and the trigger evals in `evals/`.
 
 | Skill | What it does |
 |---|---|
@@ -57,8 +58,43 @@ The terminal CLI lists each skill twice: once as a personal skill and once as `a
 
 ## Check
 
+CI (`.github/workflows/validate.yml`) runs `claude plugin validate .` on pushes to `main` and on PRs, and fails on any
+error or warning except the missing `version`, which is left out on purpose so installs track commits (that's also why
+it doesn't use `--strict`). Locally:
+
 ```bash
 claude plugin validate .
 ```
 
-Not `--strict`: it fails on the missing `version`, which is left out on purpose so installs track commits.
+It doesn't flag unknown frontmatter keys, so check by hand that the uploaded skills keep to `name` and `description`.
+
+### Trigger evals
+
+`evals/<skill>/` holds trigger cases for `claude plugin eval`: per skill, `loads-*` prompts that should load it and
+`skips-*` near misses that shouldn't, mostly taken from a sibling skill's territory. Each case has one free
+`tool_used: Skill` grader. Run them by hand after changing a description, not in CI: every run is a model call on your
+plan (about $0.08 each, so about $8 for the suite at 3 runs per case).
+
+```bash
+claude plugin eval . --ablation none --model claude-opus-5-5 --no-publish -j 4 --threshold 0
+```
+
+- `--ablation none`: the no-plugin arm says nothing about triggering and doubles the cost.
+- `--model`: pin it, so a model change isn't read as a description regression. Add `--case 'refresh-md-files-*'` or
+  `--tag <skill>` to run one skill.
+- Runs are isolated: only this plugin's skills compete. Overlap with skills from other plugins (`claude-md-improver`,
+  `skill-creator`) doesn't show up here.
+- Results go to `evals/results/`, which is ignored.
+
+Trigger rates (runs that loaded the skill / skipped it, 3 runs per case, Opus 5.5, Claude Code 2.1.296):
+
+| Skill | Should load | Near miss skipped | Date |
+|---|---|---|---|
+| `roadmap-issues` | 9/9 | 9/9 | 2026-10-12 |
+| `roadmap-issues` `loads-4` (single cross-repo follow-up) | 0/3 | | 2026-10-12 |
+| `parallel-code-orchestrator` | 9/9 | 9/9 | 2026-10-12 |
+| `refresh-md-files` | 9/9 | 9/9 | 2026-10-12 |
+| `skill-workshop` | 9/9 | 9/9 | 2026-10-12 |
+| `claude-kb-lookup` | 9/9 | 9/9 | 2026-10-12 |
+
+Add a row with the new date when you rerun after a change, and keep the old rows for comparison.

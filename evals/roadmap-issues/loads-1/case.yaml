@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: roadmap-issues-loads-1
+tags: [roadmap-issues, should-load]
+execution:
+  prompt: "We're splitting the auth migration over several issues across osrs-tracker-api and osrs-tracker-web. Set up a tracking issue that lists the pieces in order and what blocks what."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?roadmap-issues"'

@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: refresh-md-files-loads-1
+tags: [refresh-md-files, should-load]
+execution:
+  prompt: "Audit the README in this repo for stale or missing information, checked against the code."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?refresh-md-files"'
