@@ -53,9 +53,9 @@ These outrank this skill where they disagree.
 
 Children are the work units; an open child that waits on nothing open is ready, and the ready children are the current wave. A child's `## Verify` is its done-when, and the file paths in its `## Problem` and `## Do` are the files it touches. A child without a `## Verify` has its check among the `## Do` steps; one whose first line names no limits takes them from the roadmap's Order. Split a large child further inside its repo, but never merge children into one unit. What the roadmap lists as considered and dropped stays dropped. Roadmaps go stale: check the evidence dates and the plan against the current code first.
 
-Other sessions may be working the same roadmap. Skip children that are assigned or have an open PR (`gh pr list --search "<n>"`), and assign the ones you take when you launch: `gh issue edit <n> --add-assignee @me`.
+Other sessions may be working the same roadmap. Skip children that are assigned or have an open PR (`gh pr list --search "<n>"`), and assign the ones you take when you launch: `gh api -X POST repos/<owner>/<repo>/issues/<n>/assignees -f 'assignees[]=<login>'` (`gh api user --jq .login` gives the login; `gh issue edit --add-assignee` can fail on a Projects (classic) error).
 
-Where `gh issue` commands fail with a GraphQL error (cloud sessions), use REST: `gh api repos/<owner>/<repo>/issues/<n>` to read, the same path with `-X PATCH -F body=@file` to edit, `-X POST .../issues/<n>/assignees -f 'assignees[]=<login>'` to assign (`gh api user --jq .login` gives the login), and `gh api -X GET search/issues -f q='repo:<owner>/<repo> is:pull-request state:open <n>'` to look for an open PR.
+Where `gh issue` commands fail with a GraphQL error (cloud sessions), use REST: `gh api repos/<owner>/<repo>/issues/<n>` to read, the same path with `-X PATCH -F body=@file` to edit, and `gh api -X GET search/issues -f q='repo:<owner>/<repo> is:pull-request state:open <n>'` to look for an open PR.
 
 Work that spans several sessions or repos and has no roadmap: suggest the `roadmap-issues` skill first.
 
