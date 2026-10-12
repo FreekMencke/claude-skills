@@ -19,13 +19,19 @@ jobs:
       # validate needs no credentials. Evals aren't run here: they spend model calls (see README "Check").
       - run: npm install -g @anthropic-ai/claude-code
       # Strict, except for the missing version, which is left out on purpose so installs track commits.
+      # The marketplace check at the root doesn't look inside local-skills/, so validate that plugin too.
       - name: claude plugin validate
         run: |
           claude --version
-          claude plugin validate --json . > validate.json || true
-          jq -r '[.manifest] + .contents | .[] | (.errors[] | "error   \(.path): \(.message)"), (.warnings[] | "warning \(.path): \(.message)")' validate.json
-          problems=$(jq '[.manifest] + .contents | [.[] | .errors[], (.warnings[] | select(.path | test("(^|→ )version$") | not))] | length' validate.json)
-          if [ "$(jq .success validate.json)" != true ] || [ "$problems" -ne 0 ]; then
-            echo "::error::claude plugin validate found $problems problem(s) besides the missing version"
-            exit 1
-          fi
+          status=0
+          for target in . local-skills; do
+            echo "== $target"
+            claude plugin validate --json "$target" > validate.json || true
+            jq -r '[.manifest] + .contents | .[] | (.errors[] | "error   \(.path): \(.message)"), (.warnings[] | "warning \(.path): \(.message)")' validate.json
+            problems=$(jq '[.manifest] + .contents | [.[] | .errors[], (.warnings[] | select(.path | test("(^|→ )version$") | not))] | length' validate.json)
+            if [ "$(jq .success validate.json)" != true ] || [ "$problems" -ne 0 ]; then
+              echo "::error::claude plugin validate $target found $problems problem(s) besides the missing version"
+              status=1
+            fi
+          done
+          exit $status
