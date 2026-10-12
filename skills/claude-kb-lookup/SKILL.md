@@ -10,11 +10,12 @@ The knowledge base is a git repo of sourced entries at `/home/fremen/repos/claud
 ## 1. Get the index
 
 ```bash
-git -C /home/fremen/repos/claude-kb pull --ff-only -q
+git -C /home/fremen/repos/claude-kb fetch -q && git -C /home/fremen/repos/claude-kb merge --ff-only -q origin/main
 ```
 
+- Not `git pull`: two sessions pulling at once fail with "Cannot fast-forward to multiple branches".
 - If the folder doesn't exist (a cloud session, another machine), say the knowledge base isn't available here and stop; the caller decides where to look instead.
-- If the pull fails, carry on with what is there and say the copy may be behind.
+- If the update fails, carry on with what is there and say the copy may be behind.
 
 Then read `/home/fremen/repos/claude-kb/INDEX.md` in full, once per session. Its Quick answers table often settles the question; its index lists every entry by ID, title, type and tags.
 
