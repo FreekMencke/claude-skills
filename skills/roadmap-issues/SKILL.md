@@ -1,6 +1,6 @@
 ---
 name: "roadmap-issues"
-description: "Create, audit or refresh a GitHub roadmap issue with ordered sub-issues and blocked-by links, across repos. Use when work is split over several issues, when asked for a roadmap, a tracking issue or to break work into issues, or to check whether an existing roadmap and its children are stale."
+description: "Create, audit or refresh a GitHub roadmap issue with ordered sub-issues and blocked-by links, across repos, or open a follow-up issue in another repo. Use when work is split over several issues, when asked for a roadmap, a tracking issue or to break work into issues, when a change needs a follow-up in another repo, or to check whether an existing roadmap and its children are stale."
 ---
 
 # Roadmap issues

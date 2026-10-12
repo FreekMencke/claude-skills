@@ -1,6 +1,6 @@
 ---
 name: "refresh-md-files"
-description: "Audit .md docs for gaps, ambiguity and stale content, from the target reader's perspective and checked against the code. Outputs severity-ranked findings with proof and a fix note each, no rewrites. Use for doc reviews, to audit or refresh a README or CLAUDE.md, and for stale, outdated or drifted docs."
+description: "Audit .md docs for gaps, ambiguity and stale content, from the target reader's perspective and checked against the code. Outputs severity-ranked findings with proof and a fix note each, no rewrites. Use for doc reviews, to audit or refresh a README or CLAUDE.md, and for stale, outdated or drifted docs. Not for scoring CLAUDE.md quality or editing it: use claude-md-improver."
 ---
 
 # Audit Markdown docs
