@@ -1,9 +1,9 @@
 schema_version: "1.1"
 name: claude-kb-lookup-skips-2
 tags: [claude-kb-lookup, near-miss]
-description: "Near miss: skill-workshop."
+description: "Near miss: a code review, not a question about using Claude. (Was \"Write a new skill…\", which the description deliberately covers: \"use before writing an agent or skill\".)"
 execution:
-  prompt: "Write a new skill that formats changelogs."
+  prompt: "Review the diff on this branch for bugs before I open a PR."
   max_turns: 3
   timeout_seconds: 180
   allowed_tools: [Read, Glob, Grep, Skill]

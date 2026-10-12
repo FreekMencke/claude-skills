@@ -1,9 +1,22 @@
 ---
 name: claude-kb-lookup
-description: "Looks up the claude-kb knowledge base on using Claude efficiently: models and effort, subagents, skills, repo agents, token usage, context and caching. Answers cite entry IDs and flag entries due for re-check. Use before choosing a subagent's model, writing an agent or skill, or cutting token cost, and for how Claude Code features behave. Not for editing the knowledge base."
+description: "Looks up the claude-kb knowledge base on using Claude efficiently (models and effort, subagents, skills, repo agents, token usage, context, caching), citing entry IDs. Use before choosing a subagent's model, writing an agent or skill, or cutting token cost, and for how Claude Code features behave. Pass a self-contained question; keep its entry IDs in your reply. Not for editing the knowledge base."
+context: fork
+agent: general-purpose
+model: haiku
+background: false
+argument-hint: "<self-contained question>"
 ---
 
 # Look up the Claude knowledge base
+
+You run as a separate subagent on Haiku (`context: fork`, `model: haiku`), with no access to the caller's
+conversation. Answer this question from the knowledge base, following the steps below, and return only the answer in
+the format of step 4:
+
+> $ARGUMENTS
+
+If the question is empty or depends on context you can't see ("this", "the above"), say what is missing and stop.
 
 The knowledge base is a git repo of sourced entries at `/home/fremen/repos/claude-kb`. Read it; never edit it.
 
@@ -17,7 +30,7 @@ git -C /home/fremen/repos/claude-kb fetch -q && git -C /home/fremen/repos/claude
 - If the folder doesn't exist (a cloud session, another machine), say the knowledge base isn't available here and stop; the caller decides where to look instead.
 - If the update fails, carry on with what is there and say the copy may be behind.
 
-Then read `/home/fremen/repos/claude-kb/INDEX.md` in full, once per session. Its Quick answers table often settles the question; its index lists every entry by ID, title, type and tags.
+Then read `/home/fremen/repos/claude-kb/INDEX.md` in full. Its Quick answers table often settles the question; its index lists every entry by ID, title, type and tags.
 
 ## 2. Read only the entries you need
 
