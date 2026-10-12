@@ -94,20 +94,15 @@ claude plugin eval local-skills --ablation none --model claude-opus-5-5 --no-pub
   `skill-creator`) doesn't show up here.
 - Results go to `evals/results/` and `local-skills/evals/results/`, which are ignored.
 
-Trigger rates (runs that loaded the skill / skipped it, 3 runs per case, Opus 5.5, Claude Code 2.1.296):
+Trigger rates of the latest run per skill (runs that loaded the skill / skipped it, 3 runs per case, Opus 5.5):
 
-| Skill | Should load | Near miss skipped | Date |
-|---|---|---|---|
-| `roadmap-issues` | 9/9 | 9/9 | 2026-10-12 |
-| `parallel-code-orchestrator` | 9/9 | 9/9 | 2026-10-12 |
-| `refresh-md-files` | 9/9 | 9/9 | 2026-10-12 |
-| `skill-workshop` | 9/9 | 9/9 | 2026-10-12 |
-| `claude-kb-lookup` | 9/9 | 9/9 | 2026-10-12 |
-| `roadmap-issues` after #3 (5 should-load, 4 near-miss cases) | 15/15 | 12/12 | 2026-10-12 |
-| `roadmap-issues` `loads-4`, `loads-5` (single cross-repo follow-up) after #3; `loads-4` was 0/3 before | 6/6 | | 2026-10-12 |
-| `refresh-md-files` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
-| `skill-workshop` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
-| `parallel-code-orchestrator` after #4 (trigger-only description) | 9/9 | 9/9 | 2026-10-12 |
-| `claude-kb-lookup` after #20 (new claude-kb topics; 11 + 5 cases) | 33/33 | 15/15 | 2026-10-12 |
+| Skill | Cases (load + near miss) | Should load | Near miss skipped | Claude Code | Date |
+|---|---|---|---|---|---|
+| `roadmap-issues` | 5 + 4 | 15/15 | 12/12 | 2.1.296 | 2026-10-12 |
+| `parallel-code-orchestrator` | 3 + 3 | 9/9 | 9/9 | 2.1.296 | 2026-10-12 |
+| `refresh-md-files` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
+| `skill-workshop` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
+| `claude-kb-lookup` | 11 + 5 | 33/33 | 15/15 | 2.1.296 | 2026-10-12 |
 
-Add a row with the new date when you rerun after a change, and keep the old rows for comparison.
+When you rerun after a change, replace that skill's row and put the before/after in the PR description; git history
+keeps the old numbers.
