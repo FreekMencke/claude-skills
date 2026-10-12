@@ -109,5 +109,6 @@ Trigger rates (runs that loaded the skill / skipped it, 3 runs per case, Opus 5.
 | `refresh-md-files` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
 | `skill-workshop` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
 | `parallel-code-orchestrator` after #4 (trigger-only description) | 9/9 | 9/9 | 2026-10-12 |
+| `claude-kb-lookup` after #20 (new claude-kb topics; 11 + 5 cases) | 33/33 | 15/15 | 2026-10-12 |
 
 Add a row with the new date when you rerun after a change, and keep the old rows for comparison.
