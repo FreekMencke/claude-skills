@@ -1,7 +1,7 @@
 # claude-skills
 
 Source of truth for my personal Claude Code skills. The repo is laid out as a skills-dir plugin (`freek-skills`;
-plugin names can't start with `claude-`), so `claude plugin validate --strict .` and `claude plugin eval .` work on it.
+plugin names can't start with `claude-`) and a marketplace, so `claude plugin validate .` and `claude plugin eval .` work on it.
 
 | Skill | What it does |
 |---|---|
@@ -17,7 +17,29 @@ plugin names can't start with `claude-`), so `claude plugin validate --strict .`
 ```
 
 This symlinks each `skills/<name>` into `~/.claude/skills/<name>`, so edits here are live in the next session. Run it
-again after adding a skill.
+again after adding a skill. Use this on the machine where you edit the skills.
+
+### Other machines
+
+The repo is also a marketplace. Install the plugin from it instead of cloning (Claude Code 2.1.275 or later):
+
+```bash
+CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1 claude plugin install freek-skills --marketplace FreekMencke/claude-skills
+```
+
+or, in a session:
+
+```text
+/plugin install freek-skills --marketplace FreekMencke/claude-skills
+```
+
+- The repo is private: git needs a stored credential (`gh auth login`, then `gh auth setup-git`). Set
+  `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` in the environment when the machine has no GitHub SSH key, or in-session installs
+  and updates fail.
+- Skills are then named `freek-skills:<name>`, and `/freek-skills:roadmap-issues` runs one.
+- Updates aren't automatic: run `claude plugin update freek-skills@freek-skills`, or turn on auto-update for the
+  marketplace under **Marketplaces** in `/plugin`. `version` is left out of `plugin.json` so updates track commits.
+- Don't combine this with `install.sh` on one machine, or every skill is listed twice.
 
 Why not claude.ai only: desktop sessions in WSL don't load claude.ai account skills, although the files sync to
 `~/.claude/skills/synced/` (claude-kb `SKILL-050`). Personal skills in the distro's `~/.claude/skills` do load there.
@@ -34,5 +56,7 @@ The terminal CLI lists each skill twice: once as a personal skill and once as `a
 ## Check
 
 ```bash
-claude plugin validate --strict .
+claude plugin validate .
 ```
+
+Not `--strict`: it fails on the missing `version`, which is left out on purpose so installs track commits.

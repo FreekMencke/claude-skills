@@ -1,0 +1,13 @@
+{
+  "name": "freek-skills",
+  "owner": {
+    "name": "Freek Mencke"
+  },
+  "plugins": [
+    {
+      "name": "freek-skills",
+      "source": "./",
+      "description": "Personal Claude Code skills: roadmap issues, parallel orchestration, doc audits and skill writing"
+    }
+  ]
+}
