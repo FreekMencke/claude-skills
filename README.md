@@ -99,13 +99,12 @@ Trigger rates (runs that loaded the skill / skipped it, 3 runs per case, Opus 5.
 | Skill | Should load | Near miss skipped | Date |
 |---|---|---|---|
 | `roadmap-issues` | 9/9 | 9/9 | 2026-10-12 |
-| `roadmap-issues` `loads-4` (single cross-repo follow-up) | 0/3 | | 2026-10-12 |
 | `parallel-code-orchestrator` | 9/9 | 9/9 | 2026-10-12 |
 | `refresh-md-files` | 9/9 | 9/9 | 2026-10-12 |
 | `skill-workshop` | 9/9 | 9/9 | 2026-10-12 |
 | `claude-kb-lookup` | 9/9 | 9/9 | 2026-10-12 |
 | `roadmap-issues` after #3 (5 should-load, 4 near-miss cases) | 15/15 | 12/12 | 2026-10-12 |
-| `roadmap-issues` `loads-4`, `loads-5` (single cross-repo follow-up) after #3 | 6/6 | | 2026-10-12 |
+| `roadmap-issues` `loads-4`, `loads-5` (single cross-repo follow-up) after #3; `loads-4` was 0/3 before | 6/6 | | 2026-10-12 |
 | `refresh-md-files` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
 | `skill-workshop` after #3 (4 + 4 cases) | 12/12 | 12/12 | 2026-10-12 |
 | `parallel-code-orchestrator` after #4 (trigger-only description) | 9/9 | 9/9 | 2026-10-12 |
