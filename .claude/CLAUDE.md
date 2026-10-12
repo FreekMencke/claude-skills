@@ -13,4 +13,4 @@ Marketplace with two plugins; README.md has the full layout, install and eval de
 - After adding, moving or removing a skill: `./install.sh`.
 - New skill: add `loads-*` and `skips-*` trigger cases under `evals/<skill>/` or `local-skills/evals/<skill>/`.
 - After changing a description: run that skill's trigger evals (README "Trigger evals"; `--tag <skill>` limits cost)
-  and add a dated row to the README results table, keeping old rows.
+  and replace that skill's row in the README results table; the before/after goes in the PR description.
