@@ -21,40 +21,24 @@ on it. [Check](#check) covers the CI workflow and the trigger evals in `evals/`.
 This symlinks each `skills/<name>` into `~/.claude/skills/<name>`, so edits here are live in the next session. Run it
 again after adding a skill. Use this on the machine where you edit the skills.
 
-### Other machines
+### claude.ai, chat, Cowork and other machines
 
-The repo is also a marketplace. Install the plugin from it instead of cloning (Claude Code 2.1.275 or later):
+The repo is also a marketplace, installed as a plugin on my claude.ai account (Customize › Plugins › Add marketplace
+`FreekMencke/claude-skills`, then install `freek-skills`, with **Sync automatically** on). The repo is private, so the
+Claude GitHub App needs access to it. From there:
 
-```bash
-CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1 claude plugin install freek-skills --marketplace FreekMencke/claude-skills
-```
+- Chat and Cowork load the skills as `freek-skills:<name>`. A merge to `main` reaches them without any upload.
+- Every Claude Code session signed in to the account downloads the plugin as `freek-skills@synced`. On other machines
+  that's the whole install. On the machine with `install.sh`, turn the synced copy off, or every skill is listed twice:
+  `"freek-skills@synced": false` under `enabledPlugins` in `~/.claude/settings.json`.
+- `version` is left out of `plugin.json` so updates track commits.
+- `claude-kb-lookup` also reaches chat and Cowork, where it has no claude-kb clone to read. It only costs a listing line.
 
-or, in a session:
+Don't add Claude Code-only frontmatter (`when_to_use`, `paths`, `disable-model-invocation`) to skills in this plugin
+until it's checked that claude.ai accepts it: keep to `name` and `description`.
 
-```text
-/plugin install freek-skills --marketplace FreekMencke/claude-skills
-```
-
-- The repo is private: git needs a stored credential (`gh auth login`, then `gh auth setup-git`). Set
-  `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` in the environment when the machine has no GitHub SSH key, or in-session installs
-  and updates fail.
-- Skills are then named `freek-skills:<name>`, and `/freek-skills:roadmap-issues` runs one.
-- Updates aren't automatic: run `claude plugin update freek-skills@freek-skills`, or turn on auto-update for the
-  marketplace under **Marketplaces** in `/plugin`. `version` is left out of `plugin.json` so updates track commits.
-- Don't combine this with `install.sh` on one machine, or every skill is listed twice.
-
-Why not claude.ai only: desktop sessions in WSL don't load claude.ai account skills, although the files sync to
-`~/.claude/skills/synced/` (claude-kb `SKILL-050`). Personal skills in the distro's `~/.claude/skills` do load there.
-
-## claude.ai copies
-
-Chat, Cowork and desktop Local sessions still get these skills from claude.ai. After changing a skill here, upload its
-folder as a ZIP on claude.ai so the copies don't drift. Don't upload `claude-kb-lookup`: it reads a local clone of
-claude-kb at `/home/fremen/repos/claude-kb` and has nothing to read on claude.ai. Synced skills only carry standard frontmatter (`name`,
-`description`), so don't add Claude Code-only fields such as `when_to_use` or `paths` while claude.ai is a channel.
-
-The terminal CLI lists each skill twice: once as a personal skill and once as `anthropic-skills:<name>`.
-`syncClaudeAiSkills: false` in `~/.claude/settings.json` removes the second copy, but also every other account skill.
+Desktop sessions in WSL don't load claude.ai account skills (claude-kb `SKILL-050`), and it's not checked whether they
+load synced plugins. The `install.sh` symlinks in the distro's `~/.claude/skills` do load there.
 
 ## Check
 
@@ -66,7 +50,7 @@ it doesn't use `--strict`). Locally:
 claude plugin validate .
 ```
 
-It doesn't flag unknown frontmatter keys, so check by hand that the uploaded skills keep to `name` and `description`.
+It doesn't flag unknown frontmatter keys, so check by hand that the skills keep to `name` and `description`.
 
 ### Trigger evals
 
