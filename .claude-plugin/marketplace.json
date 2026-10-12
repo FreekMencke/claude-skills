@@ -8,7 +8,12 @@
     {
       "name": "freek-skills",
       "source": "./",
-      "description": "Personal Claude Code skills: roadmap issues, parallel orchestration, doc audits, skill writing and knowledge-base lookup"
+      "description": "Personal skills for every surface (synced to claude.ai): roadmap issues, parallel orchestration, doc audits and skill writing"
+    },
+    {
+      "name": "freek-local-skills",
+      "source": "./local-skills",
+      "description": "Claude Code-only skills that need this machine (local clones, transcripts): knowledge-base lookup. Don't install on claude.ai"
     }
   ]
 }

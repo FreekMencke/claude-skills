@@ -1,0 +1,11 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "freek-local-skills",
+  "description": "Personal Claude Code-only skills that need this machine: knowledge-base lookup",
+  "author": {
+    "name": "Freek Mencke"
+  },
+  "skills": [
+    "./skills/"
+  ]
+}
