@@ -1,6 +1,6 @@
 ---
 name: claude-kb-lookup
-description: "Looks up the claude-kb knowledge base on using Claude (models, effort, subagents, skills, hooks, prompting, CLAUDE.md, memory, parallel sessions, workflows, infra agents, desktop app, artifacts, tokens, context, caching, GA4, Search Console and SEO work), citing entry IDs. Use before picking a subagent's model, writing an agent, skill, hook or CLAUDE.md rule, or cutting token cost, and for how Claude Code features behave. Pass a self-contained question; keep its IDs. Not for editing the knowledge base."
+description: "Looks up the claude-kb knowledge base on using Claude (models, effort, subagents, skills, hooks, prompting, CLAUDE.md, memory, parallel sessions, workflows, infra agents, MCP servers, desktop app, artifacts, tokens, context, caching, GA4, Search Console and SEO work), citing entry IDs. Use before picking a subagent's model, writing an agent, skill, hook or CLAUDE.md rule, or cutting token cost, and for how Claude Code features behave. Pass a self-contained question; keep its IDs. Not for editing the knowledge base."
 context: fork
 agent: general-purpose
 model: haiku
