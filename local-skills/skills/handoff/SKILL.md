@@ -13,6 +13,18 @@ reading one note.
 
 If `$ARGUMENTS` is set, it says what the next session should focus on: put it first under **Next steps**.
 
+## When not to hand off
+
+A handoff is for a context that is full or confused as a whole. Two narrower problems have cheaper fixes that keep the
+good context:
+
+- **One bad detour**: rewind (`Esc Esc` or `/rewind`, then **Restore code and conversation**) to the prompt before it,
+  and edit that prompt with what you learned.
+- **An alternative worth trying**: `/branch` copies the conversation and leaves the original to `/resume`. It copies
+  the conversation, not the files: pair it with a commit or a worktree for a code experiment.
+
+If the conversation looks like one of these, say which in one line and ask before writing the handoff.
+
 ## 1. Collect the state
 
 Check, don't recall:
