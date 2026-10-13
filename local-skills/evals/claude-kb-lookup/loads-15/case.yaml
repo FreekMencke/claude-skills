@@ -1,0 +1,14 @@
+schema_version: "1.1"
+name: claude-kb-lookup-loads-15
+tags: [claude-kb-lookup, should-load]
+description: "SEO skills (kb-web-analytics-seo.md)."
+execution:
+  prompt: "Is there a good SEO skill to install for auditing my site with Claude?"
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?claude-kb-lookup"'
