@@ -170,6 +170,7 @@ Data: <the tier line from step 2>
 - <Rich Results Test on <URL>; Search Console Pages report reasons; Crawl stats; Core Web Vitals report>
 
 ## Appendix
+<findings 6 and beyond, one row each; leave the section out when there are none>
 | # | Finding | Where | Impact | Effort | Confidence |
 
 Recheck: <date 4 weeks after the fixes deploy>; Search Console shows a change weeks later.

@@ -55,9 +55,9 @@ curl -s -G https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespee
        lcp: .lighthouseResult.audits["largest-contentful-paint"].displayValue,
        cls: .lighthouseResult.audits["cumulative-layout-shift"].displayValue,
        tbt: .lighthouseResult.audits["total-blocking-time"].displayValue,
-       lcp_element: .lighthouseResult.audits["largest-contentful-paint-element"].details.items[0].items[0].node.snippet,
-       failed_seo: [.lighthouseResult.audits | to_entries[] | select(.value.score == 0) | .key],
-       field: (.loadingExperience.metrics // "none")}'
+       lcp_element: [.lighthouseResult.audits["lcp-breakdown-insight"].details.items[]? | select(.type == "node") | .snippet][0],
+       failed_seo: [.lighthouseResult.categories.seo.auditRefs[].id as $id | .lighthouseResult.audits[$id] | select(.score == 0) | .id],
+       field: (.loadingExperience.overall_category // "none"), error: .error.message}'
 ```
 
 Runs take 20 to 60 seconds; run one page per template, in parallel. PSI fetches production only.
