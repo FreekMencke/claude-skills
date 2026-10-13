@@ -28,6 +28,9 @@ outside your scope: report them, don't make them.
 
 ## Verify
 Run: <the done-when command, then the verify command or subset>.
+A syntax-only check, or a check command that failed to start, does not
+count: it doesn't exercise the change. If no real check can run here,
+report which one and why instead of reporting DONE.
 Fix failures you caused. Already failing, ignore: <list>
 
 ## Limits
@@ -40,6 +43,10 @@ approach and what was dropped, commands, data formats, remaining work,
 pitfalls) and report STATUS: HANDOFF.
 
 ## Report, under 20 lines; the diff is the detail
+Every claim rests on a command result from this session; name any check
+you didn't run. BLOCKED is a valid report: say what blocked you and stop
+instead of working around it, such as skipping a check or editing outside
+your scope.
 STATUS: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED | HANDOFF
 - Branch, and files changed with one line each
 - Verify commands and results
