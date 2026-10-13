@@ -36,6 +36,11 @@ find one: auto mode blocks that as credential exploration, and the key must neve
 `verdict`, `coverageState`, `lastCrawlTime`, `googleCanonical` against `userCanonical`, `referringUrls`, `sitemap`.
 It reports the indexed version only ("you cannot test the indexability of a live URL"), and can disagree with the UI.
 
+**Sitemaps** (`sitemaps.list`): `isPending`, `lastDownloaded`, `errors`, `warnings` per submitted index and child.
+`isPending: true` with 0 errors, on a sitemap the logs show Googlebot fetching with a 200, means not processed yet:
+not a finding, even when the UI says "could not be read". A sitemap index row stuck pending is harmless when its
+children are submitted directly and read fine. Details: claude-kb WEB-032, through the `claude-kb-lookup` skill.
+
 **UI only** (manual steps for the user, or a browser they sign in to): the Pages report's reasons ("Discovered –
 currently not indexed", "Crawled – currently not indexed", duplicates), Crawl stats, the Core Web Vitals report.
 

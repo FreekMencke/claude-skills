@@ -52,12 +52,19 @@ So the server HTML (curl) and the rendered DOM must agree on the canonical and t
 - [Title links](https://developers.google.com/search/docs/appearance/title-link): "Make sure every page on your site
   has a title specified in the `<title>` element." "Avoid vague descriptors like "Home" for your home page". "While
   there's no limit on how long a `<title>` element can be, the title link is truncated in Google Search results as
-  needed, typically to fit the device width." "Avoid keyword stuffing."
+  needed, typically to fit the device width." "Avoid keyword stuffing." "Google uses a number of different sources to
+  automatically determine the title link". On a site name in every title: "consider including just your site name at
+  the beginning or end of each `<title>` element, separated from the rest of the text with a delimiter such as a
+  hyphen, colon, or pipe".
 - [Meta descriptions](https://developers.google.com/search/docs/appearance/snippet): "Google primarily uses the content
   on the page to automatically determine the appropriate snippet." "There's no limit on how long a meta description
   can be, but the snippet is truncated in Google Search results as needed, typically to fit the device width."
 
 A title or description shared by every page of a template is a finding; a length outside 60 or 160 characters is not.
+
+A `Brand: phrase` title whose phrase starts lowercase is a low finding: check `probe.sh`'s title column. Google's page
+allows the format, but on 2026-10-13 Google showed two such titles as `phrase - Brand`, leading with the lowercase
+word (claude-kb WEB-033, through the `claude-kb-lookup` skill). Fix: capitalise the phrase, or write `Phrase - Brand`.
 
 ## Canonicals and duplicates
 

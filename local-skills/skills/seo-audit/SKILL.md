@@ -77,7 +77,8 @@ no data). Add the edge cases that apply:
 - an unknown id or name (should be 404), a trailing slash, a query string, a case or encoding variant;
 - `http://` and `www.` (should redirect once, 301);
 - `/robots.txt`, the sitemap index and one child sitemap: URL count, `lastmod`, a sample of 10 to 20 listed URLs
-  returning 200 at their canonical.
+  returning 200 at their canonical. With Search Console, also what it made of them (`references/data-sources.md`,
+  Sitemaps).
 
 Keep production traffic small: about 50 requests, one at a time.
 
