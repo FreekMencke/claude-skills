@@ -103,7 +103,7 @@ Trigger rates of the latest run per skill (runs that loaded the skill / skipped 
 | `parallel-code-orchestrator` | 3 + 3 | 9/9 | 9/9 | 2.1.296 | 2026-10-12 |
 | `refresh-md-files` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
 | `skill-workshop` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
-| `claude-kb-lookup` | 16 + 6 | 48/48 | 18/18 | 2.1.296 | 2026-10-13 |
+| `claude-kb-lookup` | 18 + 7 | 54/54 | 21/21 | 2.1.296 | 2026-10-13 |
 | `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13 |
 
 When you rerun after a change, replace that skill's row and put the before/after in the PR description; git history
