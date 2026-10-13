@@ -21,6 +21,7 @@ A new skill goes in `local-skills/skills/` when it reads local files or uses Cla
 | `claude-kb-lookup` | `freek-local-skills` | Answer questions on using Claude efficiently from the claude-kb knowledge base, citing entry IDs. Runs as a forked Haiku subagent, so the index stays out of the caller's context |
 | `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it |
 | `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with the 2026-10 baseline |
+| `seo-audit` | `freek-local-skills` | Read-only technical SEO audit of a site, from the server HTML a crawler gets, ranked by Search Console data when the session can reach it. Local because it reads Google data through local credentials |
 
 ## Install
 
@@ -103,6 +104,7 @@ Trigger rates of the latest run per skill (runs that loaded the skill / skipped 
 | `refresh-md-files` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
 | `skill-workshop` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
 | `claude-kb-lookup` | 15 + 6 | 45/45 | 18/18 | 2.1.296 | 2026-10-13 |
+| `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13 |
 
 When you rerun after a change, replace that skill's row and put the before/after in the PR description; git history
 keeps the old numbers.

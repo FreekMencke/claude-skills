@@ -3,7 +3,7 @@ name: claude-kb-lookup-loads-15
 tags: [claude-kb-lookup, should-load]
 description: "SEO skills (kb-web-analytics-seo.md)."
 execution:
-  prompt: "Is there a good SEO skill to install for auditing my site with Claude?"
+  prompt: "Which published SEO audit skills for Claude are worth taking ideas from, and what in them should I avoid?"
   max_turns: 3
   timeout_seconds: 180
   allowed_tools: [Read, Glob, Grep, Skill]
