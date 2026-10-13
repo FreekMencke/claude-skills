@@ -34,14 +34,12 @@ Then read `/home/fremen/repos/claude-kb/INDEX.md` in full: Quick answers, the fi
 
 If Quick answers doesn't settle it, find entries in `ENTRIES.md`, which lists every entry by ID, title, type and tags. Don't read it whole: grep it case-insensitively for two to five keywords and synonyms from the question, e.g. `grep -i -E 'webfetch|curl|raw' /home/fremen/repos/claude-kb/ENTRIES.md`. Grep again with other words if nothing fits. Matches from more than one topic file (different ID prefixes) usually mean each covers a different angle: read the best match from each.
 
-Until FreekMencke/claude-kb#68 merges: if `ENTRIES.md` doesn't exist, the entry rows are still in INDEX.md.
-
 ## 2. Read only the entries you need
 
 Pick the IDs from Quick answers or `ENTRIES.md`, usually one to four. Print each entry with its file and line:
 
 ```bash
-cd /home/fremen/repos/claude-kb && for id in ORCH-005 TOK-036; do awk -v id="$id" '$(0) ~ "^## \\[" id "\\]" {p=1; print FILENAME ":" FNR; print; next} p && /^## / {exit} p' $(ls topics/kb-*.md kb-*.md 2>/dev/null); done
+cd /home/fremen/repos/claude-kb && for id in ORCH-005 TOK-036; do awk -v id="$id" '$(0) ~ "^## \\[" id "\\]" {p=1; print FILENAME ":" FNR; print; next} p && /^## / {exit} p' topics/kb-*.md; done
 ```
 
 Keep `$(0)`: Claude Code replaces a literal dollar-zero in a skill with the first argument when one is passed.
