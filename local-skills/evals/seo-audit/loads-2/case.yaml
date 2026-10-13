@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: seo-audit-loads-2
+tags: [seo-audit, should-load]
+execution:
+  prompt: "Most of our item pages are 'Discovered - currently not indexed' in Search Console. Find out why Google isn't indexing them."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?seo-audit"'

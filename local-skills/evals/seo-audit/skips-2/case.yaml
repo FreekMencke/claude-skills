@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: seo-audit-skips-2
+tags: [seo-audit, near-miss]
+description: "Near miss: content writing."
+execution:
+  prompt: "Write meta descriptions for our 20 newest blog posts."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?seo-audit"'
+    min: 0
+    max: 0
+    arm: both

@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: seo-audit-skips-4
+tags: [seo-audit, near-miss]
+description: "Near miss: a knowledge-base question about SEO tooling, for claude-kb-lookup."
+execution:
+  prompt: "What does the claude-kb knowledge base say about using WebFetch for SEO checks?"
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?seo-audit"'
+    min: 0
+    max: 0
+    arm: both
