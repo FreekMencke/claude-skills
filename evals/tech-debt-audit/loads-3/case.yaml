@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: tech-debt-audit-loads-3
+tags: [tech-debt-audit, should-load]
+execution:
+  prompt: "Which parts of this project carry the most technical debt, and what should we fix first?"
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?tech-debt-audit"'

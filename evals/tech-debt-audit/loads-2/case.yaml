@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: tech-debt-audit-loads-2
+tags: [tech-debt-audit, should-load]
+execution:
+  prompt: "How healthy is this codebase? I want a code quality assessment with the worst hotspots ranked."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?tech-debt-audit"'

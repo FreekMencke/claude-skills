@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: tech-debt-audit-skips-1
+tags: [tech-debt-audit, near-miss]
+description: "Near miss: reviewing a diff, not the whole codebase (code-review)."
+execution:
+  prompt: "Review the diff on this branch for bugs before I merge."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?tech-debt-audit"'
+    min: 0
+    max: 0
+    arm: both
