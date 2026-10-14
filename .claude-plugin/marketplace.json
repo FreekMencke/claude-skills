@@ -8,7 +8,7 @@
     {
       "name": "freek-skills",
       "source": "./",
-      "description": "Personal skills for every surface (synced to claude.ai): roadmap issues, parallel orchestration, doc and tech-debt audits, and skill writing"
+      "description": "Personal skills for every surface (synced to claude.ai): roadmap issues, parallel orchestration, doc and tech-debt audits, skill writing, and Angular's official angular-developer skill"
     },
     {
       "name": "freek-local-skills",

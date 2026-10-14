@@ -1,0 +1,10 @@
+This folder mirrors angular-developer, Angular's official agent skill:
+https://github.com/angular/skills/tree/main/angular-developer, generated from skills/dev-skills/ in
+https://github.com/angular/angular.
+
+License: MIT. Copyright 2026 Google LLC.
+Upstream states both in the skill's frontmatter (license, metadata.author). This copy drops those keys, because
+skills/ keeps to name and description; every other byte is upstream's.
+
+.github/workflows/sync-angular-skill.yml writes this folder (scripts/sync-angular-skill.sh). Don't edit it here: the
+next sync overwrites it. Fixes go upstream to angular/angular; house rules go in a skill of their own.
