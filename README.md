@@ -20,6 +20,7 @@ uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) cover
 | `refresh-md-files` | `freek-skills` | Audit `.md` docs for gaps, ambiguity and stale content |
 | `skill-workshop` | `freek-skills` | Write or audit a skill, grounded in real material and published examples |
 | `tech-debt-audit` | `freek-skills` | Read-only technical-debt audit of a codebase in six phases, each checked by a reviewer subagent, ending in a ranked remediation roadmap |
+| `angular-developer` | `freek-skills` | Angular's official skill, mirrored weekly; don't edit here ([below](#angular-developer)) |
 | `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it. Local because it's built on `/clear`, `/rewind` and `/resume` |
 | `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with the 2026-10 baseline |
 | `seo-audit` | `freek-local-skills` | Read-only technical SEO audit of a site, from the server HTML a crawler gets, ranked by Search Console data when the session can reach it. Local because it runs from the app's repo, uses `disallowed-tools` to stay read-only, and checks pages in a local browser |
@@ -28,6 +29,20 @@ uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) cover
 routing land in one PR there. Install it locally with
 `ln -sfn /home/fremen/repos/claude-kb/.claude/skills/claude-kb-lookup ~/.claude/skills/claude-kb-lookup`; a marketplace
 install of `freek-local-skills` no longer brings it.
+
+## angular-developer
+
+`skills/angular-developer/` is Angular's official agent skill from [angular/skills](https://github.com/angular/skills),
+which is generated from `skills/dev-skills/` in angular/angular and follows its `main`.
+`.github/workflows/sync-angular-skill.yml` copies it every Monday with `scripts/sync-angular-skill.sh`: byte for byte,
+except that the `SKILL.md` frontmatter keeps to `name` and `description` and upstream's license and author go to
+`NOTICE`. When the folder changed, it opens or updates one PR from `sync/angular-developer` and starts `validate.yml` on
+it, because a PR opened with `GITHUB_TOKEN` starts no `pull_request` run. It needs the repo setting Actions › General ›
+"Allow GitHub Actions to create and approve pull requests". Run it by hand with
+`gh workflow run sync-angular-skill.yml`.
+
+Don't edit the folder: the next sync overwrites it. House rules go in a skill of their own. It has no trigger evals,
+because its description is upstream's.
 
 ## Install
 

@@ -1,0 +1,71 @@
+name: sync angular-developer
+
+# Mirrors Angular's official angular-developer skill (angular/skills, generated from angular/angular) into
+# skills/angular-developer/, and opens or updates one PR when that changed. Plain shell, no model calls.
+# Needs the repo setting Actions › General › "Allow GitHub Actions to create and approve pull requests".
+
+on:
+  schedule:
+    - cron: '23 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-angular-skill
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      BRANCH: sync/angular-developer
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: angular/skills
+          path: upstream
+      - run: scripts/sync-angular-skill.sh upstream
+      - name: Open or update the PR
+        run: |
+          git add -A skills/angular-developer
+          if git diff --cached --quiet; then
+            echo "skills/angular-developer/ is up to date"
+            exit 0
+          fi
+          pr="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [[ -n "$pr" ]] && git fetch --quiet origin "$BRANCH" && git diff --cached --quiet FETCH_HEAD -- skills/angular-developer; then
+            echo "PR #$pr already has this version"
+            exit 0
+          fi
+
+          # BUILD_INFO: the build time, then the angular/angular commit it was built from.
+          sha="$(grep -Eom1 '[0-9a-f]{40}' upstream/BUILD_INFO || echo unknown)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit --quiet -m 'Sync angular-developer from angular/skills' -m "Built from angular/angular@$sha."
+          git push --quiet --force origin "HEAD:refs/heads/$BRANCH"
+
+          # shellcheck disable=SC2016 # the backticks are Markdown
+          {
+            echo "Mirrors \`angular-developer\` from [angular/skills](https://github.com/angular/skills), built from angular/angular@$sha."
+            echo
+            echo '```'
+            git diff --stat HEAD~1
+            echo '```'
+            echo
+            echo 'Written by `.github/workflows/sync-angular-skill.yml`: review the upstream changes and merge, without editing the files here.'
+            echo 'Its `validate` check is started by that workflow, because a PR opened with `GITHUB_TOKEN` starts no `pull_request` run.'
+          } > "$RUNNER_TEMP/body.md"
+          if [[ -n "$pr" ]]; then
+            gh pr edit "$pr" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --base main --head "$BRANCH" --title 'Sync angular-developer from angular/skills' --body-file "$RUNNER_TEMP/body.md"
+          fi
+          gh workflow run validate.yml --ref "$BRANCH"

@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # sync-angular-skill.yml starts it on its PR branch: a PR opened with GITHUB_TOKEN starts no pull_request run.
+  workflow_dispatch:
 
 permissions:
   contents: read
