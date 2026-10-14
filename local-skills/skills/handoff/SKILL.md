@@ -21,7 +21,8 @@ good context:
 - **One bad detour**: rewind (`Esc Esc` or `/rewind`, then **Restore code and conversation**) to the prompt before it,
   and edit that prompt with what you learned.
 - **An alternative worth trying**: `/branch` copies the conversation and leaves the original to `/resume`. It copies
-  the conversation, not the files: pair it with a commit or a worktree for a code experiment.
+  the conversation, not the files: pair it with a commit or a worktree for a code experiment. Desktop WSL sessions
+  have no `/branch` (no session forking).
 
 If the conversation looks like one of these, say which in one line and ask before writing the handoff.
 
@@ -89,4 +90,10 @@ End with exactly this, filled in:
 > Handoff written to <link or path>. Run `/rename <short name>` so `/resume` can find this session, then `/clear`,
 > then start with: `continue from <link or path>`
 
-Uncommitted changes stay in the working tree across `/clear`; say so if there are any.
+In the desktop app, which has no `/resume` in WSL sessions, end with this instead:
+
+> Handoff written to <link or path>. Start a new session (**+ New session**, or Ctrl+N) on the same folder and begin
+> with: `continue from <link or path>`. This session stays in the sidebar.
+
+Uncommitted changes stay in the working tree across `/clear`; say so if there are any, and in the desktop app name the
+worktree they are in, since a new session may start in a new worktree.

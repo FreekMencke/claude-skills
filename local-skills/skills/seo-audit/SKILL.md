@@ -41,13 +41,15 @@ Record the commit: `git rev-parse --short HEAD`.
 ## 2. Detect the data and print the tier
 
 Check what this session can reach, then print one line before going further, e.g.
-`Data: Search Console yes · PSI key yes · GA4 no · logs yes (Loki) · browser yes · Lighthouse CLI no`.
+`Data: Search Console yes · PSI key yes · GA4 no · logs yes (Grafana connector) · browser yes · Lighthouse CLI no`.
 
 - **Search Console**: a read-only wrapper or MCP server named in the repo's docs or this session's memory. Confirm
   with one cheap call (list sites). Never search for credentials.
 - **PSI key**: where the docs or memory say. Read it into a variable; never print it.
 - **GA4**: a GA4 MCP server among this session's tools.
-- **Logs**: the route the repo's docs name (Loki, a Kubernetes or Flux MCP server).
+- **Logs**: the route the repo's docs name: a Grafana or Loki MCP server or claude.ai connector for history, a
+  Kubernetes or Flux MCP server for the current pods. A connector's tools are named by an ID
+  (`mcp__<id>__query_loki_logs`), so search the tools for `loki`, not for a server name.
 - **Browser**: Playwright or Chrome DevTools MCP tools.
 - **Lighthouse CLI**: `node --version` 22 or later and a local Chrome or Chromium.
 
