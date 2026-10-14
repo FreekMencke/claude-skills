@@ -4,13 +4,14 @@ Source of truth for my personal Claude Code skills. The repo is a marketplace wi
 with `claude-`):
 
 - **`freek-skills`** (repo root, `skills/`): skills that work on every surface. Installed on claude.ai, so they also
-  reach chat, Cowork and every signed-in Claude Code session.
-- **`freek-local-skills`** (`local-skills/`, its skills in `local-skills/skills/`): Claude Code-only skills that need this
-  machine, such as a local clone or the session transcripts. Never installed on claude.ai. They may use Claude Code-only
-  frontmatter (`disable-model-invocation`, `context`, `paths`).
+  reach chat, Cowork and every signed-in Claude Code session on a machine (cloud sessions don't load them).
+- **`freek-local-skills`** (`local-skills/`, its skills in `local-skills/skills/`): Claude Code-only skills. Never
+  installed on claude.ai. Some need this machine (a local clone, the session transcripts); others only work in Claude
+  Code, through its slash commands, tools or frontmatter (`disable-model-invocation`, `context`, `disallowed-tools`,
+  `paths`).
 
-A new skill goes in `local-skills/skills/` when it reads local files or uses Claude Code-only frontmatter, otherwise in
-`skills/`. [Check](#check) covers the CI workflow and the trigger evals.
+A new skill goes in `local-skills/skills/` when it reads local files, relies on Claude Code slash commands or tools, or
+uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) covers the CI workflow and the trigger evals.
 
 | Skill | Plugin | What it does |
 |---|---|---|
@@ -20,9 +21,9 @@ A new skill goes in `local-skills/skills/` when it reads local files or uses Cla
 | `skill-workshop` | `freek-skills` | Write or audit a skill, grounded in real material and published examples |
 | `tech-debt-audit` | `freek-skills` | Read-only technical-debt audit of a codebase in six phases, each checked by a reviewer subagent, ending in a ranked remediation roadmap |
 | `claude-kb-lookup` | `freek-local-skills` | Answer questions on using Claude efficiently from the claude-kb knowledge base, citing entry IDs. Runs as a forked Haiku subagent, so the index stays out of the caller's context |
-| `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it |
+| `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it. Local because it's built on `/clear`, `/rewind` and `/resume` |
 | `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with the 2026-10 baseline |
-| `seo-audit` | `freek-local-skills` | Read-only technical SEO audit of a site, from the server HTML a crawler gets, ranked by Search Console data when the session can reach it. Local because it reads Google data through local credentials |
+| `seo-audit` | `freek-local-skills` | Read-only technical SEO audit of a site, from the server HTML a crawler gets, ranked by Search Console data when the session can reach it. Local because it runs from the app's repo, uses `disallowed-tools` to stay read-only, and checks pages in a local browser |
 
 ## Install
 

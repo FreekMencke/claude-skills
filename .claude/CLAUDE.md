@@ -5,8 +5,8 @@ Marketplace with two plugins; README.md has the full layout, install and eval de
 
 - `skills/` (`freek-skills`, synced to claude.ai): frontmatter is `name` and `description` only;
   `scripts/check-frontmatter.py` enforces it (CI and a `PostToolUse` hook).
-- `local-skills/skills/` (`freek-local-skills`, Claude Code only): skills that read local files or need Claude Code-only
-  frontmatter (`disable-model-invocation`, `context`, `paths`).
+- `local-skills/skills/` (`freek-local-skills`, Claude Code only): skills that read local files, rely on Claude Code
+  slash commands or tools, or need Claude Code-only frontmatter (`disable-model-invocation`, `context`, `paths`).
 - No `version` in either `plugin.json`, on purpose (installs track commits); don't add one for the validate warning.
 - Don't write `$0` in a skill: Claude Code replaces it with the first argument. In awk, use `$(0)`.
 - Verify: `claude plugin validate .`, `claude plugin validate local-skills` and `python3 scripts/check-frontmatter.py`.
