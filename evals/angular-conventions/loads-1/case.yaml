@@ -2,7 +2,7 @@ schema_version: "1.1"
 name: angular-conventions-loads-1
 tags: [angular-conventions, should-load]
 execution:
-  prompt: "What are our Angular conventions for naming a new service and its file, and where should it fetch data from?"
+  prompt: "What are our Angular conventions for where HTTP calls live and how state shared between components is kept?"
   max_turns: 3
   timeout_seconds: 180
   allowed_tools: [Read, Glob, Grep, Skill]

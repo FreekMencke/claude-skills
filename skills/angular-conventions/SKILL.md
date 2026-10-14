@@ -1,6 +1,6 @@
 ---
 name: angular-conventions
-description: "House rules for Angular apps, on top of angular-developer: file names, imports and layers, signal stores, failure states, routes and page meta, SSR on a custom Express server (CSP nonce, transfer cache, third-party timeouts), Vitest specs and Tailwind tokens. Use when writing, reviewing or refactoring code in an Angular app that follows these house rules, or when asked for our Angular conventions. Not for how an Angular API works or for scaffolding: use angular-developer."
+description: "House rules for Angular apps, on top of angular-developer: templates, imports and layers, signal stores, failure states, routes and page meta, SSR on a custom Express server (CSP nonce, transfer cache, third-party timeouts), Vitest specs and Tailwind tokens. Use when writing, reviewing or refactoring code in an Angular app that follows these house rules, or when asked for our Angular conventions. Not for how an Angular API works or for scaffolding: use angular-developer."
 ---
 
 # Angular conventions
@@ -13,16 +13,6 @@ description: "House rules for Angular apps, on top of angular-developer: file na
   with `search_documentation` (pass `version`, the major) or `get_best_practices` (pass `workspacePath` from
   `list_projects`). Without it, hover the API with the LSP tool or read its `.d.ts`.
 - Verify with the repo's verify command (`CLAUDE.md`), not `angular-developer`'s plain `ng build`.
-
-## Names
-
-- Use the names `ng generate` gives (`time-ago-pipe.ts` with `class TimeAgoPipe`), also where `angular-developer`'s
-  examples differ.
-- Except services: they keep `Service`, in the class and the file (`StorageService` in `storage-service.ts`), where the
-  CLI makes `storage.ts` with `class Storage`. Generate them with the suffix in the name:
-  `ng g s <folder>/storage-service`. Other classes of your own join their suffix the same way (`-repo`, `-store`).
-- Only the CLI's own files keep a dot (`main.server.ts`, `app.config.server.ts`, `app.routes.ts`, `*.routes.ts`), and
-  generated ones (`*.generated.ts`). Models get no `.model.ts`.
 
 ## Templates
 
