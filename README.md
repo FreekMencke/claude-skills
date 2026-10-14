@@ -106,6 +106,7 @@ Trigger rates of the latest run per skill (runs that loaded the skill / skipped 
 | `skill-workshop` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
 | `claude-kb-lookup` | 18 + 7 | 54/54 | 21/21 | 2.1.296 | 2026-10-13 |
 | `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13 |
+| `tech-debt-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-14 |
 
 When you rerun after a change, replace that skill's row and put the before/after in the PR description; git history
 keeps the old numbers.
