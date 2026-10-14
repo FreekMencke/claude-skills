@@ -18,6 +18,7 @@ A new skill goes in `local-skills/skills/` when it reads local files or uses Cla
 | `parallel-code-orchestrator` | `freek-skills` | Split a large coding task or roadmap issue over parallel subagents |
 | `refresh-md-files` | `freek-skills` | Audit `.md` docs for gaps, ambiguity and stale content |
 | `skill-workshop` | `freek-skills` | Write or audit a skill, grounded in real material and published examples |
+| `tech-debt-audit` | `freek-skills` | Read-only technical-debt audit of a codebase in six phases, each checked by a reviewer subagent, ending in a ranked remediation roadmap |
 | `claude-kb-lookup` | `freek-local-skills` | Answer questions on using Claude efficiently from the claude-kb knowledge base, citing entry IDs. Runs as a forked Haiku subagent, so the index stays out of the caller's context |
 | `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it |
 | `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with the 2026-10 baseline |
@@ -105,6 +106,7 @@ Trigger rates of the latest run per skill (runs that loaded the skill / skipped 
 | `skill-workshop` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
 | `claude-kb-lookup` | 18 + 7 | 54/54 | 21/21 | 2.1.296 | 2026-10-13 |
 | `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13 |
+| `tech-debt-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-14 |
 
 When you rerun after a change, replace that skill's row and put the before/after in the PR description; git history
 keeps the old numbers.
