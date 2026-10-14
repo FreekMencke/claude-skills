@@ -16,10 +16,11 @@ description: "House rules for Angular apps, on top of angular-developer: file na
 
 ## Names
 
-- Components and directives have no suffix: `home.ts` holds `class Home`, its template `home.html`.
-- Other classes keep their suffix, and the file joins it with a hyphen: `StorageService` in `storage-service.ts`,
-  `TimeAgoPipe` in `time-ago-pipe.ts`, likewise `-repo`, `-store`, `-resolver`, `-interceptor`. `angular-developer`
-  drops it from the file name (`auth.ts`); don't. Generate with the suffix in the name: `ng g s <folder>/storage-service`.
+- Use the names `ng generate` gives (`time-ago-pipe.ts` with `class TimeAgoPipe`), also where `angular-developer`'s
+  examples differ.
+- Except services: they keep `Service`, in the class and the file (`StorageService` in `storage-service.ts`), where the
+  CLI makes `storage.ts` with `class Storage`. Generate them with the suffix in the name:
+  `ng g s <folder>/storage-service`. Other classes of your own join their suffix the same way (`-repo`, `-store`).
 - Only the CLI's own files keep a dot (`main.server.ts`, `app.config.server.ts`, `app.routes.ts`, `*.routes.ts`), and
   generated ones (`*.generated.ts`). Models get no `.model.ts`.
 
