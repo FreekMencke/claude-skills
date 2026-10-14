@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: angular-conventions-skips-4
+tags: [angular-conventions, near-miss]
+description: "Near miss: Angular's own forms guidance (angular-developer)."
+execution:
+  prompt: "Should I use Signal Forms or reactive forms for a new checkout form in Angular 22?"
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?angular-conventions"'
+    min: 0
+    max: 0
+    arm: both

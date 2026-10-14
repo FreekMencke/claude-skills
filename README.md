@@ -20,6 +20,7 @@ uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) cover
 | `refresh-md-files` | `freek-skills` | Audit `.md` docs for gaps, ambiguity and stale content |
 | `skill-workshop` | `freek-skills` | Write or audit a skill, grounded in real material and published examples |
 | `tech-debt-audit` | `freek-skills` | Read-only technical-debt audit of a codebase in six phases, each checked by a reviewer subagent, ending in a ranked remediation roadmap |
+| `angular-conventions` | `freek-skills` | House Angular rules on top of `angular-developer`: templates, layers, signal stores, failure states, routes and page meta, SSR on a custom Express server, tests and Tailwind |
 | `angular-developer` | `freek-skills` | Angular's official skill, mirrored weekly; don't edit here ([below](#angular-developer)) |
 | `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it. Local because it's built on `/clear`, `/rewind` and `/resume` |
 | `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with the 2026-10 baseline |
@@ -41,7 +42,7 @@ it, because a PR opened with `GITHUB_TOKEN` starts no `pull_request` run. It nee
 "Allow GitHub Actions to create and approve pull requests". Run it by hand with
 `gh workflow run sync-angular-skill.yml`.
 
-Don't edit the folder: the next sync overwrites it. House rules go in a skill of their own. It has no trigger evals,
+Don't edit the folder: the next sync overwrites it. House rules go in `angular-conventions`. It has no trigger evals,
 because its description is upstream's.
 
 ## Install
@@ -126,6 +127,7 @@ Trigger rates of the latest run per skill (runs that loaded the skill / skipped 
 | `skill-workshop` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-12; `skips-5` 2026-10-14 |
 | `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13 |
 | `tech-debt-audit` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-14 |
+| `angular-conventions` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-14 |
 
 When you rerun after a change, replace that skill's row and put the before/after in the PR description; git history
 keeps the old numbers.
