@@ -13,7 +13,7 @@
     {
       "name": "freek-local-skills",
       "source": "./local-skills",
-      "description": "Claude Code-only skills that need this machine (local clones, transcripts): knowledge-base lookup. Don't install on claude.ai"
+      "description": "Claude Code-only skills: handoff, token audit, SEO audit. Don't install on claude.ai"
     }
   ]
 }

@@ -6,7 +6,7 @@ with `claude-`):
 - **`freek-skills`** (repo root, `skills/`): skills that work on every surface. Installed on claude.ai, so they also
   reach chat, Cowork and every signed-in Claude Code session on a machine (cloud sessions don't load them).
 - **`freek-local-skills`** (`local-skills/`, its skills in `local-skills/skills/`): Claude Code-only skills. Never
-  installed on claude.ai. Some need this machine (a local clone, the session transcripts); others only work in Claude
+  installed on claude.ai. Some need this machine (the session transcripts); others only work in Claude
   Code, through its slash commands, tools or frontmatter (`disable-model-invocation`, `context`, `disallowed-tools`,
   `paths`).
 
@@ -20,10 +20,14 @@ uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) cover
 | `refresh-md-files` | `freek-skills` | Audit `.md` docs for gaps, ambiguity and stale content |
 | `skill-workshop` | `freek-skills` | Write or audit a skill, grounded in real material and published examples |
 | `tech-debt-audit` | `freek-skills` | Read-only technical-debt audit of a codebase in six phases, each checked by a reviewer subagent, ending in a ranked remediation roadmap |
-| `claude-kb-lookup` | `freek-local-skills` | Answer questions on using Claude efficiently from the claude-kb knowledge base, citing entry IDs. Runs as a forked Haiku subagent, so the index stays out of the caller's context |
 | `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it. Local because it's built on `/clear`, `/rewind` and `/resume` |
 | `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with the 2026-10 baseline |
 | `seo-audit` | `freek-local-skills` | Read-only technical SEO audit of a site, from the server HTML a crawler gets, ranked by Search Console data when the session can reach it. Local because it runs from the app's repo, uses `disallowed-tools` to stay read-only, and checks pages in a local browser |
+
+`claude-kb-lookup` moved to FreekMencke/claude-kb (`.claude/skills/claude-kb-lookup/`), so a new KB topic and its
+routing land in one PR there. Install it locally with
+`ln -sfn /home/fremen/repos/claude-kb/.claude/skills/claude-kb-lookup ~/.claude/skills/claude-kb-lookup`; a marketplace
+install of `freek-local-skills` no longer brings it.
 
 ## Install
 
@@ -105,7 +109,6 @@ Trigger rates of the latest run per skill (runs that loaded the skill / skipped 
 | `parallel-code-orchestrator` | 3 + 3 | 9/9 | 9/9 | 2.1.296 | 2026-10-12 |
 | `refresh-md-files` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
 | `skill-workshop` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-12 |
-| `claude-kb-lookup` | 18 + 7 | 54/54 | 21/21 | 2.1.296 | 2026-10-13 |
 | `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13 |
 | `tech-debt-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-14 |
 
