@@ -16,7 +16,7 @@ To check an existing roadmap, go to "Audit an existing roadmap".
 - **Read other repos, never change them.** Read the target repo so each issue is accurate; changes there happen in a fresh session that picks the issue up.
 - **Same owner.** GitHub only accepts a sub-issue with the same owner as its parent. A child under another owner is a normal issue linked from the roadmap body.
 - **Public repos**: no account, resource or cluster IDs anywhere, including pasted evidence.
-- **Labels**: `enhancement` (or the fitting type) on every issue, `question` on a child that investigates or decides, plus `cross-repo` on issues raised from another repo's session. Use only labels that exist in the target repo; GitHub drops a label it cannot apply without an error, so check `.labels` in the response.
+- **Labels**: `enhancement` (or the fitting type) on every issue, `question` on a child that investigates or decides, plus `cross-repo` on issues raised from another repo's session. Use only labels that exist in the target repo, except `cross-repo`: when the target repo lacks it, create it first, with this colour and description so it looks the same in every repo: `gh api -X POST repos/<owner>/<repo>/labels -f name=cross-repo -f color=5319e7 -f description='Opened from a session in another repo'`. GitHub drops a label it cannot apply without an error, so check `.labels` in the response.
 - **Never guess issue numbers.** Other sessions open issues too; a number is yours only once GitHub returns it.
 - **Order words.** A child "waits on" another issue; it is "ready" when it waits on nothing open. "Blocked-by link" means only GitHub's dependency feature.
 
