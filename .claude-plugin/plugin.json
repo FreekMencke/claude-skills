@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "freek-skills",
-  "description": "Personal skills for every surface (synced to claude.ai): roadmap issues, parallel orchestration, doc and tech-debt audits, skill writing, and Angular's official angular-developer skill",
+  "description": "Personal skills for every surface (synced to claude.ai): roadmap issues, parallel orchestration, doc and tech-debt audits, skill writing, Angular house rules, and Angular's official angular-developer skill",
   "author": {
     "name": "Freek Mencke"
   },
