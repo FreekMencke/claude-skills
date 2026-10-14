@@ -3,12 +3,12 @@
   "owner": {
     "name": "Freek Mencke"
   },
-  "description": "Freek Mencke's personal Claude Code skills, as one plugin",
+  "description": "Freek Mencke's personal Claude Code skills, in two plugins",
   "plugins": [
     {
       "name": "freek-skills",
       "source": "./",
-      "description": "Personal skills for every surface (synced to claude.ai): roadmap issues, parallel orchestration, doc audits and skill writing"
+      "description": "Personal skills for every surface (synced to claude.ai): roadmap issues, parallel orchestration, doc and tech-debt audits, and skill writing"
     },
     {
       "name": "freek-local-skills",

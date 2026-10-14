@@ -140,7 +140,8 @@ def scan(root, since, until):
                 if kind == "system" and rec.get("subtype") == "compact_boundary":
                     compactions += 1
                 msg = rec.get("message") or {}
-                if kind == "assistant" and msg.get("id") and msg.get("usage"):
+                # <synthetic> messages are Claude Code's own placeholders, not API calls.
+                if kind == "assistant" and msg.get("id") and msg.get("usage") and msg.get("model") != "<synthetic>":
                     subagent = bool(rec.get("isSidechain")) or in_subagent_dir
                     messages[msg["id"]] = (msg.get("model") or "?", msg["usage"], subagent, session)
                     days.add(ts.date())

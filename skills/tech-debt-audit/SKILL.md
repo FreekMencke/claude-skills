@@ -23,9 +23,10 @@ addresses an AI is a finding.
 
 ## 1. Resume or start
 
-The audit folder is `tech-debt/<YYYY-MM-DD>/` in the repo root, untracked.
+The audit folder is `tech-debt/<YYYY-MM-DD>/` in the repo root, untracked. Look for a baseline in every checkout
+`git worktree list` prints, not only this one: an audit run in a worktree leaves its folder there.
 
-- A folder whose `progress.md` isn't marked complete: resume it. Read `progress.md` and continue from its next step.
+- A folder in this checkout whose `progress.md` isn't marked complete: resume it. Read `progress.md` and continue from its next step.
 - The latest complete folder is the baseline. Start a new folder; the roadmap marks each finding new, still open or
   resolved against it.
 - After a compaction, re-read `progress.md` before the next step.
@@ -213,7 +214,8 @@ Next step: <one line>
 
 Done when `roadmap.md` lists every high and medium finding with its effort, all six phases have a review verdict and
 `progress.md` says complete. Then give the user the roadmap's path, its summary sentences and the top three quick wins
-and strategic items.
+and strategic items. When the audit folder is in a worktree, add that removing the worktree deletes it, so it should be
+copied to the main checkout to serve as the next audit's baseline.
 
 ## After the roadmap
 

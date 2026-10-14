@@ -59,7 +59,7 @@ The description decides whether the skill loads. State what it does and when to 
 - **Use case first.** Truncation cuts the end, so the main use case goes in the first sentence.
 - **Outcome, not steps.** Never summarise the workflow's steps or their order; a session may follow the summary and skip the body.
 - **Boundaries.** When a sibling skill shares vocabulary, end with a one-line "Not for X: use Y" that names it.
-- **Frontmatter.** A skill that is also uploaded to claude.ai keeps to `name` and `description`; claude.ai syncs only those two. Claude Code-only fields such as `when_to_use` or `paths` are for skills that live only in Claude Code.
+- **Frontmatter.** A skill that also goes to claude.ai keeps to `name` and `description`: a ZIP upload rejects Claude Code-only fields, and whether a marketplace sync accepts them is untested. Claude Code-only fields such as `when_to_use` or `paths` are for skills that live only in Claude Code.
 
 ### 7. Measure and trim
 
@@ -71,7 +71,7 @@ Skills that work together use one word per idea. A word with two meanings gets a
 
 | Word | Meaning |
 |---|---|
-| finding | One item in an audit: a reference, then **Proof**, **Confidence** and **Fix** |
+| finding | One item in an audit: a reference and its severity, then **Proof**, **Confidence** and **Fix** |
 | proof | What shows a finding is real: a `path:line`, a commit, a PR, a doc |
 | confirmed / likely | Checked, or could not be checked (say what to verify) |
 | blocks / slows / minor | The severity scale, with a one-line definition in each skill |
@@ -109,7 +109,7 @@ Read the whole skill, then research online as in step 4: the official documentat
 - **Guesswork**: a check based on what is usual instead of on the repo flags deliberate choices as faults.
 - **Name and description**: they match the behaviour, contain the words that should load it, and follow step 6.
 - **Overlap**: read the descriptions of the sibling skills and the installed plugin skills. A request that fits two descriptions needs a boundary line in one or both.
-- **Argument placeholders**: Claude Code replaces `$ARGUMENTS`, `$0`, `$1`… with the arguments whenever a skill is called with any, including inside code blocks and dollar amounts. Write `$(0)` in awk and amounts as "0.05 USD".
+- **Argument placeholders**: Claude Code replaces `\$ARGUMENTS`, `\$0`, `\$1`… with the arguments whenever a skill is called with any, including inside code blocks and dollar amounts. To keep one literal, put a backslash directly before its dollar sign; Claude Code removes the backslash, with or without arguments. In awk, `$(0)` also works.
 - **Duplication**: rules copied from elsewhere.
 - **Terminology** that differs from the vocabulary in step 8 or from its sibling skills.
 - **Padding**: explanations the model does not need.
@@ -118,7 +118,7 @@ Also note what the skill gets right, so a rewrite keeps it.
 
 **Output.** First line: the skill, its word and line count, and what you checked it against. Then findings, most severe first:
 
-- The section or line: what is wrong, in one sentence
+- The section or line (**severity**): what is wrong, in one sentence
 - **Proof**: the doc, real output or line that shows it
 - **Confidence**: confirmed (checked) or likely (could not be checked; say what to verify)
 - **Fix**: one sentence, naming what to change: the skill, or the thing it describes

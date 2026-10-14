@@ -24,7 +24,7 @@ Add `--json` for the raw numbers. Read the header lines first:
   2026-10-06. Never compare totals across ranges with different day counts: use per-day figures and shares.
 - **Not priced**: a model missing from `PRICES` in the script is reported at zero cost. Add it from
   [the pricing page](https://platform.claude.com/docs/en/about-claude/pricing) (or the `claude-api` skill), update
-  `PRICES_CHECKED`, and rerun. `<synthetic>` lines carry no usage and can be ignored.
+  `PRICES_CHECKED`, and rerun.
 
 ## 2. Compare with the baseline
 

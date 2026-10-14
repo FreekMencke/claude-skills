@@ -108,6 +108,8 @@ current code first.
 
 A child in the roadmap's own repo may write `Part of #N`. Add `Blocks owner/repo#Z` to the first paragraph when other work cannot continue without it.
 
+A follow-up outside a roadmap uses the same body, opening with `Follow-up from owner/repo#N (fixed in owner/repo#M)` instead of `Part of roadmap`. In a chain of follow-ups without a roadmap, add `Step K of N; waits on owner/repo#X` to that line.
+
 Some children take a different shape:
 
 | Child | What changes |
@@ -189,7 +191,7 @@ Read the roadmap, every child, and the code they describe. Change nothing yet.
 
 **Output.** First line: the roadmap and the number of issues audited. Then findings, most severe first:
 
-- `owner/repo#N`: what is stale or wrong, in one sentence
+- `owner/repo#N` (**severity**): what is stale or wrong, in one sentence
 - **Proof**: the `path:line`, commit or PR that shows it
 - **Confidence**: confirmed (checked against the repo) or likely (could not be checked; say what to verify)
 - **Fix**: one sentence

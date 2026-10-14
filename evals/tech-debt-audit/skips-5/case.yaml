@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: tech-debt-audit-skips-5
+tags: [tech-debt-audit, near-miss]
+description: "Near miss: turn an audit's roadmap into GitHub issues (roadmap-issues)."
+execution:
+  prompt: "Turn the findings in tech-debt/2026-10-14/roadmap.md into a GitHub roadmap issue with ordered sub-issues."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?tech-debt-audit"'
+    min: 0
+    max: 0
+    arm: both

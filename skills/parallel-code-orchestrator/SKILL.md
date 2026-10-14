@@ -13,7 +13,7 @@ Keep going without checking in, except for the cases in "When to stop and ask".
 
 **One repo per run.** Change only the repo this session started in: subagent worktrees cover no other repo, and work in another repo belongs to a fresh session there. Children in other repos are not units of this run. Read those repos freely, and report which of their children are ready.
 
-**Model and effort on every spawn.** Pass both on every Agent call, except where the table says unset. An unset model runs on the session's model (general-purpose: on `CLAUDE_CODE_SUBAGENT_MODEL` if set); an unset effort runs at `medium`, the Claude Code default for the 5.5 models. Per-call `effort` needs Claude Code v2.1.292+, and `CLAUDE_CODE_EFFORT_LEVEL`, when set, overrides it.
+**Model and effort on every spawn.** Pass both on every Agent call, except where the table says unset. An unset model runs on the session's model (general-purpose: on `CLAUDE_CODE_SUBAGENT_MODEL` if set); an unset effort follows the session's effort (`medium` by default on the 5.5 models). Per-call `effort` needs Claude Code v2.1.292+, and `CLAUDE_CODE_EFFORT_LEVEL`, when set, overrides it.
 
 | Work | Model | Effort |
 |---|---|---|
@@ -48,7 +48,7 @@ These outrank this skill where they disagree.
 **Roadmap issue.** If the task is a roadmap (a GitHub issue with ordered sub-issues, e.g. `osrs-tracker/osrs-tracker-web#159`) or an issue whose first line says `Part of roadmap owner/repo#N`, the decomposition is already done:
 
 - `gh issue view` the roadmap: which repo skills to load, `## Order`, `### Checklist`, the shared context
-- Children in order: `gh api repos/<owner>/<repo>/issues/<roadmap>/sub_issues`
+- Children in order: `gh api --paginate 'repos/<owner>/<repo>/issues/<roadmap>/sub_issues?per_page=100'` (without the parameters the list stops at 30)
 - What each child waits on: `gh api repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by --jq '[.[] | select(.state == "open") | .number]'` (the list includes closed issues, so filter), plus its first line (which also says what not to merge or deploy before which step)
 
 Children are the work units; an open child that waits on nothing open is ready, and the ready children are the current wave. A child's `## Verify` is its done-when, and the file paths in its `## Problem` and `## Do` are the files it touches. A child without a `## Verify` has its check among the `## Do` steps; one whose first line names no limits takes them from the roadmap's Order. Split a large child further inside its repo, but never merge children into one unit. What the roadmap lists as considered and dropped stays dropped. Roadmaps go stale: check the evidence dates and the plan against the current code first.
@@ -122,7 +122,7 @@ Last, check the result against the original goal, not only the units: exercise t
 
 Run these in parallel on the integrated result, then fix and rerun until clean.
 
-**The repo's reviewer agent** (`.claude/agents/`, e.g. `conventions-reviewer`):
+**The reviews the repo prescribes**, as its skill or `CLAUDE.md` describes them: its reviewer agent (`.claude/agents/`, e.g. `conventions-reviewer`), and any other review it names, such as `/code-review` run in a subagent. Check another review's findings against the code before fixing them, as for the reviewer agent below. For the reviewer agent:
 
 - Spawn it by `subagent_type` without `model`: a model passed at spawn overrides the one its file pins.
 - Name the branch or paths; its default diff assumes it runs in the checkout under review.
@@ -132,7 +132,7 @@ Run these in parallel on the integrated result, then fix and rerun until clean.
 
 **An issue check**, for roadmap children: one fresh subagent per child (Sonnet, `high`) compares that child's diff with the issue text and reports what is missing, extra or different. You wrote the brief, so you are a poor judge of whether it matched the issue.
 
-Neither replaces your own diff reading or the verify command.
+None of these replaces your own diff reading or the verify command.
 
 ## 9. Land and report
 

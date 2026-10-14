@@ -39,7 +39,7 @@ Before checking, read where the repo records its deliberate choices: a decisions
 
 First line: the scope used and the number of files audited. Then findings, most severe first:
 
-- `path:line`: what is stale or wrong, in one sentence
+- `path:line` (**severity**): what is stale or wrong, in one sentence
 - **Proof**: the `path:line` in the code or another doc that shows it, or what the reader cannot do
 - **Confidence**: confirmed (checked against the repo) or likely (could not be checked; say what to verify)
 - **Fix**: one sentence, naming which side to change: the doc, or the code it describes
