@@ -137,11 +137,11 @@ Trigger rates of the latest run per skill (runs that loaded the skill / skipped 
 
 | Skill | Cases (load + near miss) | Should load | Near miss skipped | Claude Code | Date |
 |---|---|---|---|---|---|
-| `roadmap-issues` | 5 + 5 | 15/15 | 15/15 | 2.1.296 | 2026-10-12; `skips-5` 2026-10-14 |
+| `roadmap-issues` | 5 + 5 | 15/15 | 15/15 | 2.1.296 | 2026-10-12; `skips-5` 2026-10-14; `loads-*` 2026-10-15 |
 | `parallel-code-orchestrator` | 3 + 3 | 9/9 | 9/9 | 2.1.296 | 2026-10-12 |
 | `refresh-md-files` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-12; `skips-5` 2026-10-14 |
-| `skill-workshop` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-12; `skips-5` 2026-10-14 |
-| `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13 |
+| `skill-workshop` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-12; `skips-5` 2026-10-14; `skips-3` 2026-10-15 |
+| `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13; `skips-4` 2026-10-15 |
 | `tech-debt-audit` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-14 |
 | `angular-conventions` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-14 |
 

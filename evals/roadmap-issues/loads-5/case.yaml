@@ -3,7 +3,7 @@ name: roadmap-issues-loads-5
 tags: [roadmap-issues, should-load]
 description: "Single cross-repo follow-up, second wording (#3)."
 execution:
-  prompt: "The fix here also needs osrs-tracker-web to stop sending the old field. Write that up as an issue in the web repo so I can do it in a session there."
+  prompt: "The fix here also needs billing-web to stop sending the old field. Write that up as an issue in the web repo so I can do it in a session there."
   max_turns: 3
   timeout_seconds: 180
   allowed_tools: [Read, Glob, Grep, Skill]

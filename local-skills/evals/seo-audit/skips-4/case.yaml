@@ -1,9 +1,9 @@
 schema_version: "1.1"
 name: seo-audit-skips-4
 tags: [seo-audit, near-miss]
-description: "Near miss: a knowledge-base question about SEO tooling, for claude-kb-lookup."
+description: "Near miss: a knowledge-base question about SEO tooling, not an audit."
 execution:
-  prompt: "What does the claude-kb knowledge base say about using WebFetch for SEO checks?"
+  prompt: "What does our team's knowledge base say about using WebFetch for SEO checks?"
   max_turns: 3
   timeout_seconds: 180
   allowed_tools: [Read, Glob, Grep, Skill]
