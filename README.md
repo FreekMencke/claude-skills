@@ -23,7 +23,7 @@ uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) cover
 | `angular-conventions` | `freek-skills` | House Angular rules on top of `angular-developer`: templates, layers, signal stores, failure states, routes and page meta, SSR on a custom Express server, tests and Tailwind |
 | `angular-developer` | `freek-skills` | Angular's official skill, mirrored weekly; don't edit here ([below](#angular-developer)) |
 | `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it. Local because it's built on `/clear`, `/rewind` and `/resume` |
-| `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with the 2026-10 baseline |
+| `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with a baseline saved on that machine |
 | `seo-audit` | `freek-local-skills` | Read-only technical SEO audit of a site, from the server HTML a crawler gets, ranked by Search Console data when the session can reach it. Local because it runs from the app's repo, uses `disallowed-tools` to stay read-only, and checks pages in a local browser |
 
 `claude-kb-lookup` moved to FreekMencke/claude-kb (`.claude/skills/claude-kb-lookup/`), so a new KB topic and its

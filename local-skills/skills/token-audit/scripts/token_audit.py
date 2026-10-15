@@ -4,7 +4,7 @@
 Reads only local files and prints a report; nothing is sent anywhere. Costs are list-price
 estimates (on a subscription they are plan usage, not billing).
 
-Method (claude-kb TOK-013): one API message can span several transcript lines, so assistant
+Method: one API message can span several transcript lines, so assistant
 usage is deduplicated by message.id, keeping the last line. Tool output is estimated at
 4 characters per token.
 """
@@ -33,6 +33,8 @@ PRICES_CHECKED = "2026-10-12"
 CONTEXT_BUCKETS = [(0, 100_000, "<100k"), (100_000, 200_000, "100-200k"),
                    (200_000, 400_000, "200-400k"), (400_000, float("inf"), ">400k")]
 CHARS_PER_TOKEN = 4
+# Per machine and outside every repo: it holds this machine's usage.
+DEFAULT_BASELINE = os.path.expanduser("~/.claude/token-audit/baseline.json")
 
 
 def price_key(model, prompt_tokens):
@@ -317,6 +319,50 @@ def print_report(r):
           f"{im['pasted_in_prompts']} pasted in prompts")
 
 
+def measures(r):
+    """Per-day figures and shares: the numbers that compare across ranges of different length."""
+    days = max(r["range"]["days_with_data"], 1)
+    total = r["total_cost_usd"]
+    sub = r["subagents"]
+    b = r["bash"]
+    pk = r["peak_context"]
+    m = {
+        "cost per day with data": f"${r['cost_per_day_usd']:,.2f}",
+        "cost per API message": f"${total / max(r['turns'], 1):.3f}",
+        "API messages per day": f"{r['turns'] / days:,.0f}",
+    }
+    for k, v in r["cost_split"].items():
+        m[f"cost split: {k.replace('_', ' ')}"] = pct(v, total)
+    for model, c in r["cost_by_model"].items():
+        m[f"cost share: {model}"] = pct(c["total"], total)
+    m["subagents: share of cost"] = pct(sub["cost_usd"], total)
+    for model, usd in sub["by_model"].items():
+        m[f"subagent cost share: {model}"] = pct(usd, sub["cost_usd"])
+    for label, bk in r["context_buckets"].items():
+        m[f"context {label}: turns / input tokens"] = (f"{pct(bk['turns'], r['turns'])} / "
+                                                      f"{pct(bk['input_tokens'], r['input_tokens'])}")
+    m["peak context per session: p50 / p90 / max"] = f"{pk['p50'] // 1000}k / {pk['p90'] // 1000}k / {pk['max'] // 1000}k"
+    m["sessions over 150k"] = pct(pk["sessions_over_150k"], r["sessions"])
+    m["compactions per day"] = f"{r['compactions'] / days:.1f}"
+    m["Bash output tokens per day"] = f"{b['est_tokens'] / days / 1e6:.2f}M"
+    m["Bash avg tokens per call"] = f"{b['est_tokens'] // max(b['calls'], 1)}"
+    m["Bash calls over 3k: share of calls / of volume"] = (f"{pct(b['calls_over_3k'], b['calls'])} / "
+                                                          f"{100 * b['share_of_volume_over_3k']:.0f}%")
+    m["images in tool results per day"] = f"{r['images']['in_tool_results'] / days:.0f}"
+    return m
+
+
+def print_comparison(baseline, r):
+    rng = baseline["range"]
+    print(f"\nAgainst the baseline of {rng['first_day']} to {rng['last_day']} ({rng['days_with_data']} days with data, "
+          f"prices checked {rng['prices_checked']})")
+    old, new = measures(baseline), measures(r)
+    width = max(map(len, old | new))
+    print(f"  {'measure':<{width}}  {'baseline':>18}  {'now':>18}")
+    for key in old | new:
+        print(f"  {key:<{width}}  {old.get(key, '-'):>18}  {new.get(key, '-'):>18}")
+
+
 def main():
     today = dt.datetime.now(dt.timezone.utc).date()
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -324,15 +370,31 @@ def main():
     ap.add_argument("--until", default=today.isoformat(), help="YYYY-MM-DD (UTC), inclusive, default today")
     ap.add_argument("--projects", default=os.path.expanduser("~/.claude/projects"), help="transcript root")
     ap.add_argument("--json", action="store_true", help="print the raw report as JSON")
+    ap.add_argument("--baseline", nargs="?", const=DEFAULT_BASELINE, metavar="FILE",
+                    help=f"compare with a saved baseline (default {DEFAULT_BASELINE})")
+    ap.add_argument("--save-baseline", nargs="?", const=DEFAULT_BASELINE, metavar="FILE",
+                    help="save this range's report as the baseline")
     args = ap.parse_args()
     if not os.path.isdir(args.projects):
         sys.exit(f"no transcript directory at {args.projects}")
     report = build_report(args.projects, parse_day(args.since), parse_day(args.until, end=True))
+    if args.save_baseline:
+        os.makedirs(os.path.dirname(args.save_baseline) or ".", exist_ok=True)
+        with open(args.save_baseline, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2)
     if args.json:
         json.dump(report, sys.stdout, indent=2)
         print()
     else:
         print_report(report)
+        if args.save_baseline:
+            print(f"\nSaved as the baseline: {args.save_baseline}")
+        if args.baseline:
+            if os.path.isfile(args.baseline):
+                with open(args.baseline, encoding="utf-8") as f:
+                    print_comparison(json.load(f), report)
+            else:
+                print(f"\nNo baseline at {args.baseline}; save one with --save-baseline.")
 
 
 if __name__ == "__main__":
