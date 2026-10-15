@@ -14,6 +14,9 @@ Marketplace with two plugins. README.md is for people installing them; working h
 - Don't write `$0` in a skill: Claude Code replaces it with the first argument. In awk, use `$(0)`.
 - Verify (CI runs the same on pushes to `main` and on PRs): `claude plugin validate .` (the marketplace and
   `freek-skills`), `claude plugin validate local-skills` and `python3 scripts/check-frontmatter.py`.
+- `main` is protected by the repo ruleset `main`, without bypass: changes land through a PR, squash only, once CI's
+  `validate` passes (no approvals, no up-to-date requirement); force pushes and deletion are blocked. A direct push to
+  `main` fails. If CI itself breaks, the owner can switch the ruleset off in Settings › Rules.
 - After adding, moving or removing a skill: `./install.sh` in the main checkout, once the change is pulled there. Run
   from a worktree, it links every skill into that worktree. It symlinks each skill into `~/.claude/skills/`, so edits
   are live in the next session (desktop WSL sessions load these links, not claude.ai account skills; checked
