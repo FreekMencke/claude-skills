@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: research-loads-1
+tags: [research, should-load]
+execution:
+  prompt: "Find out what the default request timeout is in the AWS SDK for JavaScript v3 and cite where it says so."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?research"'

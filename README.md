@@ -20,6 +20,7 @@ On claude.ai: Customize › Plugins › Add marketplace `FreekMencke/claude-skil
 | `parallel-code-orchestrator` | Split a large coding task over parallel subagents |
 | `refresh-md-files` | Find stale, ambiguous or missing docs |
 | `skill-workshop` | Write or audit a skill |
+| `research` | Answer a question with exact quotes, re-checked sources and tested claims |
 | `tech-debt-audit` | Ranked technical-debt audit of a codebase |
 | `angular-conventions` | Opinionated Angular rules on top of `angular-developer` |
 | `angular-developer` | Angular's official skill, mirrored weekly |

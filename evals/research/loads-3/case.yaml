@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: research-loads-3
+tags: [research, should-load]
+execution:
+  prompt: "Check whether the claims in docs/ci.md about GitHub Actions job timeouts and cache size limits are still true according to GitHub's docs."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?research"'

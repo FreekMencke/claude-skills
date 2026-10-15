@@ -34,8 +34,8 @@ Marketplace with two plugins. README.md is for people installing them; working h
   setting Actions › General › "Allow GitHub Actions to create and approve pull requests", and starts `validate.yml` on
   its PR itself (a PR opened with `GITHUB_TOKEN` starts no `pull_request` run). Run it by hand:
   `gh workflow run sync-angular-skill.yml`.
-- After changing a description: run that skill's trigger evals, by hand (each run is a model call, about $0.08), never
-  in CI. `claude plugin eval <. or local-skills> --ablation none --model claude-opus-5-5 --no-publish -j 4 --threshold 0
+- After changing a description: run that skill's trigger evals, by hand (3 model calls per case; about 2 minutes per
+  skill at `-j 4`, measured 2026-10-15), never in CI. `claude plugin eval <. or local-skills> --ablation none --model claude-opus-5-5 --no-publish -j 4 --threshold 0
   --tag <skill>`: the no-plugin arm says nothing about triggering and doubles the cost; a pinned model keeps a model
   change from reading as a regression; only the last `--case` counts. Only the plugin under test's skills compete.
   Results go to the ignored `evals/results/`. Then replace that skill's row in `evals/RESULTS.md`; the before/after
