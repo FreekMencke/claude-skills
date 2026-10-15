@@ -2,7 +2,7 @@
 """Check that skills/*/SKILL.md frontmatter keeps to name and description.
 
 Skills in skills/ sync to claude.ai, and it's not checked that claude.ai accepts Claude Code-only keys
-(README "claude.ai, chat, Cowork and other machines"). local-skills/ may use them, so it isn't checked.
+(.claude/CLAUDE.md). local-skills/ may use them, so it isn't checked.
 
   check-frontmatter.py           check every skills/*/SKILL.md (CI)
   check-frontmatter.py FILE...   check these files

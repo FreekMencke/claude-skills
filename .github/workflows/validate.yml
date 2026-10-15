@@ -18,8 +18,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # validate needs no credentials. Evals aren't run here: they spend model calls (see README "Check").
-      # validate doesn't flag unknown frontmatter keys; skills/ keeps to name and description (README "Check").
+      # validate needs no credentials. Evals aren't run here: they spend model calls (see .claude/CLAUDE.md).
+      # validate doesn't flag unknown frontmatter keys; skills/ keeps to name and description (.claude/CLAUDE.md).
       - name: skills/ frontmatter
         run: python3 scripts/check-frontmatter.py
       - run: npm install -g @anthropic-ai/claude-code

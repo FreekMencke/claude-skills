@@ -1,19 +1,39 @@
 # claude-skills
 
-Marketplace with two plugins; README.md has the full layout, install and eval details. This file is in
+Marketplace with two plugins. README.md is for people installing them; working here is below. This file is in
 `.claude/` because `claude plugin validate` warns about a `CLAUDE.md` at the plugin root, and CI fails on that warning.
 
-- `skills/` (`freek-skills`, synced to claude.ai): frontmatter is `name` and `description` only;
+- `skills/` (`freek-skills`, synced to claude.ai): frontmatter is `name` and `description` only, because it's not
+  checked that claude.ai accepts the Claude Code-only keys. `validate` doesn't flag unknown keys, so
   `scripts/check-frontmatter.py` enforces it (CI and a `PostToolUse` hook).
 - `local-skills/skills/` (`freek-local-skills`, Claude Code only): skills that read local files, rely on Claude Code
-  slash commands or tools, or need Claude Code-only frontmatter (`disable-model-invocation`, `context`, `paths`).
+  slash commands or tools, or need Claude Code-only frontmatter (`disable-model-invocation`, `context`,
+  `disallowed-tools`, `paths`).
 - No `version` in either `plugin.json`, on purpose (installs track commits); don't add one for the validate warning.
+  It's also why CI doesn't use `--strict`; any other warning fails CI.
 - Don't write `$0` in a skill: Claude Code replaces it with the first argument. In awk, use `$(0)`.
-- Verify: `claude plugin validate .`, `claude plugin validate local-skills` and `python3 scripts/check-frontmatter.py`.
+- Verify (CI runs the same on pushes to `main` and on PRs): `claude plugin validate .` (the marketplace and
+  `freek-skills`), `claude plugin validate local-skills` and `python3 scripts/check-frontmatter.py`.
 - After adding, moving or removing a skill: `./install.sh` in the main checkout, once the change is pulled there. Run
-  from a worktree, it links every skill into that worktree.
-- New skill: add `loads-*` and `skips-*` trigger cases under `evals/<skill>/` or `local-skills/evals/<skill>/`.
-- `skills/angular-developer/` is Angular's skill, mirrored weekly by `.github/workflows/sync-angular-skill.yml`:
-  don't edit it or add trigger evals for it (README "angular-developer").
-- After changing a description: run that skill's trigger evals (README "Trigger evals"; `--tag <skill>` limits cost)
-  and replace that skill's row in the README results table; the before/after goes in the PR description.
+  from a worktree, it links every skill into that worktree. It symlinks each skill into `~/.claude/skills/`, so edits
+  are live in the next session (desktop WSL sessions load these links, not claude.ai account skills; checked
+  2026-10-14). Don't also install the plugins from the marketplace on that machine.
+- `freek-skills` is installed on the owner's claude.ai account with Sync automatically on: a merge to `main` reaches
+  chat and Cowork, and signed-in Claude Code sessions get it as `freek-skills@synced`. On the `install.sh` machine keep
+  `"freek-skills@synced": false` under `enabledPlugins` in `~/.claude/settings.json`, or every skill is listed twice.
+- New skill: add `loads-*` and `skips-*` trigger cases under `evals/<skill>/` or `local-skills/evals/<skill>/`: prompts
+  that should load it, and near misses (mostly from a sibling skill's territory) that shouldn't. Each case has one
+  `tool_used: Skill` grader.
+- `skills/angular-developer/` is Angular's skill from `angular/skills`, mirrored every Monday through a PR by
+  `.github/workflows/sync-angular-skill.yml`: don't edit it (the next sync overwrites it) or add trigger evals for it
+  (its description is upstream's); house rules go in `angular-conventions`. It's byte for byte except the frontmatter,
+  cut to `name` and `description`; upstream's license and author go to its `NOTICE`. The workflow needs the repo
+  setting Actions › General › "Allow GitHub Actions to create and approve pull requests", and starts `validate.yml` on
+  its PR itself (a PR opened with `GITHUB_TOKEN` starts no `pull_request` run). Run it by hand:
+  `gh workflow run sync-angular-skill.yml`.
+- After changing a description: run that skill's trigger evals, by hand (each run is a model call, about $0.08), never
+  in CI. `claude plugin eval <. or local-skills> --ablation none --model claude-opus-5-5 --no-publish -j 4 --threshold 0
+  --tag <skill>`: the no-plugin arm says nothing about triggering and doubles the cost; a pinned model keeps a model
+  change from reading as a regression; only the last `--case` counts. Only the plugin under test's skills compete.
+  Results go to the ignored `evals/results/`. Then replace that skill's row in `evals/RESULTS.md`; the before/after
+  goes in the PR description.
