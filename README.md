@@ -1,17 +1,13 @@
 # claude-skills
 
-Source of truth for my personal Claude Code skills. The repo is a marketplace with two plugins (plugin names can't start
-with `claude-`):
+Freek Mencke's Claude Code skills, published as a plugin marketplace with two plugins (plugin names can't start with
+`claude-`):
 
-- **`freek-skills`** (repo root, `skills/`): skills that work on every surface. Installed on claude.ai, so they also
-  reach chat, Cowork and every signed-in Claude Code session on a machine (cloud sessions don't load them).
-- **`freek-local-skills`** (`local-skills/`, its skills in `local-skills/skills/`): Claude Code-only skills. Never
-  installed on claude.ai. Some need this machine (the session transcripts); others only work in Claude
-  Code, through its slash commands, tools or frontmatter (`disable-model-invocation`, `context`, `disallowed-tools`,
-  `paths`).
-
-A new skill goes in `local-skills/skills/` when it reads local files, relies on Claude Code slash commands or tools, or
-uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) covers the CI workflow and the trigger evals.
+- **`freek-skills`** (repo root, `skills/`): skills that work on every surface: Claude Code, and claude.ai chat and
+  Cowork when installed there.
+- **`freek-local-skills`** (`local-skills/`, its skills in `local-skills/skills/`): Claude Code-only skills. Some read
+  local files (the session transcripts); others rely on Claude Code's slash commands, tools or frontmatter
+  (`disable-model-invocation`, `context`, `disallowed-tools`, `paths`). Don't install it on claude.ai.
 
 | Skill | Plugin | What it does |
 |---|---|---|
@@ -20,16 +16,39 @@ uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) cover
 | `refresh-md-files` | `freek-skills` | Audit `.md` docs for gaps, ambiguity and stale content |
 | `skill-workshop` | `freek-skills` | Write or audit a skill, grounded in real material and published examples |
 | `tech-debt-audit` | `freek-skills` | Read-only technical-debt audit of a codebase in six phases, each checked by a reviewer subagent, ending in a ranked remediation roadmap |
-| `angular-conventions` | `freek-skills` | House Angular rules on top of `angular-developer`: templates, layers, signal stores, failure states, routes and page meta, SSR on a custom Express server, tests and Tailwind |
+| `angular-conventions` | `freek-skills` | An opinionated set of Angular rules on top of `angular-developer`: templates, layers, signal stores, failure states, routes and page meta, SSR on a custom Express server, tests and Tailwind. A repo's `CLAUDE.md` overrides it |
 | `angular-developer` | `freek-skills` | Angular's official skill, mirrored weekly; don't edit here ([below](#angular-developer)) |
 | `handoff` | `freek-local-skills` | User-only (`/handoff`): write the session's state to the PR, issue or a scratch file, then `/clear` and continue from it. Local because it's built on `/clear`, `/rewind` and `/resume` |
 | `token-audit` | `freek-local-skills` | User-only (`/token-audit`): measure token spend from the local transcripts and compare it with a baseline saved on that machine |
 | `seo-audit` | `freek-local-skills` | Read-only technical SEO audit of a site, from the server HTML a crawler gets, ranked by Search Console data when the session can reach it. Local because it runs from the app's repo, uses `disallowed-tools` to stay read-only, and checks pages in a local browser |
 
-`claude-kb-lookup` moved to FreekMencke/claude-kb (`.claude/skills/claude-kb-lookup/`), so a new KB topic and its
-routing land in one PR there. Install it locally with
-`ln -sfn /home/fremen/repos/claude-kb/.claude/skills/claude-kb-lookup ~/.claude/skills/claude-kb-lookup`; a marketplace
-install of `freek-local-skills` no longer brings it.
+## Install
+
+Claude Code:
+
+```bash
+claude plugin marketplace add FreekMencke/claude-skills
+claude plugin install freek-skills@freek-skills
+claude plugin install freek-local-skills@freek-skills
+```
+
+The marketplace is named `freek-skills`, like its first plugin. Neither plugin has a `version`, so an update follows the
+latest commit.
+
+claude.ai (chat and Cowork): Customize › Plugins › Add marketplace `FreekMencke/claude-skills`, then install
+`freek-skills` only. Skills load there as `freek-skills:<name>`.
+
+Setup a skill needs:
+
+- `token-audit` keeps its baseline (offered on the first run) and the config changes to judge in
+  `~/.claude/token-audit/`.
+- `seo-audit` uses Search Console, a PageSpeed Insights key, GA4, logs and a browser when the session has them; the last
+  section of `local-skills/skills/seo-audit/references/data-sources.md` says how to set each one up.
+- `roadmap-issues` and `parallel-code-orchestrator` use `gh`, signed in to GitHub.
+
+## License
+
+[MIT](LICENSE). `skills/angular-developer/` is Angular's, under its own MIT license (its `NOTICE`).
 
 ## angular-developer
 
@@ -45,7 +64,12 @@ it, because a PR opened with `GITHUB_TOKEN` starts no `pull_request` run. It nee
 Don't edit the folder: the next sync overwrites it. House rules go in `angular-conventions`. It has no trigger evals,
 because its description is upstream's.
 
-## Install
+## Maintaining these skills
+
+A new skill goes in `local-skills/skills/` when it reads local files, relies on Claude Code slash commands or tools, or
+uses Claude Code-only frontmatter, otherwise in `skills/`. [Check](#check) covers the CI workflow and the trigger evals.
+
+On the machine where the skills are edited, link them instead of installing the plugins:
 
 ```bash
 ./install.sh
@@ -53,29 +77,21 @@ because its description is upstream's.
 
 This symlinks each `skills/<name>` and `local-skills/skills/<name>` into `~/.claude/skills/<name>`, so edits here are
 live in the next session, and removes links whose skill moved or was deleted. Run it again after adding, moving or
-removing a skill, and after a pull that does. Use this on the machine where you edit the skills.
+removing a skill, and after a pull that does. Never combine it with a marketplace install of the same plugin on one
+machine.
 
-On another machine that should also get the local skills, install that plugin from the marketplace instead:
-`claude plugin install freek-local-skills --marketplace FreekMencke/claude-skills` (git needs a GitHub credential for the
-private repo; set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` without an SSH key). Never use both on one machine.
+The marketplace is also installed on the owner's claude.ai account, with **Sync automatically** on:
 
-### claude.ai, chat, Cowork and other machines
-
-The repo is also a marketplace, installed as a plugin on my claude.ai account (Customize › Plugins › Add marketplace
-`FreekMencke/claude-skills`, then install `freek-skills` only, with **Sync automatically** on). The repo is private, so the
-Claude GitHub App needs access to it. From there:
-
-- Chat and Cowork load the skills as `freek-skills:<name>`. A merge to `main` reaches them without any upload.
-- Every Claude Code session signed in to the account downloads the plugin as `freek-skills@synced`. On other machines
-  that's the whole install. On the machine with `install.sh`, turn the synced copy off, or every skill is listed twice:
-  `"freek-skills@synced": false` under `enabledPlugins` in `~/.claude/settings.json`.
-- `version` is left out of `plugin.json` so updates track commits.
+- Chat and Cowork get a merge to `main` without any upload.
+- Every Claude Code session signed in to the account downloads `freek-skills` as `freek-skills@synced`. On other
+  machines that's the whole install. On the machine with `install.sh`, turn the synced copy off, or every skill is
+  listed twice: `"freek-skills@synced": false` under `enabledPlugins` in `~/.claude/settings.json`.
 
 Skills in `skills/` keep to `name` and `description`: it's not checked that claude.ai accepts Claude Code-only
 frontmatter (`when_to_use`, `paths`, `disable-model-invocation`). A skill that needs those goes in `local-skills/`.
 
-Desktop sessions in WSL don't load claude.ai account skills (claude-kb `SKILL-050`), and it's not checked whether they
-load synced plugins. The `install.sh` symlinks in the distro's `~/.claude/skills` do load there.
+Desktop sessions in WSL didn't load claude.ai account skills (checked 2026-10-14), and it's not
+checked whether they load synced plugins. The `install.sh` symlinks in the distro's `~/.claude/skills` do load there.
 
 ## Check
 

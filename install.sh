@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Symlink each skill in skills/ and local-skills/skills/ into ~/.claude/skills/ as a personal skill.
 # Personal skills load in every session type that reads this home, including desktop WSL sessions,
-# which don't load claude.ai account skills (claude-kb SKILL-050).
+# which didn't load claude.ai account skills when tested (2026-10-14).
 set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
