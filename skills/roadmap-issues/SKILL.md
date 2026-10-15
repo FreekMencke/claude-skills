@@ -5,7 +5,7 @@ description: "Create, audit or refresh a GitHub roadmap issue with ordered sub-i
 
 # Roadmap issues
 
-A roadmap is one GitHub issue that splits a piece of work over several child issues, fixes their order, and holds the context they share. It lives in the repo where most of the work is. Reference examples (public): `osrs-tracker/osrs-tracker-web#159`, `osrs-tracker/osrs-tracker-aws#52`.
+A roadmap is one GitHub issue that splits a piece of work over several child issues, fixes their order, and holds the context they share. It lives in the repo where most of the work is.
 
 This skill writes and maintains the issues. Carrying them out is the `parallel-code-orchestrator` skill's job. A single follow-up in another repo needs one issue in the child format below, not a roadmap.
 

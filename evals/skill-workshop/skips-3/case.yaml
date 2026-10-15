@@ -1,7 +1,7 @@
 schema_version: "1.1"
 name: skill-workshop-skips-3
 tags: [skill-workshop, near-miss]
-description: "Near miss: claude-kb-lookup."
+description: "Near miss: a question about using Claude, not about writing a skill."
 execution:
   prompt: "Which model should a code-reviewer subagent use?"
   max_turns: 3

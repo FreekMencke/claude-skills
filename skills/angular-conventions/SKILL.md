@@ -5,6 +5,9 @@ description: "House rules for Angular apps, on top of angular-developer: templat
 
 # Angular conventions
 
+An opinionated set of choices for Angular apps (SignalStore for shared state, Tailwind tokens, SSR on a custom Express
+server), used as-is where a repo has made no choice of its own.
+
 - This skill builds on `angular-developer`, Angular's official skill: load that one too for Angular's APIs. Where they
   differ, this skill wins. The repo's `CLAUDE.md` and project skill win over both, and hold the repo's paths and
   examples.

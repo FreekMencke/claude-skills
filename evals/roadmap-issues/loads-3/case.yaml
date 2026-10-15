@@ -2,7 +2,7 @@ schema_version: "1.1"
 name: roadmap-issues-loads-3
 tags: [roadmap-issues, should-load]
 execution:
-  prompt: "Check whether roadmap issue FreekMencke/claude-skills#1 and its child issues are still accurate against the current code."
+  prompt: "Check whether roadmap issue acme/storefront#12 and its child issues are still accurate against the current code."
   max_turns: 3
   timeout_seconds: 180
   allowed_tools: [Read, Glob, Grep, Skill]

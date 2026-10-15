@@ -29,7 +29,7 @@ If you can state exactly which files change and how, the unit is mechanical. A c
 
 **Escalate effort before tier.** A unit too hard for its row: first the same model one effort level up (to `xhigh` at most), then one tier up (Sonnet to the session model), then Fable only for a unit that fits its row.
 
-**Fable is the exception, not the tier above the session model.** Opus 5.5 scores higher than Fable 5.1 on Anthropic's published coding benchmarks (Terminal-Bench 4.0, FrontierCode, CursorBench; Anthropic says the real gap is narrower than the scores suggest), while Fable is slower, costs 2.5× Opus per token, and on Max may use at most 50% of the weekly limits (as of 2026-10-12, claude-kb ORCH-026, ORCH-027, ORCH-031; re-check when a model ships). So use it only for units that fit its row: never for reviewers, issue checks, scouting, docs or mechanical units, even when escalating. Fable units share the session's rate limit, so run at most two at a time. Set `model` on every spawn so nothing inherits Fable from the session. When the session itself runs on Fable, use Opus for the session-model rows; Explore then runs on Opus unless you pass `model: haiku`.
+**Fable is the exception, not the tier above the session model.** Opus 5.5 scores higher than Fable 5.1 on Anthropic's published coding benchmarks (Terminal-Bench 4.0, FrontierCode, CursorBench; Anthropic says the real gap is narrower than the scores suggest), while Fable is slower, costs 2.5× Opus per token, and on Max may use at most 50% of the weekly limits (as of 2026-10-12; re-check when a model ships). So use it only for units that fit its row: never for reviewers, issue checks, scouting, docs or mechanical units, even when escalating. Fable units share the session's rate limit, so run at most two at a time. Set `model` on every spawn so nothing inherits Fable from the session. When the session itself runs on Fable, use Opus for the session-model rows; Explore then runs on Opus unless you pass `model: haiku`.
 
 ## When to stop and ask
 
@@ -45,7 +45,7 @@ Everything else: decide, note the decision in the progress file, and continue.
 
 These outrank this skill where they disagree.
 
-**Roadmap issue.** If the task is a roadmap (a GitHub issue with ordered sub-issues, e.g. `osrs-tracker/osrs-tracker-web#159`) or an issue whose first line says `Part of roadmap owner/repo#N`, the decomposition is already done:
+**Roadmap issue.** If the task is a roadmap (a GitHub issue with ordered sub-issues) or an issue whose first line says `Part of roadmap owner/repo#N`, the decomposition is already done:
 
 - `gh issue view` the roadmap: which repo skills to load, `## Order`, `### Checklist`, the shared context
 - Children in order: `gh api --paginate 'repos/<owner>/<repo>/issues/<roadmap>/sub_issues?per_page=100'` (without the parameters the list stops at 30)
