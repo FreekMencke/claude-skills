@@ -3,9 +3,10 @@
 Marketplace with two plugins. README.md is for people installing them; working here is below. This file is in
 `.claude/` because `claude plugin validate` warns about a `CLAUDE.md` at the plugin root, and CI fails on that warning.
 
-- `skills/` (`freek-skills`, synced to claude.ai): frontmatter is `name` and `description` only, because it's not
-  checked that claude.ai accepts the Claude Code-only keys. `validate` doesn't flag unknown keys, so
-  `scripts/check-frontmatter.py` enforces it (CI and a `PostToolUse` hook).
+- `skills/` (`freek-skills`, synced to claude.ai): frontmatter is `name` and `description` only, because a claude.ai
+  upload fails on any key outside the Agent Skills spec (code.claude.com/docs/en/skills, "Using skill frontmatter
+  outside Claude Code"), and it's not checked whether a marketplace sync does the same. `validate` doesn't flag
+  unknown keys, so `scripts/check-frontmatter.py` enforces it (CI and a `PostToolUse` hook).
 - `local-skills/skills/` (`freek-local-skills`, Claude Code only): skills that read local files, rely on Claude Code
   slash commands or tools, or need Claude Code-only frontmatter (`disable-model-invocation`, `context`,
   `disallowed-tools`, `paths`).

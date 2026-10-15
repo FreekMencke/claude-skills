@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Check that skills/*/SKILL.md frontmatter keeps to name and description.
 
-Skills in skills/ sync to claude.ai, and it's not checked that claude.ai accepts Claude Code-only keys
-(.claude/CLAUDE.md). local-skills/ may use them, so it isn't checked.
+Skills in skills/ sync to claude.ai: a claude.ai upload fails on any key outside the Agent Skills spec, and it's not
+checked whether a marketplace sync does the same (.claude/CLAUDE.md). local-skills/ may use Claude Code-only keys, so it
+isn't checked.
 
   check-frontmatter.py           check every skills/*/SKILL.md (CI)
   check-frontmatter.py FILE...   check these files
