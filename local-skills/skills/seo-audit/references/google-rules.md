@@ -64,7 +64,8 @@ A title or description shared by every page of a template is a finding; a length
 
 A `Brand: phrase` title whose phrase starts lowercase is a low finding: check `probe.sh`'s title column. Google's page
 allows the format, but on 2026-10-13 Google showed two such titles as `phrase - Brand`, leading with the lowercase
-word (claude-kb WEB-033, through the `claude-kb-lookup` skill). Fix: capitalise the phrase, or write `Phrase - Brand`.
+word, while a title starting with the site name was kept. Google names no such rule: an inference from one site. Fix:
+capitalise the phrase, or write `Phrase - Brand`.
 
 ## Canonicals and duplicates
 

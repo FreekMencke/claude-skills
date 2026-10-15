@@ -53,7 +53,8 @@ Check what this session can reach, then print one line before going further, e.g
 - **Browser**: Playwright or Chrome DevTools MCP tools.
 - **Lighthouse CLI**: `node --version` 22 or later and a local Chrome or Chromium.
 
-What's missing is reported under Coverage, never guessed or offered. `references/data-sources.md` has the queries.
+What's missing is reported under Coverage, never guessed or offered. `references/data-sources.md` has the queries,
+and its last section how the user sets each source up: point to it under Coverage for what was missing.
 
 ## 3. Search data first
 

@@ -39,7 +39,11 @@ It reports the indexed version only ("you cannot test the indexability of a live
 **Sitemaps** (`sitemaps.list`): `isPending`, `lastDownloaded`, `errors`, `warnings` per submitted index and child.
 `isPending: true` with 0 errors, on a sitemap the logs show Googlebot fetching with a 200, means not processed yet:
 not a finding, even when the UI says "could not be read". A sitemap index row stuck pending is harmless when its
-children are submitted directly and read fine. Details: claude-kb WEB-032, through the `claude-kb-lookup` skill.
+children are submitted directly and read fine. Seen on one site (2026-10-13): new child sitemaps showed "could not be
+read" minutes after a submit, though Googlebot got a 200, and cleared on their own within hours; a resubmitted index
+stayed pending for days. So the fix for a stuck index is submitting the children directly, not resubmitting it. Check
+in order: `sitemaps.list`, the logs for Googlebot's fetch and status, then URL Inspection's live test of the sitemap
+URL (its non-live view says "URL is unknown to Google" for any sitemap, which means nothing).
 
 **UI only** (manual steps for the user, or a browser they sign in to): the Pages report's reasons ("Discovered –
 currently not indexed", "Crawled – currently not indexed", duplicates), Crawl stats, the Core Web Vitals report.
@@ -93,3 +97,35 @@ self-declared Googlebot is unverified; Google verifies by reverse DNS.
 
 Only through a GA4 MCP server the session already has. Useful questions: landing pages for the Organic Search channel
 (sessions, engagement) per template. Without one, leave GA4 out of the tier; don't offer data the session can't read.
+
+## Giving a session the data (for the user)
+
+The audit only reads what the session already has; it sets nothing up. The Coverage section points here for what was
+missing. Set these up once per site, outside every repo, then name the route (the wrapper or the server, not the key)
+in the repo's `CLAUDE.md` or the session's memory. Auto mode denies listing a credentials folder as credential
+exploration, so a session can't find an unnamed route on its own.
+
+**Search Console.** Google ships no MCP server for it (checked 2026-10-14).
+
+1. In a Google Cloud project, enable the Google Search Console API, and create a service account with a JSON key.
+2. In Search Console, Settings › Users and permissions › Add user: the service account's email, permission
+   **Restricted** ("simple view rights on most data"; it can't submit sitemaps)
+   ([Managing owners, users, and permissions](https://support.google.com/webmasters/answer/7687615)).
+3. Authorise with the read-only scope, `https://www.googleapis.com/auth/webmasters.readonly`
+   ([Authorizing requests](https://developers.google.com/webmaster-tools/v1/how-tos/authorizing)).
+4. Give the session one route that holds the key: a small wrapper script (`sites`, `analytics`, `inspect`,
+   `sitemaps`) or a community MCP server. The most used, [`AminForou/mcp-gsc`](https://github.com/AminForou/mcp-gsc),
+   asks for the read/write scope and can submit sitemaps; its `GSC_ALLOW_DESTRUCTIVE` (default `false`) only gates
+   adding or deleting sites and deleting sitemaps. Prefer the wrapper on the read-only scope, which can't write.
+
+**PSI key.** Create one with "Get a Key" on
+[Get started](https://developers.google.com/speed/docs/insights/v5/get-started) or on the Cloud console's Credentials
+page, and restrict it to the PageSpeed Insights API. The docs call a key optional, but keyless calls returned 429
+(2026-10-13).
+
+**GA4.** Google's [`google-analytics-mcp`](https://github.com/googleanalytics/google-analytics-mcp) (experimental),
+installed per its README. It needs the Admin and Data APIs enabled and read-only credentials; the Search Console
+service account works, added as a Viewer on the GA4 property.
+
+**Logs and browser.** A Grafana or Loki MCP server or claude.ai connector for log history, a Kubernetes MCP server for
+the current pods, and Playwright or Chrome DevTools MCP for the rendered DOM.
