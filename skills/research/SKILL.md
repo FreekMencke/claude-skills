@@ -8,13 +8,14 @@ description: "Researches a question from primary sources and returns claims with
 Answer a question with claims a later reader can check: each one sourced, dated and, for any figure, quoted exactly
 from text you read in full. Treat what you remember as a lead to verify, never as a source.
 
-The steps say "with a shell" or "with an Agent tool" where they need one; without it, use the fallback the step gives.
+The steps say "with a shell" or "with an Agent tool" (any tool that spawns subagents) where they need one; without
+it, use the fallback the step gives.
 
 ## Modes
 
 - **Answer**: a question, a comparison or facts for a decision. Default output: a report file (step 8).
 - **Write into a repo**: its docs, notes or knowledge base. The repo's format, ID rules and finishing steps win over
-  this skill's; read its `CLAUDE.md` first.
+  this skill's; read its agent instructions (`CLAUDE.md`, `AGENTS.md`) first.
 - **Re-verify**: existing claims. Re-read each claim's source and report it as still true, changed (old and new
   wording) or stale (the source moved or no longer says it).
 
@@ -32,8 +33,8 @@ Not this skill:
 - Turn the request into a block of numbered questions and a done-when: what an answer has to contain to be enough.
 - Read what is already known first: the repo's docs, a knowledge-base skill if one is installed, earlier notes or
   reports. List it, and research only the gaps.
-- Get the output format and destination from the caller or the repo's `CLAUDE.md`. Without one, write the default
-  report (step 8).
+- Get the output format and destination from the caller or the repo's agent instructions. Without one, write the
+  default report (step 8).
 - Ask the caller only what changes the research (an ambiguous product name, a version or platform). Pick a default
   for the rest and say which.
 

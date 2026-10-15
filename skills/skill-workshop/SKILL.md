@@ -21,7 +21,7 @@ Ask only what changes the build: what the skill does, when it should load, what 
 
 Read what the skill will work on before drafting:
 
-- The repo's `CLAUDE.md`, its skills, its agents and its hooks
+- The repo's agent instructions (`CLAUDE.md`, `AGENTS.md`), its skills, its agents and its hooks
 - Two real examples of the output the skill should produce (an issue, a report, a PR), as raw text. A summarising reader changes headings and wording.
 - The user's own rules on the subject, wherever they keep them. Ask them to paste what you cannot read.
 
