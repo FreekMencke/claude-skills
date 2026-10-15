@@ -26,7 +26,8 @@ Earlier reports: <absolute paths, or "none">
    "Files covered" fits the scope.
 5. Shape: each finding has Where, Proof, Impact, Effort, Confidence and Fix, and the Fix is a scoped change rather
    than "refactor X" or a rewrite.
-6. Deliberate choices: no finding contradicts a trade-off recorded in the repo's CLAUDE.md or decisions doc.
+6. Deliberate choices: no finding contradicts a trade-off recorded in the repo's agent instructions (CLAUDE.md,
+   AGENTS.md) or decisions doc.
 
 ## Checks: roadmap
 1. Every high and medium finding in the phase reports appears, with its effort.

@@ -21,22 +21,32 @@ On claude.ai: Customize › Plugins › Add marketplace `FreekMencke/claude-skil
 
 ## Skills
 
-| Skill | What it does |
-|---|---|
-| `roadmap-issues` | Plan work as a GitHub roadmap issue with ordered sub-issues |
-| `parallel-code-orchestrator` | Split a large coding task over parallel subagents |
-| `refresh-md-files` | Find stale, ambiguous or missing docs |
-| `skill-workshop` | Write or audit a skill |
-| `research` | Answer a question with exact quotes, re-checked sources and tested claims |
-| `tech-debt-audit` | Ranked technical-debt audit of a codebase |
-| `angular-conventions` | Opinionated Angular rules on top of `angular-developer` |
-| `angular-developer` | Angular's official skill, mirrored weekly |
-| `handoff` * | Save the session's state, `/clear`, and continue from it |
-| `token-audit` * | Measure token spend from your local transcripts |
-| `seo-audit` * | Read-only technical SEO audit of a site ([data setup](local-skills/skills/seo-audit/references/data-sources.md#giving-a-session-the-data-for-the-user)) |
+| Skill | What it does | Runs on |
+|---|---|---|
+| `roadmap-issues` | Plan work as a GitHub roadmap issue with ordered sub-issues | Any agent |
+| `parallel-code-orchestrator` | Split a large coding task over parallel subagents | Claude Code |
+| `refresh-md-files` | Find stale, ambiguous or missing docs | Any agent |
+| `skill-workshop` | Write or audit a skill | Best in Claude Code |
+| `research` | Answer a question with exact quotes, re-checked sources and tested claims | Best in Claude Code |
+| `tech-debt-audit` | Ranked technical-debt audit of a codebase | Best in Claude Code |
+| `angular-conventions` | Opinionated Angular rules on top of `angular-developer` | Any agent |
+| `angular-developer` | Angular's official skill, mirrored weekly | Any agent |
+| `handoff` * | Save the session's state, `/clear`, and continue from it | Claude Code |
+| `token-audit` * | Measure token spend from your local transcripts | Claude Code |
+| `seo-audit` * | Read-only technical SEO audit of a site ([data setup](local-skills/skills/seo-audit/references/data-sources.md#giving-a-session-the-data-for-the-user)) | Best in Claude Code |
 
-\* `freek-local-skills`, Claude Code only. `handoff` and `token-audit` run as slash commands, such as
-`/freek-local-skills:handoff`.
+Runs on:
+
+- **Any agent**: needs no Claude Code feature, so it works in any agent that reads [Agent Skills](https://agentskills.io),
+  such as Codex or GitHub Copilot.
+- **Best in Claude Code**: runs elsewhere, but is tuned to Claude Code's subagents, models and tools, and falls back
+  to a weaker path without subagents: a self-check instead of an independent reviewer, a single reader instead of several.
+  `skill-workshop` checks a skill against Claude Code's rules.
+- **Claude Code**: needs its subagents with worktrees, its slash commands or its transcripts.
+
+\* In `freek-local-skills`, which installs in Claude Code only. `handoff` and `token-audit` run as slash commands, such as
+`/freek-local-skills:handoff`. Claude Code enforces `seo-audit`'s read-only rule (`disallowed-tools`); another agent
+may only read it as an instruction.
 
 ## License
 

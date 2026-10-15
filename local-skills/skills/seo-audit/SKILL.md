@@ -26,7 +26,8 @@ a public issue.
 
 Skip to step 2 when the session isn't in the site's repo, and say so under Coverage.
 
-Read the repo's own skill (`.claude/skills/*/SKILL.md`), `CLAUDE.md` and its decisions doc (`docs/decisions.md`, ADRs).
+Read the repo's own skill (`.claude/skills/` or `.agents/skills/`), its agent instructions (`CLAUDE.md`, `AGENTS.md`)
+and its decisions doc (`docs/decisions.md`, ADRs).
 Note:
 
 - the page templates (from the routes) and which matter most per the docs;

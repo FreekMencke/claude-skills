@@ -9,13 +9,13 @@ An opinionated set of choices for Angular apps (SignalStore for shared state, Ta
 server), used as-is where a repo has made no choice of its own.
 
 - This skill builds on `angular-developer`, Angular's official skill: load that one too for Angular's APIs. Where they
-  differ, this skill wins. The repo's `CLAUDE.md` and project skill win over both, and hold the repo's paths and
-  examples.
+  differ, this skill wins. The repo's agent instructions (`CLAUDE.md`, `AGENTS.md`) and project skill win over both,
+  and hold the repo's paths and examples.
 - The installed Angular version (`@angular/core` in `package.json`) wins over `angular-developer`, which follows
   Angular's `main` and can describe newer APIs. When the repo's `.mcp.json` has the angular-cli MCP server, check an API
   with `search_documentation` (pass `version`, the major) or `get_best_practices` (pass `workspacePath` from
   `list_projects`). Without it, hover the API with the LSP tool or read its `.d.ts`.
-- Verify with the repo's verify command (`CLAUDE.md`), not `angular-developer`'s plain `ng build`.
+- Verify with the verify command from the repo's agent instructions, not `angular-developer`'s plain `ng build`.
 
 ## Templates
 

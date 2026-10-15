@@ -47,8 +47,9 @@ Run them in order. Each writes its report to the audit folder, updates `progress
 
 ### Phase 1: orient before judging
 
-- Read the README, manifests, `CLAUDE.md`, CI workflows and where the repo records its decisions (`docs/decisions.md`,
-  ADRs). A trade-off they record isn't a finding; one worth revisiting goes under "Decisions worth revisiting".
+- Read the README, manifests, the agent instructions (`CLAUDE.md`, `AGENTS.md`), CI workflows and where the repo
+  records its decisions (`docs/decisions.md`, ADRs). A trade-off they record isn't a finding; one worth revisiting
+  goes under "Decisions worth revisiting".
 - Record the commit: `git rev-parse --short HEAD`.
 - Age and team: `git log --reverse --format=%as | head -1`, `git shortlog -sn --since=1.year HEAD | wc -l`.
 - Size: `git ls-files` per top-level module, with line counts.
@@ -72,8 +73,9 @@ Record the answers in `progress.md`.
 
 ### Large repos
 
-Above about 50,000 lines or five top-level modules, run phases 2 and 4 per module on read-only Explore subagents,
-in parallel. Pass `model: haiku` unless `~/.claude/agents/explore.md` exists and pins a model, and effort `medium`.
+Above about 50,000 lines or five top-level modules, run phases 2 and 4 per module on read-only subagents in
+parallel, on a small fast model at effort `medium` (Claude Code: the Explore agent with `model: haiku`, unless
+`~/.claude/agents/explore.md` exists and pins a model).
 Each brief names the module, the phase's scope, the finding format from step 5 and a cap of 30 findings. You merge,
 remove duplicates and rank.
 
@@ -96,25 +98,26 @@ An analyser that isn't available goes under Not verified, never replaced by an e
 
 After each phase, including the roadmap:
 
-1. Spawn a reviewer: the Agent tool, `subagent_type: general-purpose`, in the foreground (`run_in_background: false`),
-   with the model and effort below. The prompt is `references/reviewer-brief.md` with its placeholders filled in.
-   Send nothing else: not your reasoning, your drafts or the problems you suspect. A fresh context judges the report,
-   not how you got there.
+1. Spawn a reviewer subagent in the foreground, with the model and effort below (Claude Code: the Agent tool,
+   `subagent_type: general-purpose`, `run_in_background: false`). The prompt is `references/reviewer-brief.md` with
+   its placeholders filled in. Send nothing else: not your reasoning, your drafts or the problems you suspect. A
+   fresh context judges the report, not how you got there.
 
    | Phase | Model | Effort | Why |
    |---|---|---|---|
-   | 1 to 5 | `sonnet` | `high` | Checks proof against fixed rules |
-   | 6, roadmap | `opus` | `high` | The ranking is judgment |
+   | 1 to 5 | Mid-size (`sonnet`) | `high` | Checks proof against fixed rules |
+   | 6, roadmap | Frontier (`opus`) | `high` | The ranking is judgment |
 
-   Never Haiku: it skips checks and passes weak reports.
+   The names are Claude Code's; elsewhere, take the platform's model of that size. Never a small model (Haiku): it
+   skips checks and passes weak reports.
 2. **PASS**: record it in `progress.md` and start the next phase.
 3. **REVISE**: fix each problem in the report. Where the reviewer is wrong, say why under "Review notes" in the
    report; you can't turn a REVISE into a PASS yourself. Then spawn a new reviewer with the same brief plus the list
    of problems to recheck.
 4. At most two revise rounds per phase. After that, move on: list the unresolved problems under "Unresolved review
    points" in `progress.md` and under Not verified in the report, and mark the findings they touch `likely`.
-5. Without an Agent tool, re-read the report from its file and run the brief's checks yourself, and write "self-check,
-   not independent" as the verdict in `progress.md`.
+5. Without a tool that spawns subagents, re-read the report from its file and run the brief's checks yourself, and
+   write "self-check, not independent" as the verdict in `progress.md`.
 
 ## 5. Findings
 
