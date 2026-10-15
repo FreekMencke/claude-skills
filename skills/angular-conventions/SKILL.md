@@ -32,7 +32,8 @@ server), used as-is where a repo has made no choice of its own.
 
 ## State
 
-- Signals, with explicitly typed public fields: `readonly total: Signal<number> = computed(...)`.
+- Signals, with inferred types: `readonly total = computed(...)`. Type only what inference gets wrong:
+  `signal<User | null>(null)`.
 - State shared between components, or kept in `localStorage`, is an `@ngrx/signals` `signalStore`, never a plain
   service. Its private members start with `_`, which keeps them out of the store's public API.
 - `localStorage` only through a store, never from a component.
