@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: research-skips-1
+tags: [research, near-miss]
+description: "Near miss: a narrative market report, Anthropic's deep-research territory."
+execution:
+  prompt: "Write me a narrative report on the European market for AI coding assistants: the main players, trends and outlook."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?research"'
+    min: 0
+    max: 0
+    arm: both
