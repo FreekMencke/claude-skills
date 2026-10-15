@@ -1,6 +1,13 @@
-# claude-skills
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.png">
+    <img alt="claude-skills: Claude Code skills, published as a plugin marketplace" src="assets/banner.png">
+  </picture>
+</p>
 
-Claude Code skills, published as a plugin marketplace.
+<p align="center">
+  <a href="https://github.com/FreekMencke/claude-skills/actions/workflows/validate.yml"><img alt="Validate" src="https://github.com/FreekMencke/claude-skills/actions/workflows/validate.yml/badge.svg"></a>
+</p>
 
 ## Install
 

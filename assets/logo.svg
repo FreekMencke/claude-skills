@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="t">
+  <title id="t">claude-skills</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14513F"/>
+      <stop offset="1" stop-color="#0C3B2F"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <g transform="translate(6 10)">
+  <!-- card fan -->
+  <g fill="#9EC2B3">
+    <rect x="150" y="196" width="180" height="236" rx="26" transform="rotate(-13 240 432)" opacity=".55"/>
+    <rect x="150" y="196" width="180" height="236" rx="26" transform="rotate(10 240 432)"/>
+  </g>
+  <!-- front card -->
+  <rect x="150" y="196" width="180" height="236" rx="26" fill="#EEF3F0"/>
+  <!-- slash command -->
+  <path d="M206 236 L182 296" fill="none" stroke="#14513F" stroke-width="16" stroke-linecap="round"/>
+  <!-- lines -->
+  <g fill="none" stroke="#9EC2B3" stroke-width="9" stroke-linecap="round">
+    <path d="M226 266 L296 266"/>
+    <path d="M182 330 L296 330"/>
+    <path d="M182 362 L296 362"/>
+    <path d="M182 394 L250 394"/>
+  </g>
+  </g>
+  <!-- spark -->
+  <g fill="#6EE7B7">
+    <path d="M362 84 C368 132 384 150 430 156 C384 162 368 180 362 228 C356 180 340 162 294 156 C340 150 356 132 362 84 Z"/>
+    <path d="M412 238 C415 256 421 262 438 265 C421 268 415 274 412 292 C409 274 403 268 386 265 C403 262 409 256 412 238 Z"/>
+  </g>
+</svg>
