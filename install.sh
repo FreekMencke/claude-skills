@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Symlink each skill in skills/ and local-skills/skills/ into ~/.claude/skills/ as a personal skill.
+# Symlink each skill in plugins/*/skills/ into ~/.claude/skills/ as a personal skill.
 # Personal skills load in every session type that reads this home, including desktop WSL sessions,
 # which didn't load claude.ai account skills when tested (2026-10-14).
 set -euo pipefail
@@ -16,7 +16,7 @@ for link in "$target"/*; do
   fi
 done
 
-for dir in "$repo"/skills/*/ "$repo"/local-skills/skills/*/; do
+for dir in "$repo"/plugins/*/skills/*/; do
   name="$(basename "$dir")"
   link="$target/$name"
   if [[ -e "$link" && ! -L "$link" ]]; then

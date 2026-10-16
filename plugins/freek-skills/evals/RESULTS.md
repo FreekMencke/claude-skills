@@ -1,6 +1,6 @@
 # Trigger eval results
 
-Latest run per skill, for the cases in `evals/` and `local-skills/evals/`: runs that loaded the skill / skipped it,
+Latest run per skill, for the cases in `plugins/*/evals/`: runs that loaded the skill / skipped it,
 3 runs per case, Opus 5.5. After a rerun, replace that skill's row; git history keeps the old numbers.
 
 | Skill | Cases (load + near miss) | Should load | Near miss skipped | Claude Code | Date |

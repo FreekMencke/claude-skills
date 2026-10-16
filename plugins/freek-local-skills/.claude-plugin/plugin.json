@@ -1,5 +1,4 @@
 {
-  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "freek-local-skills",
   "description": "Claude Code-only skills: handoff, token audit, SEO audit",
   "author": {

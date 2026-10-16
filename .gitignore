@@ -1,3 +1,2 @@
-evals/results/
-local-skills/evals/results/
+plugins/*/evals/results/
 __pycache__/

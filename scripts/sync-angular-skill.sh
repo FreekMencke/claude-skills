@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Mirror Angular's official angular-developer skill into skills/angular-developer/, byte for byte except the SKILL.md
-# frontmatter, which keeps to name and description (scripts/check-frontmatter.py). Upstream's license and author move
-# to NOTICE. .github/workflows/sync-angular-skill.yml runs this weekly.
+# Mirror Angular's official angular-developer skill into plugins/freek-skills/skills/angular-developer/, byte for byte
+# except the SKILL.md frontmatter, which keeps to name and description (scripts/check-frontmatter.py). Upstream's
+# license and author move to NOTICE. .github/workflows/sync-angular-skill.yml runs this weekly.
 #
 #   sync-angular-skill.sh CHECKOUT    CHECKOUT is a clone of https://github.com/angular/skills
 set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 src="${1:?usage: sync-angular-skill.sh ANGULAR_SKILLS_CHECKOUT}/angular-developer"
-dest="$repo/skills/angular-developer"
+dest="$repo/plugins/freek-skills/skills/angular-developer"
 
 # Upstream has no LICENSE file: the frontmatter is the license. Stop rather than mirror it without one.
 license="$(sed -n '2,/^---$/s/^license:[[:space:]]*//p' "$src/SKILL.md")"

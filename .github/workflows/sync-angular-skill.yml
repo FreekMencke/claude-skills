@@ -1,7 +1,8 @@
 name: sync angular-developer
 
 # Mirrors Angular's official angular-developer skill (angular/skills, generated from angular/angular) into
-# skills/angular-developer/, and opens or updates one PR when that changed. Plain shell, no model calls.
+# plugins/freek-skills/skills/angular-developer/, and opens or updates one PR when that changed. Plain shell, no model
+# calls.
 # Needs the repo setting Actions › General › "Allow GitHub Actions to create and approve pull requests".
 
 on:
@@ -34,13 +35,13 @@ jobs:
       - run: scripts/sync-angular-skill.sh upstream
       - name: Open or update the PR
         run: |
-          git add -A skills/angular-developer
+          git add -A plugins/freek-skills/skills/angular-developer
           if git diff --cached --quiet; then
-            echo "skills/angular-developer/ is up to date"
+            echo "plugins/freek-skills/skills/angular-developer/ is up to date"
             exit 0
           fi
           pr="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
-          if [[ -n "$pr" ]] && git fetch --quiet origin "$BRANCH" && git diff --cached --quiet FETCH_HEAD -- skills/angular-developer; then
+          if [[ -n "$pr" ]] && git fetch --quiet origin "$BRANCH" && git diff --cached --quiet FETCH_HEAD -- plugins/freek-skills/skills/angular-developer; then
             echo "PR #$pr already has this version"
             exit 0
           fi
