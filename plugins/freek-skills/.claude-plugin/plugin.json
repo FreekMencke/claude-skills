@@ -1,5 +1,4 @@
 {
-  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "freek-skills",
   "description": "Skills for every surface, claude.ai included: roadmap issues, parallel orchestration, doc and tech-debt audits, skill writing, opinionated Angular rules, and Angular's official angular-developer skill",
   "author": {

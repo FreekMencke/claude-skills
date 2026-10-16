@@ -33,7 +33,7 @@ On claude.ai: Customize › Plugins › Add marketplace `FreekMencke/claude-skil
 | `angular-developer` | Angular's official skill, mirrored weekly | Any agent |
 | `handoff` * | Save the session's state, `/clear`, and continue from it | Claude Code |
 | `token-audit` * | Measure token spend from your local transcripts | Claude Code |
-| `seo-audit` * | Read-only technical SEO audit of a site ([data setup](local-skills/skills/seo-audit/references/data-sources.md#giving-a-session-the-data-for-the-user)) | Best in Claude Code |
+| `seo-audit` * | Read-only technical SEO audit of a site ([data setup](plugins/freek-local-skills/skills/seo-audit/references/data-sources.md#giving-a-session-the-data-for-the-user)) | Best in Claude Code |
 
 Runs on:
 
@@ -50,4 +50,4 @@ may only read it as an instruction.
 
 ## License
 
-[MIT](LICENSE). `skills/angular-developer/` is Angular's, under its own MIT license (see its `NOTICE`).
+[MIT](LICENSE). `plugins/freek-skills/skills/angular-developer/` is Angular's, under its own MIT license (see its `NOTICE`).

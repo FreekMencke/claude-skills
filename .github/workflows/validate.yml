@@ -19,17 +19,17 @@ jobs:
         with:
           node-version: 22
       # validate needs no credentials. Evals aren't run here: they spend model calls (see .claude/CLAUDE.md).
-      # validate doesn't flag unknown frontmatter keys; skills/ keeps to name and description (.claude/CLAUDE.md).
-      - name: skills/ frontmatter
+      # validate doesn't flag unknown frontmatter keys; freek-skills keeps to name and description (.claude/CLAUDE.md).
+      - name: freek-skills frontmatter
         run: python3 scripts/check-frontmatter.py
       - run: npm install -g @anthropic-ai/claude-code
       # Strict, except for the missing version, which is left out on purpose so installs track commits.
-      # The marketplace check at the root doesn't look inside local-skills/, so validate that plugin too.
+      # The marketplace check at the root doesn't look inside the plugin folders, so validate each plugin too.
       - name: claude plugin validate
         run: |
           claude --version
           status=0
-          for target in . local-skills; do
+          for target in . plugins/freek-skills plugins/freek-local-skills; do
             echo "== $target"
             claude plugin validate --json "$target" > validate.json || true
             jq -r '[.manifest] + .contents | .[] | (.errors[] | "error   \(.path): \(.message)"), (.warnings[] | "warning \(.path): \(.message)")' validate.json
