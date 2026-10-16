@@ -27,6 +27,7 @@ On claude.ai: Customize › Plugins › Add marketplace `FreekMencke/claude-skil
 | `parallel-code-orchestrator` | Split a large coding task over parallel subagents | Claude Code |
 | `refresh-md-files` | Find stale, ambiguous or missing docs | Any agent |
 | `skill-workshop` | Write or audit a skill | Best in Claude Code |
+| `design-workshop` | Choose a page's look one small visual choice at a time, ending in a design brief | Any agent |
 | `research` | Answer a question with exact quotes, re-checked sources and tested claims | Best in Claude Code |
 | `tech-debt-audit` | Ranked technical-debt audit of a codebase | Best in Claude Code |
 | `angular-conventions` | Opinionated Angular rules on top of `angular-developer` | Any agent |
