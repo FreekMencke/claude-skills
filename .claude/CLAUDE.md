@@ -21,13 +21,12 @@ Marketplace with two plugins. README.md is for people installing them; working h
 - `main` is protected by the repo ruleset `main`, without bypass: changes land through a PR, squash only, once CI's
   `validate` passes (no approvals, no up-to-date requirement); force pushes and deletion are blocked. A direct push to
   `main` fails. If CI itself breaks, the owner can switch the ruleset off in Settings › Rules.
-- After adding, moving or removing a skill: `./install.sh` in the main checkout, once the change is pulled there. Run
-  from a worktree, it links every skill into that worktree. It symlinks each skill into `~/.claude/skills/`, so edits
-  are live in the next session (desktop WSL sessions load these links, not claude.ai account skills; checked
-  2026-10-14). Don't also install the plugins from the marketplace on that machine.
+- The owner's Claude Code installs both plugins from this marketplace (`FreekMencke/claude-skills`, `autoUpdate: true`
+  under `extraKnownMarketplaces` in `~/.claude/settings.json`), so a merge to `main` reaches sessions after they
+  restart. To try a skill before it's merged: `claude --plugin-dir plugins/<plugin>` from the worktree.
 - `freek-skills` is installed on the owner's claude.ai account with Sync automatically on: a merge to `main` reaches
-  chat and Cowork, and signed-in Claude Code sessions get it as `freek-skills@synced`. On the `install.sh` machine keep
-  `"freek-skills@synced": false` under `enabledPlugins` in `~/.claude/settings.json`, or every skill is listed twice.
+  chat and Cowork. Signed-in Claude Code sessions also get it as `freek-skills@synced`; the marketplace install of the
+  same name takes precedence, so it isn't listed twice.
 - New skill: add `loads-*` and `skips-*` trigger cases under `plugins/<plugin>/evals/<skill>/`: prompts that should load
   it, and near misses (mostly from a sibling skill's territory) that shouldn't. Each case has one `tool_used: Skill`
   grader.
