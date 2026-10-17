@@ -127,7 +127,8 @@ a browser, write "Rendered DOM not compared" under Coverage.
 
 One page per top template, mobile: the PSI API with a key, else the Lighthouse CLI (`references/data-sources.md`).
 Report LCP, CLS, TBT, the LCP element and failed SEO audits. A lab LCP is an estimate: don't name its cause without a
-trace. Field data, when PSI has it, outranks the lab; small sites usually have none, so say that.
+trace. Field data from the CrUX API (same key), when it has any, outranks the lab; small sites usually have none, so
+say that.
 
 ## 8. Check the rules
 

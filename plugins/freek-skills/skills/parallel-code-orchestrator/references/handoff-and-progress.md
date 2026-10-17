@@ -2,7 +2,7 @@
 
 ## Handoff file
 
-Lets a fresh subagent or session continue without the old one's context. It lives in the unit's worktree or your scratch directory, untracked unless the repo wants it, and holds:
+Lets a fresh subagent or session continue without the old one's context. It lives in your session's scratchpad, one folder per unit (`<scratchpad>/<unit>/HANDOFF.md`), or, in a session without a scratchpad, a git-ignored folder in the main checkout. Never in the unit's worktree: removing a worktree has lost untracked and gitignored files. It holds:
 
 - **Goal and done-when**, copied from the brief, plus anything added since
 - **State**: worktree path, branch, last commit, and the last commit known to be good when later ones regress

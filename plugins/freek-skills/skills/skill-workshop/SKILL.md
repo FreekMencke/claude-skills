@@ -59,7 +59,7 @@ The description decides whether the skill loads. State what it does and when to 
 - **Use case first.** Truncation cuts the end, so the main use case goes in the first sentence.
 - **Outcome, not steps.** Never summarise the workflow's steps or their order; a session may follow the summary and skip the body.
 - **Boundaries.** When a sibling skill shares vocabulary, end with a one-line "Not for X: use Y" that names it.
-- **Frontmatter.** A skill that also goes to claude.ai keeps to `name` and `description`: a ZIP upload rejects Claude Code-only fields, and whether a marketplace sync accepts them is untested. Claude Code-only fields such as `when_to_use` or `paths` are for skills that live only in Claude Code.
+- **Frontmatter.** A skill that also goes to claude.ai keeps to `name` and `description`: a standalone ZIP upload rejects Claude Code-only fields, a plugin upload accepted them in one test (2026-10-15), and whether a marketplace sync accepts them is untested. Claude Code-only fields such as `when_to_use` or `paths` are for skills that live only in Claude Code.
 
 ### 7. Measure and trim
 

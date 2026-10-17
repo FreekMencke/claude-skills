@@ -25,7 +25,7 @@ Unless the caller names one: a fresh session with no context for agent instructi
 4. **Ambiguous steps** that can be read more than one way.
 5. **Error scenarios** with no guidance on what to do.
 6. **Contradictions** between two docs. The common case is one hard rule restated in several instruction files (`CLAUDE.md`, `AGENTS.md`, skill files, agent files, review rules) whose copies differ in scope or wording, such as "every change gets a `CHANGELOG.md` entry" against a review rule that pairs only user-visible changes with `CHANGELOG.md`. The fix names the copy to keep as the single source and the copies to turn into pointers to it.
-7. **Expired plans and status lines.** A dated status line ("Status (8 Oct): waiting for X") whose date has passed or whose blocker has cleared, and a plan doc whose steps are all done. Check the blocker read-only where the repo allows (a version pin, a merged PR, a closed issue), otherwise list it under `Not checked:`. The fix is to update the status, or to delete the doc when it says to or its work is done.
+7. **Expired plans and status lines.** A dated status line ("Status (8 Oct): waiting for X") whose date has passed or whose blocker has cleared, and a plan doc whose steps are all done. Check the blocker read-only where the repo allows (a version pin, a merged PR, a closed issue), otherwise list it under `Not checked:`. The fix is to update the status, or to delete the doc when it says to or its work is done. In docs for a fresh session, also undated time words ("currently", "new", "recently", "for now") on a claim that can change: the reader can't tell when it was true. The fix is an absolute date, or dropping the word.
 
 ## What is not a finding
 

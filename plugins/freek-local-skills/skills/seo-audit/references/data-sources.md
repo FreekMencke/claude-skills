@@ -9,7 +9,7 @@
 | Why are pages not indexed (counts per reason)? | Search Console Pages report | UI only: a manual step |
 | How often does Google crawl, how fast does the server answer? | Crawl stats, server logs | Crawl stats is UI only; logs through the repo's documented route |
 | Lab LCP, CLS, TBT | Lighthouse | PSI API with a key, or the Lighthouse CLI |
-| Field Core Web Vitals | CrUX | PSI's `loadingExperience`; low-traffic sites have none |
+| Field Core Web Vitals | CrUX | The CrUX API with a key; low-traffic sites have none |
 | Where do visitors land from search, what do they do? | GA4 | A GA4 MCP server, if the session has one |
 
 Compute numbers with `jq` or Python over the JSON; never estimate them by reading rows.
@@ -71,6 +71,26 @@ curl -s -G https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespee
 
 Runs take 20 to 60 seconds; run one page per template, in parallel. PSI fetches production only.
 
+## CrUX API
+
+Field data, 75th percentile of real Chrome visits over 28 days. PSI's `loadingExperience` is the same data, but Google
+plans to drop it from PSI ("We plan to discontinue including real-world data from the Chrome User Experience Report in
+this API", [Get started](https://developers.google.com/speed/docs/insights/v5/get-started)), so ask CrUX directly. It
+needs a key "provisioned for Chrome UX Report API usage": the PSI key works once the Chrome UX Report API is enabled in
+its project and allowed in the key's restrictions. 150 queries a minute per project
+([CrUX API](https://developer.chrome.com/docs/crux/api)).
+
+```bash
+curl -s -X POST "https://chromeuxreport.googleapis.com/v1/records:queryRecord?key=$key" \
+  -H 'Content-Type: application/json' -d '{"url": "<page URL>", "formFactor": "PHONE"}' |
+  jq '{lcp: .record.metrics.largest_contentful_paint.percentiles.p75,
+       inp: .record.metrics.interaction_to_next_paint.percentiles.p75,
+       cls: .record.metrics.cumulative_layout_shift.percentiles.p75, error: .error.message}'
+```
+
+Ask per page first, then `"origin"` instead of `"url"` for the whole site. An error and no `record` means CrUX has no
+data for it: small sites usually have none.
+
 ## Lighthouse CLI
 
 Needs Node 22 or later and a local Chrome or Chromium. Run it from the scratchpad, not the repo: under WSL its Chrome
@@ -85,7 +105,7 @@ npx -y lighthouse@13 "<page URL>" --only-categories=performance,seo --output=jso
 
 - Lab LCP with simulated throttling is an estimate from a fast load. Don't name a cause (a font, a script) from it
   alone; a cause needs a trace or a run with `--throttling-method=devtools` that shows it.
-- Lab has no INP. Field data, when PSI returns it, outranks lab numbers.
+- Lab has no INP. Field data, when CrUX has it, outranks lab numbers.
 
 ## Server logs
 
@@ -121,7 +141,8 @@ exploration, so a session can't find an unnamed route on its own.
 **PSI key.** Create one with "Get a Key" on
 [Get started](https://developers.google.com/speed/docs/insights/v5/get-started) or on the Cloud console's Credentials
 page, and restrict it to the PageSpeed Insights API. The docs call a key optional, but keyless calls returned 429
-(2026-10-13).
+(2026-10-13). For field data, also enable the Chrome UX Report API in the same project and add it to the key's
+restrictions.
 
 **GA4.** Google's [`google-analytics-mcp`](https://github.com/googleanalytics/google-analytics-mcp) (experimental),
 installed per its README. It needs the Admin and Data APIs enabled and read-only credentials; the Search Console
