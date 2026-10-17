@@ -10,6 +10,8 @@
 
 Several units BLOCKED on the same thing: fix it once yourself, then resume them.
 
+The report is the completion notification's result, or a hand-back message in auto mode. Never Read the notification's `output_file`: for a subagent it is the whole JSONL transcript.
+
 ## Fix rounds
 
 For fixes, message the same subagent so it keeps its context, after the size check below. After two failed rounds, escalate (same model one effort level up, then a fresh subagent one tier up, Fable only for a unit that fits its row) or do it yourself. Never resend an unchanged brief.

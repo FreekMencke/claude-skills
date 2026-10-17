@@ -38,7 +38,8 @@ Commit on your worktree branch with normal signing. No push, deploy,
 publish, dev server, issue edits, or anything that changes remote state.
 Don't spawn subagents except read-only Explore searches.
 Context budget: about <N>k tokens. When you get close, stop at a clean
-point: commit, write <path>/HANDOFF.md (goal and done-when, state,
+point: commit, write <scratchpad>/<unit>/HANDOFF.md, outside your
+worktree (goal and done-when, state,
 approach and what was dropped, commands, data formats, remaining work,
 pitfalls) and report STATUS: HANDOFF.
 
@@ -55,4 +56,4 @@ STATUS: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED | HANDOFF
 - Concerns, out-of-scope changes needed, or what blocks you
 ```
 
-For a HANDOFF continuation, the brief is "Continue from <path>/HANDOFF.md" plus the original brief's Scope, Decisions, Verify and Limits.
+For a HANDOFF continuation, the brief is "Continue from <scratchpad>/<unit>/HANDOFF.md" plus the original brief's Scope, Decisions, Verify and Limits.

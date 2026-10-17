@@ -7,17 +7,19 @@ argument-hint: "[what the next session should focus on]"
 
 # Handoff
 
-Long sessions re-read their whole context on every turn, and auto-compaction keeps only a lossy summary. A handoff
-written on purpose keeps the decisions and dead ends, and lets a fresh session pick up after `/clear` for the cost of
-reading one note.
+Long sessions re-read their whole context on every turn. Auto-compaction shrinks it to a summary in a fixed format,
+which keeps no file contents and may drop a dead end. A handoff written on purpose keeps the decisions and dead ends,
+and lets a fresh session pick up after `/clear` for the cost of reading one note.
 
 If `$ARGUMENTS` is set, it says what the next session should focus on: put it first under **Next steps**.
 
 ## When not to hand off
 
-A handoff is for a context that is full or confused as a whole. Two narrower problems have cheaper fixes that keep the
-good context:
+A handoff is for a context that is full or confused as a whole. Three cases have cheaper fixes that keep the good
+context:
 
+- **Long but on track**: let it compact. Measured over 31 auto-compactions at a 400k window, none lost context a
+  session then needed; the next turns re-read the files they edit.
 - **One bad detour**: rewind (`Esc Esc` or `/rewind`, then **Restore code and conversation**) to the prompt before it,
   and edit that prompt with what you learned.
 - **An alternative worth trying**: `/branch` copies the conversation and leaves the original to `/resume`. It copies
