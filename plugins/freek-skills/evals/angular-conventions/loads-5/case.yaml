@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: angular-conventions-loads-5
+tags: [angular-conventions, should-load]
+execution:
+  prompt: "Upgrade our Angular app to the next major with ng update, and keep TypeScript on a version that works."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?angular-conventions"'

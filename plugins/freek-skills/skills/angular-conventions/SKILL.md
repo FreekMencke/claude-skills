@@ -1,6 +1,6 @@
 ---
 name: angular-conventions
-description: "House rules for Angular apps, on top of angular-developer: templates, imports and layers, signal stores, failure states, routes and page meta, SSR on a custom Express server (CSP nonce, transfer cache, third-party timeouts), Vitest specs and Tailwind tokens. Use when writing, reviewing or refactoring code in an Angular app that follows these house rules, or when asked for our Angular conventions. Not for how an Angular API works or for scaffolding: use angular-developer."
+description: "House rules for Angular apps, on top of angular-developer: templates, accessibility (native elements, dialogs, focus after navigation), imports and layers, signal stores, failure states, routes and page meta, upgrades (ng update, TypeScript range, migration opt-outs), SSR on a custom Express server (CSP nonce, transfer cache, third-party timeouts), Vitest specs, Tailwind tokens and CSS features. Use when writing, reviewing, refactoring or upgrading code in an Angular app that follows these house rules, or when asked for our Angular conventions. Not for how an Angular API works or for scaffolding: use angular-developer."
 ---
 
 # Angular conventions
