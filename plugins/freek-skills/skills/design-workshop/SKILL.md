@@ -120,8 +120,8 @@ Two or three lines on the voice, then the prototype's headline, paragraph, butto
 ## Type
 Each typeface and its role (headlines, body), its weights, and where it loads from.
 The figure style per role (for example tabular for prices and stats, default elsewhere), and any OpenType feature the
-design relies on (`case` on all-caps labels, `slashed-zero` for codes): a Google Fonts link strips these, so say if it
-needs a self-hosted file. Name `opsz` in the load URL when the family has the axis and the design uses both small and
+design relies on (`case` on all-caps labels, `slashed-zero` for codes): the Google Fonts API keeps `tnum` and `frac`
+but strips those, so say if one needs a self-hosted file. Name `opsz` in the load URL when the family has the axis and the design uses both small and
 large sizes: the API serves only the axes the URL names.
 
 ## Layout
