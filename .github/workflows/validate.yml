@@ -14,10 +14,10 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .node-version
       # validate needs no credentials. Evals aren't run here: they spend model calls (see .claude/CLAUDE.md).
       # validate doesn't flag unknown frontmatter keys; freek-skills keeps to name and description (.claude/CLAUDE.md).
       - name: freek-skills frontmatter
