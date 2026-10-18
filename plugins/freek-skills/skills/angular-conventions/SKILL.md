@@ -22,6 +22,34 @@ server), used as-is where a repo has made no choice of its own.
 - Inline (`template:`) up to about 80 lines, a `.html` file beside the component (`templateUrl`) above that, so the
   class stays readable. Move it out when a change takes it over.
 
+## Accessibility
+
+Target WCAG 2.2 AA. No ARIA is better than bad ARIA: a role promises keyboard behaviour that the browser won't add.
+
+- Native elements first: `<button>` for actions, `<a href>` for navigation, never a click handler on a `<div>` or
+  `<span>` (no focus, no Enter or Space). Every input has a `<label>`, since a placeholder isn't one, and an icon button
+  has an accessible name.
+- A widget with no HTML element (tabs, combobox, listbox, grid, tree, toolbar, an application's menus) is
+  `@angular/aria` (`angular-developer` has its directives), not hand-written roles, states and key handling.
+- Site navigation is a disclosure, not an ARIA menu: `<nav>` with links, `ariaCurrentWhenActive="page"` on the router
+  links, and a `<button aria-expanded>` per dropdown. `role="menu"` promises OS-style menu keys that site navigation
+  doesn't have, and screen readers then expect them.
+- A modal is a `<dialog>` opened with `showModal()`: the browser makes the rest inert, moves focus in, closes on Esc and
+  returns focus, so no focus trap of our own. A popover on a non-semantic element (`<div popover>`) has no role and
+  moves no focus: add the ARIA, put it right after its trigger, and give something in it `autofocus`.
+- Angular leaves focus where it was after a route change, so one place (the one that sets page meta) focuses the page's
+  `h1` (`tabindex="-1"`) on `NavigationEnd`, in the browser only and skipping the first, server-rendered load. It also
+  announces the title with `LiveAnnouncer`, since screen readers don't watch title changes.
+- Focus rings use `outline`, never `box-shadow`: forced-colors mode drops shadows. Never `outline: none` without a
+  replacement. Targets are at least 24×24 CSS px, icon buttons included, unless 24 px circles around the smaller ones
+  don't overlap.
+- Lint templates with `templateRecommended` plus `templateAccessibility` (`angular-eslint`; the first doesn't include
+  the second): it catches handlers on non-interactive elements, which axe passes.
+- Verify with axe on the `wcag2a` to `wcag22aa` tags, on each state (menu open, dialog open, error shown), plus a
+  keyboard walk: Tab order, visible focus, Enter, Space and Esc, focus after navigation. Scanners miss placeholder-only
+  inputs, `alt="image"` and focus problems, so never report "accessible" from a scan alone: list what a person still
+  checks (label and alt text meaning, screen-reader output, zoom to 400%, motion).
+
 ## Imports and layers
 
 - Relative within a feature or a shared folder; a path alias (`@app/…`) across them.
