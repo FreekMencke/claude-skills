@@ -78,12 +78,11 @@ Before writing a helper, use what's installed, and hand-write only what it can't
 - After it, run each optional migration it listed, as `ng update <pkg> --name <migration>`, or note why you skip it. In
   a session `ng update` has no TTY, so it runs none and only prints their names.
 - Keep `typescript` inside the range `npm view @angular/compiler-cli@<version> peerDependencies` gives, never
-  `typescript@latest`: it can be a major ahead of what Angular accepts, and bumping it in an existing repo only warns.
-  Take the range from the registry: angular.dev's versions page lags it.
+  `typescript@latest`: it can be a major ahead of what Angular accepts, and the build breaks. Take the range from the
+  registry: angular.dev's versions page lags it.
 - Review each opt-out the migrations write to keep the old behaviour (`ChangeDetectionStrategy.Eager`,
   `strictTemplates: false`, `withNoIncrementalHydration()`, `$safeNavigationMigration()`, suppressed extended
-  diagnostics). Remove it, or keep it with the reason in the commit message: they pin the old behaviour, not the new
-  default.
+  diagnostics): remove it, or keep it with the reason in the commit message.
 
 ## SSR on a custom Express server
 
