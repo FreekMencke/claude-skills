@@ -8,6 +8,8 @@ on:
     branches: ['main']
   pull_request:
     branches: ['main']
+  # sync-angular-skill.yml starts it on its PR branch: a PR opened with GITHUB_TOKEN starts no pull_request run.
+  workflow_dispatch:
 
 permissions: {}
 
