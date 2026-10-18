@@ -1,0 +1,19 @@
+# Weekly update PRs for the GitHub Actions in the workflows, each waiting 7 days after a release (cooldown), so a
+# compromised release is usually pulled before we take it; Dependabot never applies a cooldown to security updates.
+# Third-party actions are pinned to commit SHAs, and Dependabot moves the SHA and its version comment together. There
+# is no .github/actions/ here, so `/` covers everything.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directories: [/]
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
+        group-by: dependency-name
+    commit-message:
+      prefix: ci

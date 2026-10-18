@@ -1,0 +1,13 @@
+# zizmor's configuration (.github/workflows/zizmor.yml runs it on every pull request and push to main). Every ignore
+# says why; anything else zizmor finds fails the check. Single findings are ignored where they are, with a
+# `# zizmor: ignore[<audit>]` comment and the reason beside it:
+# - artipacked on the first checkout in sync-angular-skill.yml (the sync's push uses its credentials)
+# - adhoc-packages on validate.yml's `npm install -g @anthropic-ai/claude-code` (the latest CLI is the point)
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # GitHub's own actions stay on major tags: security backports reach us through the tag, as checkout's fork-PR
+        # guard did on 2026-07-20. Everything else keeps zizmor's implicit `"*": hash-pin` (full SHAs, which Dependabot
+        # bumps with their version comment).
+        'actions/*': ref-pin
