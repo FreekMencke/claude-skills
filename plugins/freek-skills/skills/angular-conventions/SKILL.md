@@ -108,6 +108,9 @@ Before writing a helper, use what's installed, and hand-write only what it can't
 - Keep `typescript` inside the range `npm view @angular/compiler-cli@<version> peerDependencies` gives, never
   `typescript@latest`: it can be a major ahead of what Angular accepts, and the build breaks. Take the range from the
   registry: angular.dev's versions page lags it.
+- After any dependency bump, `npm ls --all` must exit 0. An npm warning is not a pass: a `typescript` outside the
+  range installs with one `ERESOLVE overriding peer dependency` warning and fails only at `ngc`, and
+  `--strict-peer-deps`, `npm ci` and a top-level `npm ls` all pass, since that peer is optional.
 - Review each opt-out the migrations write to keep the old behaviour (`ChangeDetectionStrategy.Eager`,
   `strictTemplates: false`, `withNoIncrementalHydration()`, `$safeNavigationMigration()`, suppressed extended
   diagnostics): remove it, or keep it with the reason in the commit message.
