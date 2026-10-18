@@ -102,8 +102,8 @@ agent. The default user agent is Googlebot Smartphone's with `seo-audit` appende
 - Never use WebFetch for the page under test: it returns a summary with no status, headers or head tags.
 - To check that the main content is in the server HTML, `curl -s -A '<the probe's UA>' <url> | grep -c '<a phrase
   from the page data>'`. Don't print whole pages.
-- The probe doesn't record `hreflang`: grep one page per template for it, and check any per
-  `references/google-rules.md`.
+- The probe doesn't record `hreflang`: grep one page per template for it, and check any it finds against the hreflang
+  rules in `references/google-rules.md`.
 - Tie each finding to the code that produces it, as `path:line`.
 
 ## 6. Compare with the rendered DOM
