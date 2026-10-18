@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
@@ -22,7 +24,8 @@ jobs:
       # validate doesn't flag unknown frontmatter keys; freek-skills keeps to name and description (.claude/CLAUDE.md).
       - name: freek-skills frontmatter
         run: python3 scripts/check-frontmatter.py
-      - run: npm install -g @anthropic-ai/claude-code
+      # The latest CLI on purpose: the plugins are validated against what the owner's sessions run (adhoc-packages)
+      - run: npm install -g @anthropic-ai/claude-code # zizmor: ignore[adhoc-packages]
       # Strict, except for the missing version, which is left out on purpose so installs track commits.
       # The marketplace check at the root doesn't look inside the plugin folders, so validate each plugin too.
       - name: claude plugin validate

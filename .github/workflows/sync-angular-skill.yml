@@ -27,11 +27,14 @@ jobs:
       BRANCH: sync/angular-developer
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v7
+      # Keeps its credentials on purpose (artipacked): the "Open or update the PR" step pushes the branch with them. The
+      # job uploads no artifacts.
+      - uses: actions/checkout@v7 # zizmor: ignore[artipacked]
       - uses: actions/checkout@v7
         with:
           repository: angular/skills
           path: upstream
+          persist-credentials: false
       - run: scripts/sync-angular-skill.sh upstream
       - name: Open or update the PR
         run: |
