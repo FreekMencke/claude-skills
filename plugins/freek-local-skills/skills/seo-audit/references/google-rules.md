@@ -1,9 +1,10 @@
 # Google's rules the audit checks
 
-Quotes from Google's own pages, read 2026-10-13. Google changes these: before a rule decides a finding, check that it
-still holds on its linked page (`curl -sL <url> | grep -i -o '.\{0,120\}<phrase>.\{0,200\}'`). For a rule that isn't
-here, read Google's page first; never state one from memory. [Search Central documentation
-updates](https://developers.google.com/search/updates) lists every change.
+Quotes from Google's own pages, read 2026-10-13, or 2026-10-18 where a rule says so. Google changes these: before a
+rule decides a finding, check that it still holds on its linked page
+(`curl -sL <url> | grep -i -o '.\{0,120\}<phrase>.\{0,200\}'`). For a rule that isn't here, read Google's page first;
+never state one from memory. [Search Central documentation updates](https://developers.google.com/search/updates)
+lists every change.
 
 ## Contents
 
@@ -11,6 +12,7 @@ updates](https://developers.google.com/search/updates) lists every change.
 - Status codes
 - Titles and descriptions
 - Canonicals and duplicates
+- hreflang
 - noindex and robots.txt
 - Sitemaps
 - Links and images
@@ -31,10 +33,18 @@ updates](https://developers.google.com/search/updates) lists every change.
 - "When Google encounters the noindex tag, it may skip rendering and JavaScript execution … If you do want the page
   indexed, don't use a noindex tag in the original page code."
 - Canonical: "you shouldn't use JavaScript to change the canonical URL to something else than the URL you specified
-  as the canonical URL in the original HTML."
+  as the canonical URL in the original HTML." Read 2026-10-18: "If you can't set the canonical URL in the HTML, then
+  you can use JavaScript to set the canonical URL and leave it out of the original HTML."
 - "Google can only discover your links if they are `<a>` HTML elements with an href attribute."
 
-So the server HTML (curl) and the rendered DOM must agree on the canonical and the robots meta.
+So the server HTML (curl) and the rendered DOM must agree on the robots meta, and on the canonical unless the server
+HTML has none.
+
+[Googlebot](https://developers.google.com/search/docs/crawling-indexing/googlebot), read 2026-10-18: "Googlebot crawls
+the first 2MB of a supported file type". "Once the cutoff limit is reached, Googlebot stops the fetch and only sends
+the already downloaded part of the file for indexing consideration. The file size limit is applied on the uncompressed
+data." CSS and JavaScript files are "bound by the same file size limit". `probe.sh`'s size column is the decoded body:
+a page near 2,000,000 B is a finding, as content past the cutoff isn't indexed.
 
 ## Status codes
 
@@ -74,9 +84,26 @@ capitalise the phrase, or write `Phrase - Brand`.
 - "Redirects: A strong signal". "rel="canonical" link annotations: A strong signal". "Sitemap inclusion: A weak
   signal".
 - "Don't use the robots.txt file for canonicalization purposes."
+- [JavaScript SEO basics](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics),
+  read 2026-10-18: "make sure that this is the only rel="canonical" link tag on the page." "Conflicting or multiple
+  rel="canonical" link tags may lead to unexpected results." More than one URL in `probe.sh`'s canonical column, or
+  in the rendered DOM's, is a finding.
 
 Duplicates matter when Google reports them (Search Console's Pages report, or URL Inspection's `googleCanonical`
 differing from `userCanonical`). Without that, a duplicate URL is low impact.
+
+## hreflang
+
+Only when the server HTML has `hreflang` links, which `probe.sh` doesn't record:
+`curl -s -A '<the probe's UA>' <url> | grep -o '<link[^>]*hreflang[^>]*>'`. Both pages read 2026-10-18.
+
+- [Localized versions](https://developers.google.com/search/docs/specialty/international/localized-versions): "Each
+  language version must list itself as well as all other language versions." "Alternate URLs must be
+  fully-qualified, including the transport method (http/https)". "If two pages don't both point to each other, the
+  tags will be ignored." "The `<link>` tags must be inside a well-formed `<head>` section", unlike robots meta.
+- [Multi-regional](https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites):
+  "Avoid automatically redirecting users from one language version of a site to a different language version of a
+  site." Googlebot "sends HTTP requests without setting Accept-Language in the request header."
 
 ## noindex and robots.txt
 
@@ -84,7 +111,10 @@ differing from `userCanonical`). Without that, a duplicate URL is low impact.
   to be effective, the page or resource must not be blocked by a robots.txt file". A page both disallowed and
   `noindex` can still be indexed.
 - [Robots meta tag](https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag): "Any rule that can
-  be used in a robots meta tag can also be specified as an X-Robots-Tag." Check the header as well as the tag.
+  be used in a robots meta tag can also be specified as an X-Robots-Tag." Check the header as well as the tag. Read
+  2026-10-18: "Google Search doesn't enforce placement of meta robots in the HTML head and will respect robots meta
+  tags in the body section of an HTML document as well." `probe.sh` reads the whole document, so a `noindex` in its
+  robots column counts wherever it sits.
 - [robots.txt spec](https://developers.google.com/crawling/docs/robots-txt/robots-txt-spec): "Google supports the
   following fields (other fields such as crawl-delay aren't supported): user-agent … allow … disallow … sitemap".
 
@@ -138,6 +168,21 @@ AI text files, or markup to appear in these features." Don't recommend llms.txt 
 - [Spam policies](https://developers.google.com/search/docs/essentials/spam-policies): cloaking is "presenting
   different content to users and search engines with the intent to manipulate search rankings and mislead users". A
   difference between the Googlebot and browser probes is a finding to explain, not proof of cloaking.
+- Same page, read 2026-10-18 (added 2026-04-13, enforced from 2026-06-15 per the [blog
+  post](https://developers.google.com/search/blog/2026/04/back-button-hijacking)): "Back button hijacking is when a
+  site interferes with user browser navigation by manipulating the browser history or other functionalities,
+  preventing them from using their back button to immediately get back to the page they came from." The post: it
+  "may originate from the site's included libraries or advertising platform". Check `history.pushState` and
+  `popstate` handlers in the app and its third-party scripts; a router's own navigation isn't it.
+- AI crawlers, read 2026-10-18. [AI features](https://developers.google.com/search/docs/appearance/ai-features):
+  "robots.txt directives for Googlebot is the control for site owners to manage access to how their sites are crawled
+  for Search", AI Overviews and AI Mode included. [Common
+  crawlers](https://developers.google.com/crawling/docs/crawlers-fetchers/google-common-crawlers): `Google-Extended`
+  governs Gemini training and grounding only; it "does not impact a site's inclusion in Google Search". Other vendors
+  also split training tokens (`GPTBot`, `Applebot-Extended`, `meta-externalagent`, `CCBot`) from search tokens
+  (`OAI-SearchBot`, `PerplexityBot`): a robots.txt that blocks a search token to opt out of training is a finding.
+  Tokens per vendor: claude-kb [WEB-039 and
+  WEB-040](https://github.com/FreekMencke/claude-kb/blob/main/topics/kb-web-analytics-seo.md); they change often.
 
 ## Advice Google retired
 
@@ -152,6 +197,8 @@ Models still give these. Each is wrong today; flag it when the site follows it, 
 | `noindex` or `crawl-delay` in robots.txt | Unsupported fields ([robots.txt spec](https://developers.google.com/crawling/docs/robots-txt/robots-txt-spec)) |
 | Titles under 60, descriptions of 150–160 characters | "there's no limit"; truncated "to fit the device width" ([Title links](https://developers.google.com/search/docs/appearance/title-link), [Snippets](https://developers.google.com/search/docs/appearance/snippet)) |
 | FAQ or HowTo markup for rich results | HowTo stopped showing 2023-09-13 ([post](https://developers.google.com/search/blog/2023/08/howto-faq-changes)); FAQ "will no longer appear in Google Search starting May 7, 2026" ([updates](https://developers.google.com/search/updates)) |
+| ClaimReview, Course Info, Estimated Salary, Learning Video, Special Announcement or Vehicle Listing markup | "will no longer be supported in Google Search results" ([2025-06-12](https://developers.google.com/search/blog/2025/06/simplifying-search-results)); docs removed 2025-09-09, except ClaimReview's: "We're phasing out support for ClaimReview markup in Google Search." ([Fact check](https://developers.google.com/search/docs/appearance/structured-data/factcheck), read 2026-10-18) |
+| Practice problem or Dataset markup for Google Search | Practice problem "is no longer shown in Google Search results" (docs removed 2026-01-06); Dataset "is only used by Dataset Search, and not Google Search" (2025-11-05) ([updates](https://developers.google.com/search/updates), read 2026-10-18) |
 | `WebSite` + `SearchAction` for a sitelinks search box | "The sitelinks search box feature is no longer available in Google Search results." (docs removed 2024-11-29, [updates](https://developers.google.com/search/updates)) |
 | FID as a Core Web Vital | "Interaction to Next Paint is now a stable Core Web Vital metric, replacing First Input Delay." ([web.dev, 2024-03-12](https://web.dev/blog/inp-cwv-launch)) |
 | Keyword density, keyword in the first 100 words | Not in Google's docs; "Avoid keyword stuffing" ([Title links](https://developers.google.com/search/docs/appearance/title-link)) |
