@@ -124,5 +124,5 @@ Before writing a helper, use what's installed, and hand-write only what it can't
 - Hover changes the background, never adds a shadow.
 - CSS features, utilities included: free to use when Baseline widely available on the Angular major's Baseline date
   (angular.dev/reference/versions; v22: 2026-05-07). Newer ones (`light-dark()`, `starting:`, `@scope`, `field-sizing`,
-  scroll-driven animations) only as an enhancement, behind `@supports` or after a plain fallback declaration. No browser
-  versions here, they move per major. Check one: `curl -s https://api.webstatus.dev/v1/features/<web-features id>`.
+  scroll-driven animations) only as an enhancement, behind `@supports` or after a plain fallback declaration. Check
+  one: `curl -s https://api.webstatus.dev/v1/features/<web-features id>`.
