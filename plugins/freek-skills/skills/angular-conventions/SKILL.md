@@ -24,8 +24,7 @@ server), used as-is where a repo has made no choice of its own.
 
 ## Accessibility
 
-Target WCAG 2.2 AA. WCAG 3.0 is still a draft: never a rule to pass or fail. No ARIA is better than bad ARIA: a role
-promises keyboard behaviour that the browser won't add.
+Target WCAG 2.2 AA. No ARIA is better than bad ARIA: a role promises keyboard behaviour that the browser won't add.
 
 - Native elements first: `<button>` for actions, `<a href>` for navigation, never a click handler on a `<div>` or
   `<span>` (no focus, no Enter or Space). Every input has a `<label>`, since a placeholder isn't one, and an icon button
