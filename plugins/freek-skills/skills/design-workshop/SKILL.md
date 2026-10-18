@@ -56,7 +56,7 @@ already settles a step (fixed brand colours, a named audience), lock it: say so 
 | 2. Feel | A word (fancy, sporty, artisanal, calm), one line on what it means here, and a small hint made of plain shapes, in the system font |
 | 3. Tone of voice | The same content written in that voice: a headline, a short paragraph, a button label and one key fact such as a price. System font and no colour, so only the words differ |
 | 4. Colour | A palette of 4 to 8 colours as a row of plain squares, background first, with only its number and a plain-words name: no mock-up, sample text or labels |
-| 5. Type | A font pairing (Google Fonts, or the brand's own fonts) in the picked colours, with the picked tone's headline, paragraph, key fact and button, and a plain-words line on its character |
+| 5. Type | A font pairing (Google Fonts, or the brand's own fonts) in the picked colours, with the picked tone's headline, paragraph, key fact and button, and a plain-words line on its character. The key fact is a number in a short aligned column (two or three prices or stats) set with `tabular-nums`, so a pairing without tabular figures shows it |
 | 6. Layout | A grey wireframe of the whole page, top to bottom, every section labelled. The five differ in structure and section order, not only in the top section. No colour or fonts from earlier steps, so only the structure differs |
 | 7. Combine | Five variants of the full page: see "The final step" |
 
@@ -119,6 +119,10 @@ Two or three lines on the voice, then the prototype's headline, paragraph, butto
 
 ## Type
 Each typeface and its role (headlines, body), its weights, and where it loads from.
+The figure style per role (for example tabular for prices and stats, default elsewhere), and any OpenType feature the
+design relies on (`case` on all-caps labels, `slashed-zero` for codes): the Google Fonts API keeps `tnum` and `frac`
+but strips those, so say if one needs a self-hosted file. Name `opsz` in the load URL when the family has the axis
+and the design uses both small and large sizes: the API serves only the axes the URL names.
 
 ## Layout
 The sections from top to bottom, one line each on what it holds.
