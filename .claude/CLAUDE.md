@@ -17,10 +17,12 @@ Marketplace with two plugins. README.md is for people installing them; working h
   It's also why CI doesn't use `--strict`; any other warning fails CI.
 - Don't write `$0` in a skill: Claude Code replaces it with the first argument. In awk, use `$(0)`.
 - Verify (CI runs the same on pushes to `main` and on PRs): `claude plugin validate` on `.` (the marketplace),
-  `plugins/freek-skills` and `plugins/freek-local-skills`, and `python3 scripts/check-frontmatter.py`.
+  `plugins/freek-skills` and `plugins/freek-local-skills`, and `python3 scripts/check-frontmatter.py`. After changing a
+  workflow, also `GH_TOKEN=$(gh auth token) uvx zizmor@<version in zizmor.yml> .`: CI's `zizmor` check runs it, and
+  every ignore is inline with its reason (`.github/zizmor.yml`).
 - `main` is protected by the repo ruleset `main`, without bypass: changes land through a PR, squash only, once CI's
-  `validate` passes (no approvals, no up-to-date requirement); force pushes and deletion are blocked. A direct push to
-  `main` fails. If CI itself breaks, the owner can switch the ruleset off in Settings › Rules.
+  `validate` and `zizmor` pass (no approvals, no up-to-date requirement); force pushes and deletion are blocked. A
+  direct push to `main` fails. If CI itself breaks, the owner can switch the ruleset off in Settings › Rules.
 - The owner's Claude Code installs both plugins from this marketplace (`FreekMencke/claude-skills`, `autoUpdate: true`
   under `extraKnownMarketplaces` in `~/.claude/settings.json`), so a merge to `main` reaches sessions after they
   restart. To try a skill before it's merged: `claude --plugin-dir plugins/<plugin>` from the worktree.
@@ -35,8 +37,8 @@ Marketplace with two plugins. README.md is for people installing them; working h
   evals for it (its description is upstream's); house rules go in `angular-conventions`. It's byte for byte except the
   frontmatter, cut to `name` and `description`; upstream's license and author go to its `NOTICE`. The workflow needs the
   repo setting Actions › General › "Allow GitHub Actions to create and approve pull requests", and starts `validate.yml`
-  on its PR itself (a PR opened with `GITHUB_TOKEN` starts no `pull_request` run). Run it by hand: `gh workflow run
-  sync-angular-skill.yml`.
+  and `zizmor.yml` on its PR itself (a PR opened with `GITHUB_TOKEN` starts no `pull_request` run). Run it by hand: `gh
+  workflow run sync-angular-skill.yml`.
 - After changing a description: run that skill's trigger evals, by hand (3 model calls per case; about 2 minutes per
   skill at `-j 4`, measured 2026-10-15), never in CI. `claude plugin eval plugins/<plugin> --ablation none --model
   claude-opus-5-5 --no-publish -j 4 --threshold 0 --tag <skill>`: the no-plugin arm says nothing about triggering and

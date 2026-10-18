@@ -65,7 +65,7 @@ jobs:
             echo '```'
             echo
             echo 'Written by `.github/workflows/sync-angular-skill.yml`: review the upstream changes and merge, without editing the files here.'
-            echo 'Its `validate` check is started by that workflow, because a PR opened with `GITHUB_TOKEN` starts no `pull_request` run.'
+            echo 'Its `validate` and `zizmor` checks are started by that workflow, because a PR opened with `GITHUB_TOKEN` starts no `pull_request` run.'
           } > "$RUNNER_TEMP/body.md"
           if [[ -n "$pr" ]]; then
             gh pr edit "$pr" --body-file "$RUNNER_TEMP/body.md"
@@ -73,3 +73,4 @@ jobs:
             gh pr create --base main --head "$BRANCH" --title 'Sync angular-developer from angular/skills' --body-file "$RUNNER_TEMP/body.md"
           fi
           gh workflow run validate.yml --ref "$BRANCH"
+          gh workflow run zizmor.yml --ref "$BRANCH"
