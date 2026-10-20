@@ -12,7 +12,9 @@ Marketplace with two plugins. README.md is for people installing them; working h
   doesn't flag unknown keys, so `scripts/check-frontmatter.py` enforces it (CI and a `PostToolUse` hook).
 - `plugins/freek-local-skills/skills/` (`freek-local-skills`, Claude Code only): skills that read local files, rely on
   Claude Code slash commands or tools, or need Claude Code-only frontmatter (`disable-model-invocation`, `context`,
-  `disallowed-tools`, `paths`).
+  `disallowed-tools`, `paths`). Its subagents are in `plugins/freek-local-skills/agents/` (the default folder, so no
+  `agents` key in `plugin.json`: that key replaces the folder scan), spawned as `freek-local-skills:<agent>`; a skill
+  that falls back to reading one uses `${CLAUDE_PLUGIN_ROOT}/agents/<agent>.md`.
 - No `version` in either `plugin.json`, on purpose (installs track commits); don't add one for the validate warning.
   It's also why CI doesn't use `--strict`; any other warning fails CI.
 - Don't write `$0` in a skill: Claude Code replaces it with the first argument. In awk, use `$(0)`.

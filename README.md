@@ -35,6 +35,7 @@ On claude.ai: Customize › Plugins › Add marketplace `FreekMencke/claude-skil
 | `handoff` * | Save the session's state, `/clear`, and continue from it | Claude Code |
 | `token-audit` * | Measure token spend from your local transcripts | Claude Code |
 | `seo-audit` * | Read-only technical SEO audit of a site ([data setup](plugins/freek-local-skills/skills/seo-audit/references/data-sources.md#giving-a-session-the-data-for-the-user)) | Best in Claude Code |
+| `font-outline-repair` * | Audit and repair a weight family's UFO masters, and re-derive Thin and Black from them (Python venv, `font-outline-reviewer` subagent) | Claude Code |
 
 Runs on:
 
@@ -47,7 +48,8 @@ Runs on:
 
 \* In `freek-local-skills`, which installs in Claude Code only. `handoff` and `token-audit` run as slash commands, such as
 `/freek-local-skills:handoff`. Claude Code enforces `seo-audit`'s read-only rule (`disallowed-tools`); another agent
-may only read it as an instruction.
+may only read it as an instruction. `font-outline-repair` runs its Python scripts in a venv it sets up
+(`~/.venvs/fontrepair`) and hands its renders to the plugin's `font-outline-reviewer` subagent.
 
 ## License
 
