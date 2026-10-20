@@ -13,7 +13,7 @@
     {
       "name": "freek-local-skills",
       "source": "./plugins/freek-local-skills",
-      "description": "Claude Code-only skills: handoff, token audit, SEO audit. Don't install on claude.ai"
+      "description": "Claude Code-only skills: handoff, token audit, SEO audit, font outline repair (with its reviewer subagent). Don't install on claude.ai"
     }
   ]
 }

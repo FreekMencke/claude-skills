@@ -1,0 +1,8 @@
+fonttools[ufo]>=4.60
+ufoLib2>=0.16
+fontMath>=0.9
+skia-pathops>=0.8
+scipy>=1.10
+matplotlib>=3.7
+fontmake>=3.8
+uharfbuzz>=0.39
