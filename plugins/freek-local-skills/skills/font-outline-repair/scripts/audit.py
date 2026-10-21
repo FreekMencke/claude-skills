@@ -52,6 +52,7 @@ SEVERITY = {
     "thin-stroke": "slows", "counter-tight": "slows", "crossing-shrink": "slows", "overhang": "slows",
     "stroke-ratio": "slows", "parts-close": "slows", "edge-turned": "slows", "stroke-wedge": "slows",
     "stroke-uneven": "slows", "stroke-weight": "slows", "copy-drift": "slows",
+    "stroke-off": "slows", "stroke-sibling": "slows", "counter-needle": "slows",
 }
 SCORE = {"blocks": 10, "slows": 3, "minor": 1}
 
@@ -321,23 +322,29 @@ def corner_angles(c):
     return out
 
 
-def corner_checks(name, wl, cs, ref_cs, derived, opt):
-    """Corners that turn the other way than in the reference master, or turn much more or less."""
+def corner_checks(name, wl, cs, ref_cs, derived, opt, near_cs=None, near_label=None):
+    """Corners that turn the other way than in the reference master, or turn much more or
+    less. A derived weight's corner change is measured against the nearest drawn master
+    (near_cs), as the stroke checks are: against the reference, Black S's end-cut corner
+    read +98° against Light's +72° where Bold, the nearest, has +94°."""
     out = []
     for ci, c in enumerate(cs):
         if not c:
             continue
         mine, ref = corner_angles(c), corner_angles(ref_cs[ci])
+        near = corner_angles(near_cs[ci]) if near_cs else ref
         for i, ra in ref.items():
             if i not in mine or abs(ra) < 10:
                 continue
             a = mine[i]
+            na = near.get(i, ra)
             if a * ra < 0 and abs(a) > 5:
                 out.append(I(name, "corner-flip", wl, f"corner turns the other way ({a:+.0f}° where the reference turns {ra:+.0f}°): a barb or notch",
                              ci, i, severity="blocks" if derived else "slows"))
-            elif abs(a - ra) > opt.corner_tol:
-                out.append(I(name, "corner-change", wl, f"corner {'sharper' if abs(a) > abs(ra) else 'blunter'} than in the reference "
-                             f"({a:+.0f}° against {ra:+.0f}°)", ci, i))
+            elif abs(a - na) > opt.corner_tol:
+                where = f"in {near_label}" if near_cs else "in the reference"
+                out.append(I(name, "corner-change", wl, f"corner {'sharper' if abs(a) > abs(na) else 'blunter'} than {where} "
+                             f"({a:+.0f}° against {na:+.0f}°)", ci, i))
     return out
 
 
@@ -942,6 +949,8 @@ def evenness_checks(name, wl, dglyph, mglyph, k, near_label, near_stem, cache):
     if k < 1 and abs(med - 1) > 0.2 and abs(statistics.median(td - tm * k for _, _, tm, td in rs)) > 3:
         out.append(I(name, "stroke-weight", wl, f"strokes x{med:.2f} of {near_label} x {k:.3f} (median of {len(rs)} spots): "
                      f"evenly too {'heavy' if med > 1 else 'light'}"))
+    else:
+        out += stroke_off_checks(name, wl, dglyph, mglyph, k, near_label, near_stem, dots)
     off = [(key, r, tm, td) for key, r, tm, td in rs if abs(r / med - 1) > 0.2 and abs(td - tm * k * med) > 3]
     if len(off) >= 3 and len(off) >= 0.1 * len(rs):
         off.sort(key=lambda x: -abs(x[1] / med - 1))
@@ -950,6 +959,181 @@ def evenness_checks(name, wl, dglyph, mglyph, k, near_label, near_stem, cache):
         out.append(I(name, "stroke-uneven", wl, f"{len(off)} of {len(rs)} spots off the glyph's own median by over 20% "
                      f"(against {near_label} x {k:.3f}): {spots}" + (" …" if len(off) > 4 else ""),
                      contour=ci, point=int(tag[1:]), severity="slows" if len(off) >= 0.15 * len(rs) else "minor"))
+    return out
+
+
+def stroke_off_checks(name, wl, dglyph, mglyph, k, near_label, near_stem, skip=()):
+    """stroke-off: one straight stroke off the nearest master x k while the glyph's median
+    is fine (Thin e's bar x1.32, M's right diagonal x1.19: stroke-weight takes the median
+    of all spots, stroke-ratio only looks for strokes too thin). Per straight edge at
+    least a stem long (end cuts left out), the median over nine places of the largest disc
+    in the ink touching it (widths.py's measure), outside 0.85-1.15; one finding per glyph."""
+    import statistics
+    from contrast import Outline, segs, tangent
+    from reshape import ink_side, outline_balls
+    R = [list(c.points) for c in mglyph.contours]
+    T = [list(c.points) for c in dglyph.contours]
+    if not R or [[p.type for p in c] for c in R] != [[p.type for p in c] for c in T]:
+        return []
+    olr = Outline(R)
+    cand = []
+    for ci, pts in enumerate(R):
+        if ci in skip or not any(p.type for p in pts):
+            continue
+        sg, side = segs(pts), ink_side(olr, pts)
+        for si, s in enumerate(sg):
+            chord = math.dist((pts[s[0]].x, pts[s[0]].y), (pts[s[2]].x, pts[s[2]].y))
+            if s[1] or chord < near_stem:
+                continue
+            d_in, d_out, d = tangent(pts, sg[si - 1], False), tangent(pts, sg[(si + 1) % len(sg)], True), tangent(pts, s, True)
+            if (chord < 2.2 * near_stem and d_in and d_out and L.dot(d_in, d_out) < -0.7
+                    and L.cross(d_in, d) * side > 0 and L.cross(d, d_out) * side > 0):
+                continue                        # a stroke's end cut
+            cand.append((ci, si, s))
+    if not cand:
+        return []                               # the discs are slow: only for glyphs with straight strokes
+    br = outline_balls(R, 8, set(), 2.5 * near_stem, near=0.3 * near_stem)
+    bt = outline_balls(T, 8, set(), 2.5 * near_stem * max(k, 1.0), near=0.3 * near_stem * k)
+    off = []
+    for ci, si, s in cand:
+        rows = [(hd / (hr * k), 2 * hd, 2 * hr * k) for (_, _, _, hr), (_, _, _, hd) in zip(br[ci][si], bt[ci][si])
+                if hr and hd and math.isfinite(hd / hr)]
+        if len(rows) < 5:
+            continue
+        r = statistics.median(x[0] for x in rows)
+        if not 0.85 <= r <= 1.15:
+            off.append((abs(r - 1), ci, s, r, statistics.median(x[1] for x in rows), statistics.median(x[2] for x in rows)))
+    if not off:
+        return []
+    off.sort(key=lambda x: -x[0])
+    spots = ", ".join(f"c{ci} {s[0]}-{s[2]} x{r:.2f} ({wd:.0f}, want {wm:.0f})" for _, ci, s, r, wd, wm in off[:4])
+    return [I(name, "stroke-off", wl, f"straight strokes off {near_label} x {k:.3f} (widths.py): {spots}"
+              + (" …" if len(off) > 4 else ""), contour=off[0][1], point=off[0][2][0])]
+
+
+def needle_checks(name, wl, cs, near_cs, k, stem, near_label, upm):
+    """counter-needle: an inside corner that extrapolation put within a few units of the
+    outline beyond it (under a quarter stem and 1.5% of the em), under half its distance
+    in the nearest master x k (Thin 2: the diagonal met the base 2 units from the glyph's
+    left edge, where Light x k gives 26: a needle of counter). Distances on flattened
+    outlines, the corner's own two segments left out."""
+    from contrast import Outline, segs, tangent
+    from reshape import ink_side
+    if len(cs) != len(near_cs) or any(len(a) != len(b) for a, b in zip(cs, near_cs)):
+        return []
+    def samples(contours):
+        out = []
+        for ci, c in enumerate(contours):
+            if not c or c[0].type == "move":
+                continue
+            for s in segs(c):
+                P = [(c[s[0]].x, c[s[0]].y)] + [(c[h].x, c[h].y) for h in s[1]] + [(c[s[2]].x, c[s[2]].y)]
+                pts = [L.cubic_at(*P, t / 16) for t in range(17)] if len(P) == 4 else [P[0], P[-1]]
+                out.append(((ci, s[0]), (ci, s[2]), pts))
+        return out
+
+    def clearance(sm, ci, i, p):
+        best = math.inf
+        for a, b, poly in sm:
+            if (ci, i) in (a, b):
+                continue
+            for q0, q1 in zip(poly, poly[1:]):
+                d = L.sub(q1, q0)
+                l2 = L.dot(d, d)
+                t = 0.0 if l2 == 0 else max(0.0, min(1.0, L.dot(L.sub(p, q0), d) / l2))
+                best = min(best, L.dist(p, L.add(q0, L.mul(d, t))))
+        return best
+    sd, sm_ = samples(cs), samples(near_cs)
+    ol = Outline(cs)
+    out = []
+    for ci, c in enumerate(cs):
+        if not c or c[0].type == "move":
+            continue
+        sg, side = segs(c), ink_side(ol, c)
+        for si, s in enumerate(sg):
+            i = s[0]
+            if c[i].smooth:
+                continue
+            d_in, d_out = tangent(c, sg[si - 1], False), tangent(c, s, True)
+            if not (d_in and d_out):
+                continue
+            turn = math.degrees(math.atan2(L.cross(d_in, d_out), L.dot(d_in, d_out)))
+            if turn * side > -25:
+                continue                        # inside corners only
+            dd = clearance(sd, ci, i, (c[i].x, c[i].y))
+            dm = clearance(sm_, ci, i, (near_cs[ci][i].x, near_cs[ci][i].y)) * k
+            if dd < 0.5 * dm and dd < min(0.25 * stem, 0.015 * upm):
+                out.append(I(name, "counter-needle", wl, f"inside corner {dd:.0f} units from the outline beyond it, where "
+                             f"{near_label} x {k:.3f} gives {dm:.0f}: a needle of counter", ci, i))
+    return out
+
+
+# the same stroke in several glyphs, measured alike: (class, glyphs, how)
+SIBLINGS = [("middle bars", "H E F B P R".split(), "bar"),
+            ("capital stems", "H I L E F B D P R K N".split(), "stem"),
+            ("lowercase stems", "n h m l i b".split(), "stem")]
+
+
+def sibling_widths(font, names, how, stem):
+    """{glyph: width} of one stroke per glyph: a middle bar at the vertical scans 1.5,
+    2 and 2.5 stems in from the glyph's left (the run nearest half the cap height, the
+    thinnest of the three: one may hit a leg's join), a stem at a horizontal scan at 30%
+    of the cap height (lowercase: x-height), the leftmost run."""
+    info = font.info
+    out = {}
+    for n in names:
+        if n not in font:
+            continue
+        polys = L.glyph_polygons(font[n], font)
+        xs = [x for p in polys for x, _ in p]
+        if not xs:
+            continue
+        if how == "bar":
+            mid = (info.capHeight or 700) / 2
+            ws = []
+            for f in (1.5, 2.0, 2.5):
+                runs = L.ink_runs(polys, min(xs) + f * stem, horizontal=False)
+                if runs:
+                    r = min(runs, key=lambda r: abs((r[0] + r[1]) / 2 - mid))
+                    ws.append(r[1] - r[0])
+            if ws:
+                out[n] = min(ws)
+        else:
+            h = (info.capHeight if n[0].isupper() else info.xHeight) or 500
+            runs = L.ink_runs(polys, 0.3 * h)
+            if runs:
+                out[n] = runs[0][1] - runs[0][0]
+    return out
+
+
+def sibling_checks(names, masters, derived, stem_of):
+    """stroke-sibling: a stroke out of line with the same stroke in its sibling glyphs,
+    against the nearest master's ratios (Thin R and P bars 25 units against H E F B's
+    28-29, where Light has 54 against 57-58). Each glyph's stroke as a ratio of its class
+    median, in the derived weight and the nearest master; flagged over 5% and 1.5 units
+    apart."""
+    import statistics
+    out = []
+    for d in derived:
+        sd = stem_of.get(d.label)
+        cands = [m for m in masters if stem_of.get(m.label)]
+        if not sd or not cands:
+            continue
+        m = min(cands, key=lambda m: abs(stem_of[m.label] - sd))
+        for cls, glyphs, how in SIBLINGS:
+            glyphs = [g for g in glyphs if g in names]
+            wm = sibling_widths(m.font, glyphs, how, stem_of[m.label])
+            wd = sibling_widths(d.font, glyphs, how, sd)
+            both = [g for g in glyphs if g in wm and g in wd]
+            if len(both) < 3:
+                continue
+            mm, md = statistics.median(wm[g] for g in both), statistics.median(wd[g] for g in both)
+            for g in both:
+                rm, rd = wm[g] / mm, wd[g] / md
+                want = rm * md
+                if abs(rd / rm - 1) > 0.05 and abs(wd[g] - want) >= 1.5:
+                    out.append(I(g, "stroke-sibling", d.label, f"{cls[:-1]} {wd[g]:.0f} units, x{rd:.2f} of the {cls} "
+                                 f"({md:.0f}), where {m.label} has x{rm:.2f} ({wm[g]:.0f} of {mm:.0f}): {want:.0f} would match"))
     return out
 
 
@@ -1253,20 +1437,22 @@ def derived_glyph_issues(name, d, gl, masters, labels, r, aligned, st, ref_cs, s
         dcs = da[1]
     # else: same point structure as the reference master, so indices match
     # already and inside-out contours show up as direction-flip
+    sd = stem_of.get(d.label)
+    ni = min((k for k in range(len(masters)) if stem_of.get(masters[k].label)),
+             key=lambda k: abs(stem_of[masters[k].label] - sd), default=None) if sd else None
     issues += shape_checks(name, d.label, dcs, ref_cs, smooth_any, opt, derived=True)
     issues += curvature_checks(name, d.label, dcs, ref_cs, False, opt)
-    issues += corner_checks(name, d.label, dcs, ref_cs, True, opt)
+    issues += corner_checks(name, d.label, dcs, ref_cs, True, opt, *((aligned[ni], masters[ni].label) if ni is not None else ()))
     issues += scan_checks(name, d.label, dcs, opt)
     issues += crossing_checks(name, d.label, dcs, ref_cs)
     issues += overhang_checks(name, d.label, dg, d.font, [(g, m.font) for g, m in zip(gl, masters)])
     issues += edge_checks(name, d.label, dcs, aligned, d.font.info.unitsPerEm or 1000)
-    sd = stem_of.get(d.label)
     if sd:
-        ni = min((k for k in range(len(masters)) if stem_of.get(masters[k].label)),
-                 key=lambda k: abs(stem_of[masters[k].label] - sd), default=None)
         if ni is not None:
             issues += proportion_checks(name, d.label, dcs, aligned[ni], sd, stem_of[masters[ni].label], masters[ni].label)
             issues += parts_close_checks(name, d.label, dcs, aligned[ni], masters[ni].label, d.font.info.unitsPerEm or 1000)
+            issues += needle_checks(name, d.label, dcs, aligned[ni], sd / stem_of[masters[ni].label], sd, masters[ni].label,
+                                    d.font.info.unitsPerEm or 1000)
             if getattr(opt, "evenness", False):
                 ns = stem_of[masters[ni].label]
                 issues += evenness_checks(name, d.label, dg, gl[ni], sd / ns, masters[ni].label, ns,
@@ -1278,7 +1464,7 @@ class DerivedChecker:
     """The audit's derived-weight checks for one glyph at a time, for scripts that
     change a derived weight and want to know whether a change made it worse.
     masters: [(label, ufoLib2.Font)]; derived: (label, font) as it is being edited.
-    evenness=True adds stroke-uneven and stroke-weight (off by default, so the steps that
+    evenness=True adds stroke-uneven, stroke-weight and stroke-off (off by default, so the steps that
     choose between variants with this, contrast.py and reshape.py, keep their results)."""
 
     def __init__(self, masters, derived, ref=None, evenness=False):
@@ -1344,7 +1530,7 @@ def main(argv=None):
     ap.add_argument("--axis", choices=["stem", "design"], default="stem",
                     help="where masters sit when judging motion and tension trends (default: measured stem width)")
     ap.add_argument("--no-evenness", dest="evenness", action="store_false",
-                    help="skip stroke-uneven and stroke-weight in derived weights")
+                    help="skip stroke-uneven, stroke-weight and stroke-off in derived weights")
     opt = ap.parse_args(argv)
 
     masters, _ = L.load_sources(opt.sources)
@@ -1401,6 +1587,7 @@ def main(argv=None):
         for d in derived:
             issues += derived_glyph_issues(name, d, gl, masters, labels, r, aligned, st, ref_cs, smooth_any, stem_of, opt)
     issues += copy_drift_checks(names, masters, derived)
+    issues += sibling_checks(names, masters, derived, stem_of)
 
     stems = []
     copied = {(i["glyph"], i["weight"]) for i in issues if i["code"] == "not-derived"}

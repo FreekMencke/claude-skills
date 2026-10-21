@@ -36,6 +36,15 @@ END's distance off the line (3) and, with --aim, how far the curve beyond moves 
 
 Without --write it prints the choice and the bends before and after; --top N also
 prints the next best choices.
+
+  --between   RUN is CONTOUR:A>B (or A<B), any straight run between two nodes that both
+              stay (a terminal's edge stored as a row of tiny curves, which zigzags at
+              derived and in-between weights because every point rounds on its own):
+              every point between them goes to whole steps of the small step nearest the
+              run's direction (--dirs to choose it), as evenly spaced as the steps allow.
+              B may move up to --slide units (1) to land on a whole step. A run with fewer
+              whole steps than gaps between its points is refused rather than stacking
+              points on one spot: it needs fewer points, in every master.
 """
 import argparse
 import itertools
@@ -345,6 +354,52 @@ def solve_run(pts, nodes, segs, far_h, A, B0, S, orig_dir, A0, max_back=0.5, aim
     return best
 
 
+def between(pts, a, b, step, force=None, slide=1):
+    """--between: (plan, message). plan is {index: (x, y)} or None when refused."""
+    n = len(pts)
+    idx, i = [], a
+    while i != b:
+        i = (i + step) % n
+        idx.append(i)
+        if len(idx) > n:
+            sys.exit("B not reached from A")
+    inner = idx[:-1]
+    A, B = (pts[a].x, pts[a].y), (pts[b].x, pts[b].y)
+    v = (B[0] - A[0], B[1] - A[1])
+    L = math.hypot(*v)
+    off = max((abs((pts[j].x - A[0]) * v[1] - (pts[j].y - A[1]) * v[0]) / L for j in inner), default=0.0)
+    if off > max(2.0, 0.06 * L):
+        return None, f"not a straight run: a point lies {off:.1f} units off the line from {a} to {b}"
+    cands = [force] if force else primitive_steps(v, 13, 8)
+    best = None
+    for p in cands:
+        pl2 = p[0] ** 2 + p[1] ** 2
+        K = round((v[0] * p[0] + v[1] * p[1]) / pl2)
+        if K < 1:
+            continue
+        B2 = (A[0] + K * p[0], A[1] + K * p[1])
+        miss = math.hypot(B2[0] - B[0], B2[1] - B[1])
+        # the smallest step that reaches B: the most whole steps for the points
+        key = (miss > slide + 1e-9, math.hypot(*p) if miss <= slide + 1e-9 else miss, miss)
+        if best is None or key < best[0]:
+            best = (key, p, K, B2, miss)
+    if best is None:
+        return None, "no small whole step runs this way"
+    if best[0][0]:
+        return None, (f"no small whole step reaches {b} within --slide {slide} of where it is (nearest: "
+                      f"{best[2]} x {best[1]}, {best[4]:.1f} units off)")
+    _, p, K, B2, miss = best
+    gaps = len(idx)
+    if K < gaps:
+        return None, (f"{gaps} gaps between {gaps + 1} points but only {K} whole steps of {p}: points would "
+                      f"stack on one spot. This run needs at most {K + 1} points (remove {gaps - K}), in every master")
+    plan = {j: (A[0] + round(K * (q + 1) / gaps) * p[0], A[1] + round(K * (q + 1) / gaps) * p[1])
+            for q, j in enumerate(inner)}
+    plan[b] = B2
+    return plan, (f"{len(inner)} points between {a} and {b} at whole steps of {p} ({angle(p):.1f} deg, the run "
+                  f"{angle(v):.1f}), {K} steps for {gaps} gaps" + (f"; {b} moved {miss:.1f} onto a step" if miss else ""))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("ufo")
@@ -363,10 +418,34 @@ def main():
                          "nearest master)")
     ap.add_argument("--max-back", type=float, default=0.5,
                     help="degrees an edge may turn against the curve it runs into (an S, a dip); default 0.5")
+    ap.add_argument("--between", action="store_true",
+                    help="RUN is A>B, a straight run whose ends both stay: its points at evenly spaced whole steps")
     ap.add_argument("--write", action="store_true")
     a = ap.parse_args()
     font = ufoLib2.Font.open(a.ufo)
     runs = [parse_run(r) for r in a.runs]
+    if a.between:
+        forced = [None if d == "auto" else tuple(int(v) for v in d.split(",")) for d in a.dirs.split("/")] \
+            if a.dirs else [None] * len(runs)
+        refused = 0
+        for (ci, ra, rb, st), force in zip(runs, forced):
+            pts = list(font[a.glyph].contours[ci].points)
+            plan, msg = between(pts, ra, rb, st, force, a.slide or 1)
+            print(f"{a.glyph} {ci}:{ra}{'>' if st > 0 else '<'}{rb}: {msg}")
+            if plan is None:
+                refused += 1
+                continue
+            for j, (x, y) in plan.items():
+                pts[j].x, pts[j].y = x, y
+        if refused:
+            print("  nothing written")
+            sys.exit(1)
+        if a.write:
+            font.save()
+            print(f"  written: {a.ufo}")
+        else:
+            print("  dry run: nothing written")
+        return
     cidx = runs[0][0]
     tip = runs[0][1]
     assert all(r[0] == cidx and r[1] == tip for r in runs), "all runs start at one tip in one contour"

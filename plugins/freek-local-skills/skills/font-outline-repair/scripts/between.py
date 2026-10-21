@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Glyphs at weights between the masters, as a static instance draws them (rounded to
-whole units) or as the variable font does (--raw), and the bends they get there that no
-master has.
+whole units, halves up as fontmake does) or as the variable font does (--raw), and the
+bends they get there that no master has.
 
 usage:
   between.py SOURCES... --glyphs G [G ...] --weights W [W ...] [--raw]
@@ -23,6 +23,7 @@ from pathlib import Path
 
 import ufoLib2
 from fontTools.designspaceLib import DesignSpaceDocument
+from fontTools.misc.roundTools import otRound
 
 
 def angle(v):
@@ -84,7 +85,10 @@ def main(argv=None):
     masters, to_design = load_masters(args.sources)
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    rnd = (lambda v: v) if args.raw else round
+    # otRound (halves up), as fontmake rounds: Python's round takes halves to even, and at a
+    # weight halfway between two masters every odd difference is a half (an 8.1 degree kink
+    # where the built font has 4.8)
+    rnd = (lambda v: v) if args.raw else otRound
     names = needed(masters[0][1], args.glyphs)
 
     # bends in the masters, per glyph/contour/node
@@ -110,7 +114,7 @@ def main(argv=None):
         for name in names:
             g0, g1 = f0[name], f1[name]
             g = font.newGlyph(name)
-            g.width = round(g0.width + (g1.width - g0.width) * t)
+            g.width = otRound(g0.width + (g1.width - g0.width) * t)
             g.unicodes = list(g0.unicodes)
             for c0, c1 in zip(g0.contours, g1.contours):
                 if len(c0.points) != len(c1.points):
