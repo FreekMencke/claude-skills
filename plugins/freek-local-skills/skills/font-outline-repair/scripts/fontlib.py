@@ -586,8 +586,11 @@ def fit_joint_fixed_tangents(cases, iters=6):
     return sols, err
 
 
-def merge_preconditions(c, idx, keep_extremes=True, max_bend=5.0):
-    """The checks try_merge does before fitting. Returns (A, unit t0, B, unit t3) or None."""
+def merge_preconditions(c, idx, keep_extremes=True, max_bend=5.0, tol=1.0):
+    """The checks try_merge does before fitting, and with keep_extremes a node more than
+    tol past both its neighbours on x or y: its tangent may be a degree or two off the
+    axis (a derived master), but without it the merged curve bulges past its ends.
+    Returns (A, unit t0, B, unit t3) or None."""
     A, a1, a2, N, b1, b2, B = (xy(c[k]) for k in idx)
     t0, t3 = sub(a1, A), sub(b2, B)
     if norm(t0) < 1e-6 or norm(t3) < 1e-6:
@@ -598,6 +601,8 @@ def merge_preconditions(c, idx, keep_extremes=True, max_bend=5.0):
     if keep_extremes:
         ang = math.degrees(math.atan2(t_out[1], t_out[0])) % 90
         if min(ang, 90 - ang) < 0.5:
+            return None
+        if any(N[k] - max(A[k], B[k]) > tol or min(A[k], B[k]) - N[k] > tol for k in (0, 1)):
             return None
     if angle_deg(t0, sub(B, b2)) > 120:
         return None

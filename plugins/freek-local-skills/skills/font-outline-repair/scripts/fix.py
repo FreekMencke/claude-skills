@@ -24,8 +24,11 @@ Operations run in this order, whatever order you list them in:
   merge          reduce points: remove a smooth node when one curve can replace the two
                  around it within --tol units in every master (end tangents kept, so the
                  neighbours still join smoothly), and drop nodes that sit on a straight
-                 line. Keeps corners, extremes (unless --merge-extremes) and inflections.
-                 Changes every master, the reference too, so it can't run with --only
+                 line. Keeps corners, extremes (unless --merge-extremes) and inflections;
+                 an extreme is a node whose tangent runs along x or y, or that lies more
+                 than --tol past both its neighbours, in any master.
+                 Changes every master, the reference too, so it can't run with --only.
+                 Repo scripts that read glyph points by position break: check SKILL.md
   collinear      line up both handles of every smooth node, keeping handle lengths; turns
                  the handle the other masters disagree with; leaves bends over 30° alone
                  (those are flipped handles: use repredict)
@@ -40,7 +43,9 @@ Operations run in this order, whatever order you list them in:
                  say they should be (glyph:master:contour:point, numbering as in audit.py).
                  A curl or barb usually involves several points: give a range around the
                  spot (glyph:master:contour:6-10) and run without --write first; only points
-                 more than --min-dev units off are moved
+                 more than --min-dev units off are moved. Each run of consecutive points is
+                 measured from the two points just outside it, so two ranges in one contour
+                 are repredicted as if run one at a time
 When the masters use whole units, changed glyphs are rounded back to whole units
 and moves under 0.75 units are skipped (rounding would undo them); --round no keeps
 decimals. Run audit.py and the repo's own checks after: rounding can bring kinks back.
@@ -255,7 +260,7 @@ def plan_merges(cs_by_master, ci, tol, keep_extremes=True, cache=None, greedy=Tr
             for mi, c in enumerate(cs):
                 # the reference (cs[0]) must be nearly straight there; other masters may
                 # carry the small kinks whole-unit rounding leaves (the node goes anyway)
-                pre = L.merge_preconditions(c, idx, keep_extremes, max_bend=3.0 if mi == 0 else 5.0)
+                pre = L.merge_preconditions(c, idx, keep_extremes, max_bend=3.0 if mi == 0 else 5.0, tol=tol)
                 if pre is None:
                     break
                 samples = spans[mi][id(c[idx[0]])] + spans[mi][id(c[idx[3]])][1:]
@@ -627,11 +632,27 @@ def _loo(xs, vals, x):
     return vm + slope * (x - mean)
 
 
+def point_runs(idx, n):
+    """Split point numbers of a contour of n points into runs of consecutive numbers,
+    wrapping round the contour (n-1 and 0 are neighbours)."""
+    idx = sorted(set(idx))
+    runs = []
+    for p in idx:
+        if runs and p == runs[-1][-1] + 1:
+            runs[-1].append(p)
+        else:
+            runs.append([p])
+    if len(runs) > 1 and runs[0][0] == 0 and runs[-1][-1] == n - 1:
+        runs[0] = runs.pop() + runs[0]
+    return runs
+
+
 def op_repredict(name, glyphs, labels, ref_i, log, points, locs):
     """Move points of one master to where the other masters put them. A single point
     follows its own trend across the masters. A range is measured relative to the
     two points just outside it, so the master keeps its own placement of that part
-    of the glyph and only the shape is restored. Coordinates all other masters share
+    of the glyph and only the shape is restored; separate ranges in one contour are
+    measured each from their own anchors. Coordinates all other masters share
     exactly (baselines, stem edges) are kept exact."""
     aligned = _aligned_or_none(name, glyphs, labels, ref_i, log, "repredict")
     if aligned is None:
@@ -648,52 +669,55 @@ def op_repredict(name, glyphs, labels, ref_i, log, points, locs):
         bad = [p for p, _ in plist if not 0 <= p < n]
         if bad:
             log[name].append(f"{mlabel}: contour {ci} has {n} points; ignored point numbers {bad}")
-        plist = [(p, d) for p, d in plist if 0 <= p < n]
-        if not plist:
+        min_devs = {p: d for p, d in plist if 0 <= p < n}
+        for run in point_runs(min_devs, n):
+            _repredict_run(name, glyphs, labels, log, aligned, locs, m, ci, [(p, min_devs[p]) for p in run])
+
+
+def _repredict_run(name, glyphs, labels, log, aligned, locs, m, ci, plist):
+    """repredict for one run of consecutive points (in contour order) of master m."""
+    mlabel = labels[m]
+    n = len(aligned[m][ci])
+    idx = [p for p, _ in plist]
+    # anchors: the points just before and after the run
+    a, b = (idx[0] - 1) % n, (idx[-1] + 1) % n
+    others = [k for k in range(len(glyphs)) if k != m]
+    xs = [locs[k] for k in others]
+
+    def frame(k):
+        A, B = L.xy(aligned[k][ci][a]), L.xy(aligned[k][ci][b])
+        d = L.sub(B, A)
+        return A, d, (-d[1], d[0]), L.norm(d)
+
+    Am, dm, pm, lm = frame(m)
+    # a run over the whole contour has no anchors outside it
+    relative = 1 < len(plist) < n and lm > 1 and all(frame(k)[3] > 1 for k in others)
+    for pi, min_dev in plist:
+        absolute = (_loo(xs, [aligned[k][ci][pi][0] for k in others], locs[m]),
+                    _loo(xs, [aligned[k][ci][pi][1] for k in others], locs[m]))
+        if relative:
+            us, vs = [], []
+            for k in others:
+                A, d, pp, ln = frame(k)
+                rel = L.sub(L.xy(aligned[k][ci][pi]), A)
+                us.append(L.dot(rel, d) / ln ** 2)
+                vs.append(L.dot(rel, pp) / ln ** 2)
+            u, v = _loo(xs, us, locs[m]), _loo(xs, vs, locs[m])
+            pred = (Am[0] + u * dm[0] + v * pm[0], Am[1] + u * dm[1] + v * pm[1])
+        else:  # a single point (or anchors on top of each other): its own trend
+            pred = absolute
+        # a coordinate every other master shares exactly (a baseline, a stem edge) stays exact
+        pred = tuple(aligned[others[0]][ci][pi][ax] if max(aligned[k][ci][pi][ax] for k in others) -
+                     min(aligned[k][ci][pi][ax] for k in others) < 0.5 else pred[ax] for ax in (0, 1))
+        p = glyphs[m].contours[ci].points[pi]
+        dev = L.dist((p.x, p.y), pred)
+        if dev < min_dev:
+            log[name].append(f"{mlabel}: point {ci}:{pi} kept: only {dev:.1f} units from where the other masters put it")
             continue
-        idx = sorted(p for p, _ in plist)
-        # anchors: the nearest points before and after the group that are not in it
-        a = (idx[0] - 1) % n
-        while a in idx:
-            a = (a - 1) % n
-        b = (idx[-1] + 1) % n
-        while b in idx:
-            b = (b + 1) % n
-        others = [k for k in range(len(glyphs)) if k != m]
-        xs = [locs[k] for k in others]
-
-        def frame(k):
-            A, B = L.xy(aligned[k][ci][a]), L.xy(aligned[k][ci][b])
-            d = L.sub(B, A)
-            return A, d, (-d[1], d[0]), L.norm(d)
-
-        Am, dm, pm, lm = frame(m)
-        for pi, min_dev in plist:
-            absolute = (_loo(xs, [aligned[k][ci][pi][0] for k in others], locs[m]),
-                        _loo(xs, [aligned[k][ci][pi][1] for k in others], locs[m]))
-            if len(plist) > 1 and lm > 1 and all(frame(k)[3] > 1 for k in others):
-                us, vs = [], []
-                for k in others:
-                    A, d, pp, ln = frame(k)
-                    rel = L.sub(L.xy(aligned[k][ci][pi]), A)
-                    us.append(L.dot(rel, d) / ln ** 2)
-                    vs.append(L.dot(rel, pp) / ln ** 2)
-                u, v = _loo(xs, us, locs[m]), _loo(xs, vs, locs[m])
-                pred = (Am[0] + u * dm[0] + v * pm[0], Am[1] + u * dm[1] + v * pm[1])
-            else:  # a single point (or anchors on top of each other): its own trend
-                pred = absolute
-            # a coordinate every other master shares exactly (a baseline, a stem edge) stays exact
-            pred = tuple(aligned[others[0]][ci][pi][ax] if max(aligned[k][ci][pi][ax] for k in others) -
-                         min(aligned[k][ci][pi][ax] for k in others) < 0.5 else pred[ax] for ax in (0, 1))
-            p = glyphs[m].contours[ci].points[pi]
-            dev = L.dist((p.x, p.y), pred)
-            if dev < min_dev:
-                log[name].append(f"{mlabel}: point {ci}:{pi} kept: only {dev:.1f} units from where the other masters put it")
-                continue
-            how = f"relative to points {a} and {b}" if len(plist) > 1 else "following its own trend"
-            log[name].append(f"{mlabel}: point {ci}:{pi} ({p.x:.1f}, {p.y:.1f}) -> ({pred[0]:.1f}, {pred[1]:.1f}), {dev:.1f} units, "
-                             f"from the other masters ({how})")
-            p.x, p.y = round(pred[0], 2), round(pred[1], 2)
+        how = f"relative to points {a} and {b}" if relative else "following its own trend"
+        log[name].append(f"{mlabel}: point {ci}:{pi} ({p.x:.1f}, {p.y:.1f}) -> ({pred[0]:.1f}, {pred[1]:.1f}), {dev:.1f} units, "
+                         f"from the other masters ({how})")
+        p.x, p.y = round(pred[0], 2), round(pred[1], 2)
 
 
 def round_keeping_directions(glyph):

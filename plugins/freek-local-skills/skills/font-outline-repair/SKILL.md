@@ -29,6 +29,7 @@ Scripts, in `${CLAUDE_SKILL_DIR}/scripts` (each explains itself with `--help`):
 | `straighten.py` | puts every node and handle of the straight edges running into a point (a counter's tip) on one whole-unit line each, so they stay straight after rounding; `--aim`, `--slide` and `--move` for edges too short for their step, `--dirs` to take the nearest master's steps, `--max-back` refuses edges that turn against the curve they run into | the UFO, only with `--write` |
 | `profile.py` | how much a stretch of outline turns, how much of that turns back against the main turn (a dip, an S) and its sharpest turn per unit, per UFO; `--curves` adds each curve's curvature (start, least, peak, end) and the jump at each node: a knee, a flat spot | a line per UFO |
 | `fair.py` | re-places one or two curves' handles (and the node between) in whole units for even curvature, keeping the directions at both ends; `--edge` lets the end of a straight edge move back so the curve starts gently, `--ratio` keeps the node between split as in the other masters | the UFO, only with `--write` |
+| `interpolate.py` | rebuilds glyphs of a drawn middle master on the line between its neighbours at the glyph's own weight fraction, keeping width, left side bearing and zone lines | the middle UFO, only with `--write` |
 | `between.py` | glyphs at weights between the masters, rounded as in a static instance or `--raw` as the variable font draws them, and the bends no master has | UFOs per weight |
 | `carry.py` | takes the glyphs a derived Thin/Black can't get right from an earlier version of that weight, when the user says that version can be trusted | UFOs in `--out-dir` |
 | `checkbuild.py` | checks built fonts: against the previous build, stems per weight, variable font instances against the statics | a summary |
@@ -58,6 +59,7 @@ What each step did on one typeface project, and the attempts that failed, is in
 - Work on a git branch. Change masters only after the user's go-ahead for that kind of fix, and approve `repredict` per point list after showing a close-up of each point.
 - Record each approved hand edit to a drawn master as a script that lists every moved point, old and new, and checks the old values before it writes. The rebuild then starts from the masters as found, and the record says exactly what moved.
 - Look at every changed spot in an enlarged render before calling it fixed. The checks find spots; the picture decides.
+- Never call an audit block a false positive without a filled, enlarged render of it (`solid.py`, a window on the spot) beside the nearest master. On one family a `segment-reversal` dismissed from the point view was a real fold.
 - Check each writing step before the next one: `compare.py` against the version before it (every master within `--tol`, no corner lost, widths and anchors unchanged), then `audit.py`. Trust a clean result only from a check you have seen catch a known case: the first `compare.py` sampled straight lines only at their ends and reported a 25-unit change that wasn't there, and boolean path operations report large differences between outlines that are the same to within a unit.
 - Ask how existing extremes were made before relying on them. A Thin or Black in the repo may have been drawn by a person, or extrapolated and patched by scripts; only the first records a designer's decisions. On one family they were an earlier automated attempt, and treating them as hand-edited sent 46 glyphs down the wrong path. Use them to compare against, and as a source (`carry.py`) only when the user says so.
 - Tag the masters as found before the first write (`git tag outline-repair-baseline`). Every later comparison, and `carry.py --before`, needs them, and `HEAD~1` stops being the original after a few commits.
@@ -185,9 +187,12 @@ in `outline-repair/`.
    ```bash
    $PY $S/fix.py "$DS" --ref $REF --ops redundant compat --write
    $PY $S/fix.py "$DS" --ref $REF --ops merge --write                    # if approved; --tol to change the 1-unit limit
-   $PY $S/fix.py "$DS" --ref $REF $ONLY --ops smooth-flags collinear --write
+   $PY $S/fix.py "$DS" --ref $REF $ONLY --ops smooth-flags --write
+   $PY $S/fix.py "$DS" --ref $REF $ONLY --ops collinear --write          # situation B: --out-dir <scratch>, then the guard below
    ```
-   Leave `$ONLY` empty when the user approved changes to every master. Lines marked `<- look` go on the list for step 3. Merging first means the later fixes work on fewer, cleaner curves. `merge` fits each new curve in all masters at once, with shared parameters, against the original outline, so it also stays within `--tol` at every weight in between, not only in the masters; and it rounds handles keeping their direction, since plain rounding kinks short handles.
+   Leave `$ONLY` empty when the user approved changes to every master. Lines marked `<- look` go on the list for step 3. Merging first means the later fixes work on fewer, cleaner curves. `merge` fits each new curve in all masters at once, with shared parameters, against the original outline, so it also stays within `--tol` at every weight in between, not only in the masters; and it rounds handles keeping their direction, since plain rounding kinks short handles. It keeps a node that is an extreme in any master, the derived ones in the designspace included: a tangent along x or y, or the node more than `--tol` past both its neighbours (a derived Black's arch top, its tangent a few degrees off the axis, went and the curve bulged 5.4 units past its ends).
+   - **Before `merge`**, look for repo scripts that build glyphs from other glyphs' points by position (`contours[i].points[k]`, an on-curve list indexed by number; often under `scripts/glyphs/`), and list their input glyphs. Merge changes the numbering, so leave those glyphs out (`--glyphs` with every other glyph) or, after the merge, run the repo's regeneration and `compare.py --tol 1` the generated glyphs against before. On one family `Œ` came out 5 units off in every master and Black `ð`'s bar 20, until `O` and `o` were left out.
+   - **`collinear` in situation B** needs the same per-glyph guard as in derived weights: run it with `--out-dir <scratch>`, and keep it per glyph and master only where `audit.DerivedChecker(drawn masters, (weight, font)).score(glyph)` doesn't get worse, `compare.py` stays within `--tol` and no corner is lost. Across all of Thin and Black it moved 16 Thin glyphs more than 1 unit (q by 3.4) and smoothed deliberate 10–11° corners away; guarded it kept 20 Thin and 37 Black glyphs, all fine.
 2. **Check.** With an old copy of the masters (`git worktree add ../before outline-repair-baseline`):
    ```bash
    $PY $S/compare.py ../before/sources/A.ufo sources/A.ufo ../before/sources/B.ufo sources/B.ufo --tol 1
@@ -198,7 +203,7 @@ in `outline-repair/`.
    ```bash
    $PY $S/fix.py "$DS" --ref $REF $ONLY --ops repredict --points R:900:0:6-9 e:900:0:85-88
    ```
-   It moves only points more than `--min-dev` (3) units from where the other masters put them. A range is measured from the two points just outside it, so the master keeps its own placement of that part and only the shape is restored; a single point follows its own trend; coordinates every other master shares (a baseline, a stem edge) stay exact. Propose the list with one line each on why, get the go-ahead, then add `--write`. It re-lines the handles afterwards. Findings in the reference master are listed separately in the summary: fix.py won't move them, so show them to the user. Structure findings left over (`point-count`, `point-type`, `contour-count`, `component-mismatch`) need a hand edit: say which contour and master differ and ask the user to fix it in their editor, or offer a small script.
+   It moves only points more than `--min-dev` (3) units from where the other masters put them. A range is measured from the two points just outside it (several ranges in one contour each from their own), so the master keeps its own placement of that part and only the shape is restored; a single point follows its own trend; coordinates every other master shares (a baseline, a stem edge) stay exact. Propose the list with one line each on why, get the go-ahead, then add `--write`. It re-lines the handles afterwards. Findings in the reference master are listed separately in the summary: fix.py won't move them, so show them to the user. Structure findings left over (`point-count`, `point-type`, `contour-count`, `component-mismatch`) need a hand edit: say which contour and master differ and ask the user to fix it in their editor, or offer a small script.
 4. **Derive or compare.**
    - Situation A: `derive.py "$DS" --targets 100 900 --stems 100=<a> 900=<b> --out-dir outline-repair/derived` (or `--stems-from` the old Thin/Black), then audit with `--derived` on the new UFOs. Masters are placed by measured stem width. Each glyph's outline uses whichever of piecewise (nearest two masters), fit (least squares through all) and wide (the two outermost: least amplification) gives the fewest blocks, then slows; widths, side bearings, kerning and font metrics follow one method across the font (wide), or related glyphs drift apart (on one family the two braces ended 12 units apart at Thin). Coordinates round with handle directions kept (kinks 205 to 148 against plain rounding), and the new UFOs get their names from the designspace's axis labels. On a test family, extrapolating by the weight number instead missed the real ExtraLight and Black by 6 to 16 units on average (43 at worst); placing by stem missed by under 1 unit on average.
    - Choose the target stems by trying a few: derive at each and count the audit's blocks in the derived weights. Report the choice and the alternative. An example with numbers is in `${CLAUDE_SKILL_DIR}/references/case-notes.md`.
@@ -283,6 +288,25 @@ Repeat from step 2 until one of these holds, then go to step 5:
 separate choices, and keep them only where the audit and the renders improve: on one
 family `collinear` cut more kinks than `triplet-ratio`, and `harmonize` after merging
 made ratio mismatches worse. What each operation did there, with counts, is in `${CLAUDE_SKILL_DIR}/references/case-notes.md`.
+
+**A drawn middle master off the line between its neighbours.** A repo's own check (say a
+`masters.py` flagging Regular points off the Light–Bold line) can point at a middle master
+whose glyphs drift. Fix it only with the user's go-ahead, and:
+
+- Measure the line at the glyph's own weight fraction, not at the axis location: t = (stroke
+  in the middle master − in the lighter) / (heavier − lighter), with `widths.py` on the
+  glyph's strokes. On one family the axis said 1/4 and glyphs rebuilt there came out about
+  5 units too light; stems wanted 1/3, the diagonals of v and w 0.36 (w at 1/3 came out 4%
+  lighter than v).
+- A whole-glyph rebuild (`interpolate.py LIGHT MID BOLD --glyphs G --t T`) keeps the advance
+  width, left side bearing and nodes on zone lines (rebuilt tops landed at 466 against the
+  x-height's 467). It worked for z, w, 4 and v.
+- On dense, wiggly outlines (braces) a whole-glyph rebuild adds 5–11° rounding kinks: use
+  `repredict` on the spot instead.
+- Points on the line don't make the shape right. `repredict` on Regular `{` lined its points
+  up and opened the notch from 95° to 104°, blunter than either neighbour, and it stopped
+  mirroring `}`. Judge by the outline against its neighbours and its mirror or sibling
+  glyphs (filled renders, `profile.py`), not by the point distances.
 
 **Extrapolation limits.** Straight-line extrapolation overshoots wherever two edges
 meet at a shallow angle (the crotch of v and w, the apex of the counter in 4: the
