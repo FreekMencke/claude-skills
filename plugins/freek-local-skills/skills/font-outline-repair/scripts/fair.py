@@ -34,7 +34,9 @@ twice in turn.
 It prints the curvature (1/radius, x1000, positive with the run's turn) of the run now
 and of the --top (5) best layouts: least (a flat spot), peak, the jumps at A, at the node
 between and at B, and the largest distance from the current outline. Layouts with any
-curvature against the turn are refused. --write saves layout --pick (1). Look at the
+curvature against the turn are refused. --write saves layout --pick (1). When the edge
+into A has a long whole-unit step ((73,-3)) or the corner has more than two curves, use
+corner.py. Look at the
 result filled (solid.py) beside the other masters, and measure it with profile.py.
 """
 import argparse
@@ -252,6 +254,8 @@ def main(argv=None):
             if len(idx) > n:
                 sys.exit("--edge: TIP not reached going back from A")
         offsets = [(P(k)[0] - T[0], P(k)[1] - T[1]) for k in idx if P(k) != T]
+        if not offsets and P(A) != T:
+            offsets = [(P(A)[0] - T[0], P(A)[1] - T[1])]   # one line segment TIP->A: A's own offset
         st = primitive(offsets[-1]) if offsets else None
         if not st:
             sys.exit("--edge: no straight edge between TIP and A")
@@ -400,6 +404,10 @@ def main(argv=None):
           f"{mid(jm_now)}  B {abs(ks_now[-1][-1] - k_out):5.2f}" + ("" if sc_now else "  (turns against the run)"))
     if not rows:
         print("  no layout within --dev without curvature against the turn; try a larger --move, --turn or --dev")
+        st = primitive((round(tA[0]), round(tA[1])))
+        if st and max(abs(st[0]), abs(st[1])) > 12:
+            print(f"  the edge into A runs in whole steps of {st}, too long for handles on its line: "
+                  "corner.py lets A's handle turn a few degrees off it")
         return 1
     for rank, (cost, dev, item) in enumerate(rows[: args.top], 1):
         sc = item[1]

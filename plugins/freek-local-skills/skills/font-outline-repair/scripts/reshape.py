@@ -40,7 +40,10 @@ ops
                                     nodes on each, in any contour) made straight and parallel
                                     again at the master's width x k about the derived centre
                                     line, its end corners slid along their cuts, every join
-                                    put where the new edge crosses the curve it meets.
+                                    put where the new edge crosses the curve it meets; where
+                                    a wall runs on across the bar (the bowl of e), its
+                                    straighter side continued across the bar places the
+                                    corner on the other edge.
   min-segment G@W:C:A-B ... --length L
                                     a short straight segment A-B that extrapolation turned
                                     round (a notch passing zero, the barb of an arrow): A and
@@ -190,6 +193,8 @@ class Ctx:
         self.ref = opt.ref
         self.source = getattr(opt, "source", None)
         self.checkers = {}
+        self.refused = []
+        self.worse = []         # what an op made worse that the checks don't count as blocks
 
     def near(self, w):
         if self.source:
@@ -385,6 +390,21 @@ def op_copy_shape(ctx, opt):
             kk = (d1 - d0) / (s1 - s0_)
             return lambda v: d0 + (v - s0_) * kk
         fx, fy = axis(A.x, B.x, A2.x, B2.x), axis(A.y, B.y, A2.y, B2.y)
+        # per axis, a stretch whose ends are nearly level (or plumb) is scaled by a ratio of
+        # a few units: Thin e's bowl bottom (Light 13 units high, Thin 7) went x0.54 in y and
+        # rose through the counter. Refuse when the two scales differ by over 1.5 or one span
+        # is under a tenth of the other; --similar keeps the piece's angles
+        spans = [(abs(B.x - A.x), B2.x - A2.x, B.x - A.x), (abs(B.y - A.y), B2.y - A2.y, B.y - A.y)]
+        ks_ = [d / s_ for span, d, s_ in spans if span >= 1]
+        squash = len(ks_) == 2 and (min(ks_) <= 0 or max(ks_) / min(ks_) > 1.5
+                                    or min(spans[0][0], spans[1][0]) < 0.1 * max(spans[0][0], spans[1][0]))
+        if squash and not opt.similar and not opt.force:
+            print(f"{name}@{w}: {a}-{b} of contour {ci} spans {spans[0][0]:.0f} x {spans[1][0]:.0f} in "
+                  f"{opt.source or ctx.near(w)} and {abs(spans[0][1]):.0f} x {abs(spans[1][1]):.0f} here: per axis it "
+                  f"scales x{ks_[0]:.2f} across and x{ks_[1]:.2f} up, which distorts it. Not changed: use --similar "
+                  f"(the piece turned and scaled whole), or --force")
+            ctx.refused.append(t)
+            continue
         if opt.similar:
             # turned and scaled as a whole (A onto A', B onto B'): the piece keeps its
             # angles, where per axis a span of a few units in one direction blows it up
@@ -917,6 +937,77 @@ def realign(pts, nodes, tol=1.0, rule="best"):
             a.x, a.y = na
 
 
+def flat_spots(pts, n=16, least_len=8.0, reach=40.0):
+    """Stretches where a curve goes flat between two bends the same way: within a run of
+    smoothly joined curves (lines, drawn straight, end it) and between inflections, at
+    least least_len units whose curvature is under 0.3 x the lower of the highest within
+    reach units either side (both over 10, x1000). [(first segment index, last, least,
+    peak before, peak after)]."""
+    from fair import bez, curv
+    sg = segs(pts)
+    xy = lambda i: (pts[i].x, pts[i].y)
+    ks, owner, at = [], [], []
+    for si, s_ in enumerate(sg):
+        P = [xy(s_[0])] + [xy(h) for h in s_[1]] + [xy(s_[2])]
+        for j in range(n + 1):
+            ks.append(1000 * curv(P, j / n) if len(P) == 4 else None)   # a line: drawn straight
+            owner.append(si)
+            at.append(bez(P, j / n) if len(P) == 4 else P[0])
+    runs, cur = [], []
+    for si in range(len(sg)):
+        if cur and bend_at(pts, sg, si) > 5:
+            runs.append(cur)
+            cur = []
+        cur += [x for x in range(len(ks)) if owner[x] == si]
+    if cur:
+        runs.append(cur)
+    out = []
+    for run in runs:
+        lobes, lobe, sign = [], [], 0
+        for x in run:
+            if ks[x] is None:
+                if lobe:
+                    lobes.append((sign or 1, lobe))
+                lobe, sign = [], 0
+                continue
+            sg_ = 1 if ks[x] > 1 else -1 if ks[x] < -1 else 0
+            if sg_ and sign and sg_ != sign:
+                lobes.append((sign, lobe))
+                lobe = []
+            sign = sg_ or sign
+            lobe.append(x)
+        if lobe:
+            lobes.append((sign or 1, lobe))
+        for sign, lobe in lobes:
+            v = [sign * ks[x] for x in lobe]
+            arc = [0.0]
+            for x, y in zip(lobe, lobe[1:]):
+                arc.append(arc[-1] + math.dist(at[x], at[y]))
+            flat = []
+            for m in range(1, len(v) - 1):
+                left = max((v[j] for j in range(m) if arc[m] - arc[j] <= reach), default=v[m])
+                right = max((v[j] for j in range(m + 1, len(v)) if arc[j] - arc[m] <= reach), default=v[m])
+                if min(left, right) > 10 and v[m] < 0.3 * min(left, right):
+                    flat.append((m, left, right))
+            for grp in _consecutive([f[0] for f in flat]):
+                a, b = grp[0], grp[-1]
+                if arc[b] - arc[a] < least_len:
+                    continue                # a dip at one node, not a stretch
+                pk = {f[0]: f[1:] for f in flat}
+                out.append((owner[lobe[a]], owner[lobe[b]], min(v[a:b + 1]), pk[a][0], pk[b][1]))
+    return out
+
+
+def _consecutive(xs):
+    out = []
+    for x in xs:
+        if out and x == out[-1][-1] + 1:
+            out[-1].append(x)
+        else:
+            out.append([x])
+    return out
+
+
 def op_rebuild_stroke(ctx, opt):
     import numpy as np
     which = [w for w in (opt.keep_limits or "").split(",") if w]
@@ -967,6 +1058,7 @@ def op_rebuild_stroke(ctx, opt):
             if len(sides) != 2:
                 raise SystemExit(f"{name}: expected two sides between the cuts, found {len(sides)}")
         orig = [(p.x, p.y) for p in pt]
+        flats0 = flat_spots(pt) + flat_spots(pr)        # as derived, or drawn so in the master
         steps = 16
         dr = [[seg_at(pr, s, j / 60) for s in x for j in range(61)] for x in sides]
         dt = [[seg_at(pt, s, j / 60) for s in x for j in range(61)] for x in sides]
@@ -1045,8 +1137,19 @@ def op_rebuild_stroke(ctx, opt):
                     realign(list(ctx.fonts[w][name].contours[ci].points), nodes, rule=rule)
             rule, _, _, _ = ctx.best_of(name, w, attempt, ("none", "best", "short"))
             note = f", handles re-lined: {rule}"
+        # a flat spot the rebuild made between two bends (Black S: the lower counter's arc ends
+        # pulled in round an x 447 extreme, a 25-unit straight run with curvature 47 and 24 at
+        # its ends, while the checks' slows went 27 -> 15): not written without --force
+        pts_now = list(ctx.fonts[w][name].contours[ci].points)
+        sg_now = segs(pts_now)
+        made = [f for f in flat_spots(pts_now) if not any(f[0] <= g_[1] and g_[0] <= f[1] for g_ in flats0)]
+        flat_note = "".join(f", FLAT SPOT made at c{ci} {sg_now[a][0]}-{sg_now[b][2]} (curvature {p1:.0f} > {lo:.0f} < {p2:.0f})"
+                            for a, b, lo, p1, p2 in made)
+        if made:
+            ctx.worse.append(f"{name}@{w}: flat spot between two bends; keep the arc's end nodes as derived "
+                             f"(--keep-nodes) or fair it")
         print(f"{name}@{w}: contour {ci} rebuilt about the {'master' if opt.centre == 'ref' else 'derived'} centre line at "
-              f"{ctx.near(w)} x {k:.3f}{scale}{note}, largest move {worst:.1f}; checks {s0} -> {ctx.score(name, w)}")
+              f"{ctx.near(w)} x {k:.3f}{scale}{note}, largest move {worst:.1f}; checks {s0} -> {ctx.score(name, w)}{flat_note}")
 
 
 LIMITS_BOX = "left,right,top,bottom"
@@ -1296,6 +1399,67 @@ def edge_runs(pts, ks, steps):
     return runs
 
 
+def _axis_line(pts, s, tol=0.5):
+    """'h' or 'v' for a straight segment level or plumb within tol units, else None."""
+    if s[1]:
+        return None
+    a, b = pts[s[0]], pts[s[2]]
+    if abs(a.y - b.y) <= tol and abs(a.x - b.x) > 2:
+        return "h"
+    if abs(a.x - b.x) <= tol and abs(a.y - b.y) > 2:
+        return "v"
+    return None
+
+
+def stem_joins(pts, side, stem, zones):
+    """In a master contour: the nodes where a curve (a bowl, an arm) joins a stem (a plumb
+    edge a stem long) at an inside corner, {node: index of the stem's segment}, and the top joins of a slanted
+    stroke and a stem, [(N, slanted segment, stem segment, the stroke's other edge)]: N a
+    corner on a zone line between a level edge and the slanted stroke's edge, the stem's
+    plumb edge crossed by that level edge (M: the diagonal's top corner, Light's 15 units
+    inside the stem)."""
+    sg = segs(pts)
+    nseg = len(sg)
+    joins, tops = {}, []
+    for si in range(nseg):
+        pi = (si - 1) % nseg
+        i = sg[si][0]
+        if pts[i].smooth:
+            continue
+        d_in, d_out = tangent(pts, sg[pi], False), tangent(pts, sg[si], True)
+        if not (d_in and d_out):
+            continue
+        turn = math.degrees(math.atan2(L.cross(d_in, d_out), L.dot(d_in, d_out)))
+        if turn * side < -25:                       # an inside corner
+            for st, other in ((pi, si), (si, pi)):
+                s = sg[st]
+                if _axis_line(pts, s) == "v" and sg[other][1] and \
+                        L.dist((pts[s[0]].x, pts[s[0]].y), (pts[s[2]].x, pts[s[2]].y)) >= stem:
+                    joins[i] = st
+        if not any(abs(pts[i].y - z) <= 1 for z in zones):
+            continue
+        for lev, sl in ((pi, si), (si, pi)):
+            if _axis_line(pts, sg[lev]) != "h" or sg[sl][1] or _axis_line(pts, sg[sl]):
+                continue
+            far = pts[sg[lev][2] if lev == si else sg[lev][0]]
+            lo, hi = sorted((pts[i].x, far.x))
+            stems_ = [x for x in range(nseg) if _axis_line(pts, sg[x]) == "v" and lo < pts[sg[x][0]].x < hi
+                      and min(abs(pts[sg[x][0]].y - pts[i].y), abs(pts[sg[x][2]].y - pts[i].y)) < 2.5 * stem]
+            if not stems_:
+                continue
+            st = min(stems_, key=lambda x: abs(pts[sg[x][0]].x - pts[i].x))
+            a0, a1 = (pts[sg[sl][0]].x, pts[sg[sl][0]].y), (pts[sg[sl][2]].x, pts[sg[sl][2]].y)
+            d = L.unit(L.sub(a1, a0))
+            par = [x for x in range(nseg) if x not in (sl, lev) and not sg[x][1]]
+            par = [x for x in par if abs(L.cross(d, L.unit(L.sub((pts[sg[x][2]].x, pts[sg[x][2]].y),
+                                                               (pts[sg[x][0]].x, pts[sg[x][0]].y))))) < math.sin(math.radians(5))
+                   and 0.3 * stem < abs(L.cross(d, L.sub((pts[sg[x][0]].x, pts[sg[x][0]].y), a0))) < 2.5 * stem]
+            if par:
+                other = min(par, key=lambda x: abs(L.cross(d, L.sub((pts[sg[x][0]].x, pts[sg[x][0]].y), a0))))
+                tops.append((i, sl, st, other))
+    return joins, tops
+
+
 def op_rebuild_outline(ctx, opt):
     """Every contour of the glyph rebuilt about the master's centre lines at master x k."""
     import numpy as np
@@ -1331,6 +1495,8 @@ def op_rebuild_outline(ctx, opt):
             kept_nodes.setdefault(int(c_), set()).update((a_ + d) % n_ for d in range((b_ - a_) % n_ + 1))
         kind, cut_segs = [], set()
         olr = Outline(R)
+        zones = zone_ys(ctx.fonts[ctx.near(w)])
+        joins_of, tops_of = zip(*(stem_joins(pts, ink_side(olr, pts), stem, zones) for pts in R)) if R else ((), ())
         # short: F x the master's stem, but no more than 1.5% of the em (at Bold a quarter
         # stem is 30 units and took ordinary segments of the small Black counters for
         # corner details)
@@ -1746,6 +1912,55 @@ def op_rebuild_outline(ctx, opt):
             for i in kept_here:
                 if pts[i].type:
                     new[i] = old[ci][i]
+            pos = (lambda j, new=new, ci=ci: new.get(j, old[ci][j]))
+            # a bowl's join with a stem stays where derived, on the rebuilt stem edge: where
+            # the rebuilt edges meet, Thin q's joins rose from y 348/119 to 316/131 and the
+            # bowl's lower right came out 16 units where Light x k gives 28 (--free-joins:
+            # where they meet)
+            for i, st in ([] if opt.free_joins else joins_of[ci].items()):
+                if i in kept_here or i not in new or ks[st] != "long" or None in (S_[st][0], S_[st][-1]):
+                    continue
+                a_, b_ = S_[st][0], S_[st][-1]
+                d = L.unit(L.sub(b_, a_))
+                q = L.add(a_, L.mul(d, L.dot(L.sub(old[ci][i], a_), d)))
+                if L.dist(q, new[i]) > 0.5:
+                    notes.append(f"c{ci} {i}: bowl's join with the stem kept where derived "
+                                 f"({L.dist(q, new[i]):.1f} units from where the rebuilt edges meet)")
+                new[i] = q
+            # a slanted stroke's top join with a stem (M's diagonals): its corner on the zone
+            # line keeps the master's inset from the stem's edge x k, the stroke's other edge
+            # moved parallel so it keeps its width (Thin M: 25 units inside the stem where
+            # Light x k gives 7, so the diagonal met the stem 11 units under the cap)
+            for N, sl, st, oth in tops_of[ci]:
+                if N in kept_here or N not in new:
+                    continue
+                rs = (R[ci][sg[st][0]].x + R[ci][sg[st][2]].x) / 2
+                ts = (pos(sg[st][0])[0] + pos(sg[st][2])[0]) / 2
+                sgn_ = 1 if R[ci][N].x > rs else -1
+                want_in = abs(R[ci][N].x - rs) * k
+                if abs(abs(new[N][0] - ts) - want_in) <= 1:
+                    continue
+                F = sg[sl][0] if sg[sl][2] == N else sg[sl][2]
+                G, H = sg[oth][0], sg[oth][2]
+                d0 = L.unit(L.sub(new[N], pos(F)))
+                off = L.cross(d0, L.sub(pos(G), pos(F)))           # the stroke's width, signed
+                Nn = (ts + sgn_ * want_in, new[N][1])
+                d1 = L.unit(L.sub(Nn, pos(F)))
+                o2 = L.add(pos(F), L.mul((-d1[1], d1[0]), off))     # a point on the other edge
+                moved_ = []
+                for X in (G, H):
+                    nb = next((x for x in sg if x != sg[oth] and X in (x[0], x[2])), None)
+                    if nb is None or nb[1]:
+                        continue
+                    Y = nb[2] if nb[0] == X else nb[0]
+                    dy = L.sub(pos(X), pos(Y))
+                    if L.norm(dy) < 1e-6 or abs(L.cross(L.unit(dy), d1)) < 0.05:
+                        continue
+                    new[X] = meet(pos(Y), L.unit(dy), o2, d1)
+                    moved_.append(str(X))
+                notes.append(f"c{ci} {N}: top join {abs(new[N][0] - ts):.0f} units inside the stem -> {want_in:.0f} "
+                             f"({ctx.near(w)}'s x k), other edge {'+'.join(moved_) or 'kept'} moved parallel")
+                new[N] = Nn
             # a rebuilt node next to a kept one, or a smooth node next to a corner the
             # rebuilt edges made, may land past it (heavier strokes at a crossing: the arm
             # of the Black & meets the leg above its node 52): it slides back along its own
@@ -1798,6 +2013,27 @@ def op_rebuild_outline(ctx, opt):
             for i, xy in new.items():
                 moved = max(moved, L.dist(old[ci][i], xy))
                 pts[i].x, pts[i].y = xy
+            # edges level or plumb in the master stay so (Thin R's counter bottom came out
+            # sloped 2 units): each run of them to its mean, the nodes' handles with them
+            npts = len(pts)
+            for ax in ("h", "v"):
+                group = {}
+                for s_ in sg:
+                    if _axis_line(R[ci], s_) == ax and not (s_[0] in kept_here or s_[2] in kept_here):
+                        ga, gb = group.get(s_[0], {s_[0]}), group.get(s_[2], {s_[2]})
+                        merged = ga | gb
+                        for j in merged:
+                            group[j] = merged
+                for nodes_ in {id(g_): g_ for g_ in group.values()}.values():
+                    vals = [pts[j].y if ax == "h" else pts[j].x for j in nodes_]
+                    m_ = sum(vals) / len(vals)
+                    for j, v in zip(nodes_, vals):
+                        for q in (j, (j - 1) % npts, (j + 1) % npts):
+                            if q == j or pts[q].type is None:
+                                if ax == "h":
+                                    pts[q].y += m_ - v
+                                else:
+                                    pts[q].x += m_ - v
         scale = ""
         if want:
             allpts = [p for c in T for p in c]
@@ -2282,7 +2518,7 @@ def op_bar(ctx, opt):
         lines = [(L.add(mid, L.mul(n, width / 2)), d), (L.sub(mid, L.mul(n, width / 2)), d)]
         before = abs(L.cross(d, L.sub(o2, o1)))
         on_edge = {q: ei for ei, e in enumerate(edges) for q in e}
-        moved = []
+        moved, corners = [], []
         for ei, e in enumerate(edges):
             lo_, ld = lines[ei]
             for key in e:
@@ -2315,9 +2551,51 @@ def op_bar(ctx, opt):
                     for j, q in zip((other[0], other[1][0], other[1][1], other[2]), c):
                         pts[j].x, pts[j].y = q
                 moved.append(L.dist(old, (pts[i].x, pts[i].y)))
+                corners.append((ei, ci, i, other, end))
+        # a wall that runs on across the bar (the bowl of e above and below its bar): the
+        # straighter side of it, continued across the bar, places the corner on the other
+        # edge, and that side's handle turns onto it, so the wall doesn't step at the bar's
+        # end (sliding each along its own side left Thin e's counter edge at x 96 above the
+        # bar and the bowl's at 97 below)
+        def wall(c_):
+            """the corner, the wall's direction away from it, its handle there, and how far
+            the wall bends from that direction to its far node (degrees)"""
+            _, ci, i, other, end = c_
+            pts = g.contours[ci].points
+            idx = [other[0]] + list(other[1]) + [other[2]]
+            idx = idx if end == 0 else idx[::-1]
+            p0 = (pts[i].x, pts[i].y)
+            d = next((L.unit(L.sub((pts[j].x, pts[j].y), p0)) for j in idx[1:]
+                      if L.dist((pts[j].x, pts[j].y), p0) > 1e-6), None)
+            far = (pts[idx[-1]].x, pts[idx[-1]].y)
+            bend = L.angle_deg(d, L.sub(far, p0)) if d and L.dist(far, p0) > 1e-6 else 180.0
+            return p0, d, (idx[1] if other[1] else None), bend
+        walls = 0
+        for c0_ in [c_ for c_ in corners if c_[0] == 0]:
+            pa, ta, _, _ = wall(c0_)
+            best = None
+            for c1_ in [c_ for c_ in corners if c_[0] == 1]:
+                pb, tb, _, _ = wall(c1_)
+                if not (ta and tb) or L.dot(ta, tb) > -math.cos(math.radians(20)):
+                    continue        # not one wall running on across the bar
+                off = abs(L.cross(L.unit(L.sub(ta, tb)), L.sub(pb, pa)))
+                if off <= 0.25 * width + 2 and (best is None or off < best[0]):
+                    best = (off, c1_)
+            if not best:
+                continue
+            pair = sorted(((c0_, wall(c0_)), (best[1], wall(best[1]))), key=lambda x: x[1][3])
+            (_, (p_ref, t_ref, _, _)), (c_, (p0, t0, h, _)) = pair
+            pts = g.contours[c_[1]].points
+            q = meet(p_ref, t_ref, *lines[c_[0]])
+            pts[c_[2]].x, pts[c_[2]].y = q
+            if h is not None:
+                hl = L.dist((pts[h].x, pts[h].y), p0)
+                pts[h].x, pts[h].y = L.sub(q, L.mul(t_ref, hl))
+            walls += 1
         round_glyph(ctx, g)
         print(f"{name}@{w}: bar straight and parallel, width {before:.1f} -> {width:.1f} ({ctx.near(w)} x {k:.3f}), "
-              f"{len(moved)} corners onto its edges (largest move {max(moved, default=0):.1f}); checks {s0} -> {ctx.score(name, w)}")
+              f"{len(moved)} corners onto its edges (largest move {max(moved, default=0):.1f}), {walls} wall(s) lined up "
+              f"across it; checks {s0} -> {ctx.score(name, w)}")
 
 
 OPS = {"copy-shape": op_copy_shape, "junction": op_junction, "bar": op_bar, "min-segment": op_min_segment, "same-part": op_same_part,
@@ -2325,6 +2603,16 @@ OPS = {"copy-shape": op_copy_shape, "junction": op_junction, "bar": op_bar, "min
        "strokes": op_strokes, "upright": op_upright, "follow-edge": op_follow_edge,
        "offset-inner": op_offset_inner, "rebuild-stroke": op_rebuild_stroke, "rebuild-outline": op_rebuild_outline,
        "union": op_union}
+
+
+def blocks_now(ctx, name, w):
+    """(the derived checks' blocks, contours that cross themselves) of a glyph at w: an op
+    that adds either isn't written without --force (copy-shape squashed Thin e's bowl
+    bottom through its counter, rebuild-outline barbed its bar end, and both were kept)."""
+    from audit import self_intersects
+    from compat import pts_of
+    g = ctx.fonts[w][name]
+    return ctx.score(name, w)[0], sum(1 for c in g.contours if len(c.points) > 2 and self_intersects(pts_of(c)))
 
 
 def main(argv=None):
@@ -2336,6 +2624,7 @@ def main(argv=None):
     ap.add_argument("--ref", help="reference master for the checks (default: the middle one, as audit.py)")
     ap.add_argument("--from", dest="source", help="take shapes and thickness from this master instead of the nearest")
     ap.add_argument("--write", action="store_true")
+    ap.add_argument("--force", action="store_true", help="write even when the op added blocks or a self-intersection")
     ap.add_argument("--length", type=float, default=4.0, help="min-segment: length in units")
     ap.add_argument("--part", help="same-part: GLYPH:CONTOUR to copy; union: the glyph the band is laid over")
     ap.add_argument("--bar", type=int, default=1, help="bar-place: the bar's contour")
@@ -2363,6 +2652,8 @@ def main(argv=None):
     ap.add_argument("--smooth-centre", nargs="?", const=1.0, type=float, default=None,
                     help="rebuild-outline: the master's centre lines and widths smoothed along each edge over F x its "
                          "stem (default 1): its wiggles, which a thinner weight shows more, go")
+    ap.add_argument("--free-joins", action="store_true",
+                    help="rebuild-outline: a bowl's join with a stem goes where the rebuilt edges meet, not where derived")
     ap.add_argument("--keep-short", action="store_true",
                     help="rebuild-outline: those short pieces keep their derived shape, moved with the corner")
     ap.add_argument("--smooth", type=int, default=0, help="rebuild-stroke: average the centre line over N samples")
@@ -2378,13 +2669,32 @@ def main(argv=None):
                     help="rebuild-stroke: after rounding, line short handles up again with the long ones at each node")
     opt = ap.parse_args(argv)
     ctx = Ctx(opt)
+    touched = set()
+    for t in opt.targets:
+        if "=" in t:
+            names, _, w = t.partition("@")
+            touched.update((n_, w) for n_ in names.split("="))
+        else:
+            touched.add(parse_target(t)[:2])
+    before = {key: blocks_now(ctx, *key) for key in touched}
     OPS[opt.op](ctx, opt)
+    worse = [(key, before[key], blocks_now(ctx, *key)) for key in sorted(touched)]
+    worse = [(key, b0, b1) for key, b0, b1 in worse if b1[0] > b0[0] or b1[1] > b0[1]]
+    for (name, w), (c0, s0_), (c1, s1_) in worse:
+        print(f"{name}@{w}: blocks {c0} -> {c1}, self-intersecting contours {s0_} -> {s1_}")
+    for line in ctx.worse:
+        print(line)
+    if (worse or ctx.worse) and not opt.force:
+        print("not saved: the op made it worse (look at it enlarged; --force writes it anyway)")
+        return 1
+    if ctx.refused:
+        print(f"refused: {' '.join(ctx.refused)} (see above); the rest is saved with --write")
     if opt.write:
-        for w in {parse_target(t)[1] if "=" not in t else t.partition("@")[2] for t in opt.targets}:
+        for w in {w for _, w in touched}:
             ctx.fonts[w].save()
     else:
         print("dry run: nothing saved (use --write)")
-    return 0
+    return 1 if ctx.refused else 0
 
 
 if __name__ == "__main__":
