@@ -157,6 +157,14 @@ The sections from top to bottom, one line each on what it holds.
 Spacing and density, corner shapes, how the accent is used, decoration, and the headline treatment, as in the
 prototype.
 
+## Depth
+One line per kind of surface on the page (cards, menus and popovers, dialogs, overlapping images, a sticky header):
+its shadow token or "none", and its edge. Then what changes when stacked, on hover and in dark mode. Shadows go on
+what floats or overlaps; cards are flat by default (a border, whitespace or a tone step) unless the picked variant
+shadows them. For example: "Cards: none, 1px Border. Menus: `--shadow-overlay`, transparent outline. Screenshots side
+by side: `--shadow-raised`; stacked: none. Hover: background only. Dark: a lighter surface per level, a hairline on
+overlays."
+
 ## Not decided
 What the workshop left open, such as dark mode, motion, images or other pages.
 Images: record each photo's author, licence and source link when chosen, and for CC BY-SA, that adaptations share
@@ -172,10 +180,11 @@ Then append the look to the log of past looks.
 
 - No repo: a `design-brief.md` (or an artifact), with the picked variant saved next to it. Tell the person to name it
   in the build prompt ("build from design-brief.md"): a later session uses a file it is pointed at.
-- A repo: the colours by role, fonts, spacing and corner values go into its token file (theme CSS custom properties, a
-  Tailwind theme, a tokens JSON); the rest of the brief goes into its design skill, or wherever its agent instructions
-  keep design rules, with the picked variant saved next to it. Changing a token file restyles the running site, so
-  show the change and write it after a go-ahead. If the repo has neither, propose where they go and wait.
+- A repo: the colours by role, fonts, spacing, corner values and shadow tokens go into its token file (theme CSS
+  custom properties, a Tailwind theme, a tokens JSON); the rest of the brief goes into its design skill, or wherever
+  its agent instructions keep design rules, with the picked variant saved next to it. Changing a token file restyles
+  the running site, so show the change and write it after a go-ahead. If the repo has neither, propose where they go
+  and wait.
 - **Make it load.** A file in the repo is not enough: a later session builds from it only when it is loaded. Propose
   one line, and write it after a go-ahead: an import in the repo's CLAUDE.md (`@path/to/brief.md`), or, when the repo
   has a design skill, a line in it naming the token file and brief. An import loads in every session, so import the

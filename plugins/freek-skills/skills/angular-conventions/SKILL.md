@@ -231,6 +231,15 @@ Before writing a helper, use what's installed, and hand-write only what it can't
 - Whole-pixel line heights (`text-xl/6`).
 - `tabular-nums` on standalone values only (prices, counts, axes), never on numbers in running text or a page root.
 - Hover changes the background, never adds a shadow.
+- Shadows go on what floats or overlaps (menus, popovers, dialogs, overlapping images). Cards are flat by default, with
+  a border, whitespace or a tone step; the design brief may say otherwise. Shadow tokens are named by job
+  (`--shadow-raised`, `--shadow-overlay`, `--shadow-dialog`), never Tailwind's stock sizes: clear those with
+  `--shadow-*: initial` in `@theme`.
+- Every shadowed surface also has an edge forced colours keeps: `border`, or `border border-transparent` /
+  `outline outline-transparent` when it shouldn't show. Forced colours computes every `box-shadow` to `none`, `ring-*`
+  included.
+- Dark mode shows height with a lighter surface token per level and a hairline `border` or `outline`, not only a
+  stronger shadow.
 - CSS features, utilities included: free to use when Baseline widely available on the Angular major's Baseline date
   (angular.dev/reference/versions; v22: 2026-05-07). Newer ones (`light-dark()`, `starting:`, `@scope`, `field-sizing`,
   scroll-driven animations) only as an enhancement, behind `@supports` or after a plain fallback declaration. Check
