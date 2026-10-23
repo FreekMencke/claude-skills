@@ -32,6 +32,7 @@
 | `pages` | Paths for the page checks, keyboard walks and motion check | `[]` |
 | `widths` | Viewport widths, CSS px; heights 900, 1024, 812, 640 for the defaults, else 900 | `[1440, 768, 375, 320]` |
 | `colorScheme` | `light` or `dark`; for an app with both, run the plan once per scheme into separate `--out` folders | `light` |
+| `dismiss` | Selectors clicked after each load when visible, such as a consent banner's decline button. Without it, the walks show what a first visit gets: a banner pinned to the bottom covers focus at phone widths | none |
 | `views[].page` | Page holding the data view | required |
 | `views[].api` | Glob or URL of the request the view loads, as `page.route` takes it | required |
 | `views[].from`, `views[].link` | For a server-rendered view: a page to start on and the selector of a link to the view, followed client-side so the data loads in the browser | load `page` directly |

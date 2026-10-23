@@ -90,6 +90,7 @@ const helpers = () => {
   window.__ui = { describe, look, uncovered, overflow, statusText, stops: [] };
 };
 
+const dismissed = new Set();
 const settle = (page) => page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
 const open = async (context, path, { wait = true } = {}) => {
   const page = await context.newPage();
@@ -99,6 +100,13 @@ const open = async (context, path, { wait = true } = {}) => {
   page.on('response', (res) => res.status() >= 400 && failed.push(`${res.request().method()} ${res.url()} ${res.status()}`));
   await page.goto(url(path), { waitUntil: wait ? 'load' : 'commit' });
   if (wait) await settle(page);
+  for (const selector of plan.dismiss ?? []) {
+    const banner = page.locator(selector).first();
+    if (await banner.isVisible().catch(() => false)) {
+      await banner.click();
+      dismissed.add(selector);
+    }
+  }
   return { page, console: console_, failed };
 };
 const newContext = (browser, width, options = {}) =>
@@ -108,7 +116,8 @@ const axe = async (page, root) => {
   if (root) builder.include(root);
   const { violations, incomplete } = await builder.analyze();
   return {
-    violations: violations.map(({ id, impact, nodes }) => ({ id, impact, count: nodes.length, targets: nodes.slice(0, 5).map((n) => n.target.join(' >> ')) })),
+    // `why`: axe's reason for the first node, e.g. the measured contrast ratio
+    violations: violations.map(({ id, impact, nodes }) => ({ id, impact, count: nodes.length, targets: nodes.slice(0, 5).map((n) => n.target.join(' >> ')), why: nodes[0]?.failureSummary?.split('\n')[1]?.trim() })),
     incomplete: incomplete.map(({ id, nodes }) => `${id} ${nodes.length}`),
   };
 };
@@ -162,7 +171,10 @@ const pageChecks = (page) =>
       const s = getComputedStyle(el);
       return s.transitionProperty.split(',').some((p) => p.trim() === 'all') && s.transitionDuration.split(',').some((d) => parseFloat(d) > 0);
     });
-    const images = [...document.images].filter((img) => !(img.getAttribute('width') && img.getAttribute('height')) && getComputedStyle(img).aspectRatio === 'auto');
+    // Without width and height attributes or an aspect-ratio, and drawn at the file's own size (or not loaded yet): no
+    // CSS reserves its box. One sized by CSS classes is drawn at another size, and passes.
+    const images = [...document.images].filter((img) => img.checkVisibility() && !(img.getAttribute('width') && img.getAttribute('height')) && getComputedStyle(img).aspectRatio === 'auto'
+      && img.width === img.naturalWidth && img.height === img.naturalHeight);
     return {
       overflow: window.__ui.overflow(),
       transitionAll: { count: transitionAll.length, elements: transitionAll.slice(0, 8).map(window.__ui.describe) },
@@ -278,10 +290,13 @@ try {
           const retry = page.locator(view.retry).first();
           if (await retry.count()) {
             failing = false;
+            const before = await text(page, root);
             await retry.focus();
             await page.keyboard.press('Enter');
+            // Wait for the view to change: Enter does nothing before hydration, and a slow dev server hydrates late
+            const recovered = await page.waitForFunction(([root, before]) => (document.querySelector(root) ?? document.body).innerText.trim().replace(/\n{2,}/g, '\n').slice(0, 600) !== before, [root, before], { timeout: 5000 }).then(() => true, () => false);
             await settle(page);
-            row.afterRetry = { focus: await page.evaluate(() => window.__ui.describe(document.activeElement)), text: (await text(page, root)).slice(0, 200) };
+            row.afterRetry = { recovered, focus: await page.evaluate(() => window.__ui.describe(document.activeElement)), text: (await text(page, root)).slice(0, 200) };
           } else row.afterRetry = `no element matches ${view.retry}`;
         }
         row.consoleErrors = errors.slice(0, MAX_LIST);
@@ -295,7 +310,7 @@ try {
       await context.close();
     }
     if (results.empty && results.loaded && results.empty.text === results.loaded.text)
-      report.notRun.push(`${view.page}: the empty state shows the same text as the loaded one, so the mock may not reach the view (data loaded during server rendering? set from and link)`);
+      report.notRun.push(`${view.page}: the empty state shows the same text as the loaded one, so either the view draws its data on a canvas (compare the screenshots) or the mock doesn't reach it (data loaded during server rendering? set from and link)`);
     // An empty message shown while loading (UIPAT-001): lines only the empty state has, seen in the loading state
     if (results.empty && results.loaded && results.loading) {
       const loaded = lines(results.loaded.text), loading = lines(results.loading.text);
@@ -357,4 +372,5 @@ try {
 } finally {
   await browser.close();
 }
+for (const selector of plan.dismiss ?? []) if (!dismissed.has(selector)) report.notRun.push(`dismiss: ${selector} matched nothing visible on any page`);
 console.log(JSON.stringify(report, null, 1));
