@@ -135,18 +135,18 @@ Before someone else's skill or plugin is installed, read it at one commit and re
 
 ### 1. Pin what you read
 
-Resolve the ref (the default branch if none is given) to a full 40-character commit SHA, for example `gh api repos/<owner>/<repo>/commits/<ref> --jq .sha` or `git ls-remote https://github.com/<owner>/<repo> <ref>`. Record the SHA with today's date; everything below is read at that SHA. Check the owner and repo name letter by letter against the author's own site or package page: a lookalike name passes a quick glance.
+Resolve the ref (the default branch if none is given) to a full 40-character commit SHA, for example `gh api repos/<owner>/<repo>/commits/<ref> --jq .sha` or `git ls-remote https://github.com/<owner>/<repo> <ref>`. Record the SHA with today's date; everything below is read at that SHA. Check the owner and repo name letter by letter against the author's own site or package page, or an official marketplace listing (such as `anthropics/claude-plugins-official`), which also shows the commit that marketplace pins: a lookalike name passes a quick glance.
 
-### 2. Read every file
+### 2. Read what the install loads
 
-- **With a shell**: clone into a scratch folder, `git -C <clone> checkout <sha>`, list the files with `git -C <clone> ls-files`, and read each one. Cloning and reading run nothing.
+- **With a shell**: clone into a scratch folder, `git -C <clone> checkout <sha>`, and list the files with `git -C <clone> ls-files`. Cloning and reading run nothing.
 - **Without one** (claude.ai chat): read the files at that SHA from GitHub (`https://github.com/<owner>/<repo>/tree/<sha>`, raw files at `https://raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>`), and say in the report which greps from step 4 didn't run.
 
-With a path, read every file under it, plus the repo's install scripts and every file outside the path that the skill reads, runs or copies. Take behaviour from the code, not the README.
+Read in full every file the install loads or runs: the manifest and the marketplace entry, each `SKILL.md` and the files it points to, `agents/`, `commands/`, hooks, `.mcp.json`, `bin/`, the repo's install scripts, and every file these run, read or copy, wherever it sits. A plugin whose source is the whole repo still loads only these. Search the rest (docs, tests, other agents' adapters) with step 4's greps instead of reading it, open a file when a hit in it matters, and list what you only searched under what wasn't checked. Take behaviour from the code, not the README.
 
 ### 3. Walk the checklist
 
-1. **Code that runs**: hooks, monitors, `.mcp.json` and other MCP servers, mods, `bin/` (put on the Bash tool's `PATH`), `scripts/`. Hooks, monitors and servers run outside the sandbox. A downloaded binary needs a hash you computed; a checksum file next to it only catches corrupt downloads.
+1. **Code that runs**: hooks, monitors, `.mcp.json` and other MCP servers, mods, `bin/` (put on the Bash tool's `PATH`), `scripts/`. Hooks, monitors and servers run outside the sandbox. A downloaded binary needs a hash you computed; a checksum file next to it only catches corrupt downloads. Also read what a hook prints into the session: a SessionStart hook's output becomes context in every session in every repo, where it can steer the model or compete with your own skills.
 2. **Later installs**: a plugin's npm dependencies install from an exact lockfile, registry packages only, with install scripts off. Anything else (Python packages, git dependencies, build steps) comes from a hook or script, so read those.
 3. **Network**: every host it contacts, what it sends (telemetry fields), the default and the opt-out.
 4. **Config writes and installs**: writes to settings files, `claude mcp add`, and instructions to install other skills, plugins or servers. Report each as stop-and-ask, and vet the target too.
@@ -163,7 +163,7 @@ For a plugin, also:
 
 ### 4. Run the greps
 
-Run these on the clone with the patterns unchanged, and account for every hit in the report. `--hidden` and `--no-ignore` matter: without them ripgrep skips `.mcp.json` and `.claude-plugin/`.
+Run these on the clone with the patterns unchanged. Account for each hit in a file from step 2; in the other files, one line per file saying what the hits are (documentation links, test fixtures). On a large repo, add `-l` first to see which files hit. `--hidden` and `--no-ignore` matter: without them ripgrep skips `.mcp.json` and `.claude-plugin/`.
 
 ```bash
 rg -n -i --hidden --no-ignore -g '!.git' 'https?://|curl|wget|fetch\(' <clone>
@@ -192,7 +192,7 @@ If it isn't a fast-forward, vet the new SHA from step 2. Otherwise walk steps 3 
 
 ### 7. Report
 
-First line: the repo, the SHA, the date, and what was read (the path and the number of files). Then findings, most severe first, in the shape of "Auditing a skill":
+First line: the repo, the SHA, the date, and what was read: the files read in full, and those only searched. Then findings, most severe first, in the shape of "Auditing a skill":
 
 - The file or item (**severity**): what it does, in one sentence
 - **Proof**: `path:line` at the SHA
