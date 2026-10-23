@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: ui-review-skips-3
+tags: [ui-review, near-miss]
+description: "Near miss: building a design, for frontend-design."
+execution:
+  prompt: "Build a pricing page with a bold look that doesn't feel templated."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?ui-review"'
+    min: 0
+    max: 0
+    arm: both

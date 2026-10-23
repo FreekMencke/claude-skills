@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: ui-review-skips-2
+tags: [ui-review, near-miss]
+description: "Near miss: reviewing code, for code-review."
+execution:
+  prompt: "Review the diff on this branch for bugs before I open the PR."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?ui-review"'
+    min: 0
+    max: 0
+    arm: both
