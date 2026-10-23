@@ -1,6 +1,6 @@
 {
   "name": "freek-local-skills",
-  "description": "Claude Code-only skills: handoff, token audit, SEO audit, font outline repair (with its reviewer subagent)",
+  "description": "Claude Code-only skills: handoff, token audit, SEO audit, UI review, font outline repair (the last two with a reviewer subagent)",
   "author": {
     "name": "Freek Mencke"
   },

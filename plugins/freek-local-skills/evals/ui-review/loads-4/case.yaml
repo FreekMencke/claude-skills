@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: ui-review-loads-4
+tags: [ui-review, should-load]
+execution:
+  prompt: "QA the signup form on staging: when do errors show, where does focus go after submit, is the button ever disabled?"
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?ui-review"'

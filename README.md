@@ -35,6 +35,7 @@ On claude.ai: Customize › Plugins › Add marketplace `FreekMencke/claude-skil
 | `handoff` * | Save the session's state, `/clear`, and continue from it | Claude Code |
 | `token-audit` * | Measure token spend from your local transcripts | Claude Code |
 | `seo-audit` * | Read-only technical SEO audit of a site ([data setup](plugins/freek-local-skills/skills/seo-audit/references/data-sources.md#giving-a-session-the-data-for-the-user)) | Best in Claude Code |
+| `ui-review` * | Read-only UI, design and states review of a running page (Playwright check script, `ui-reviewer` subagent) | Claude Code |
 | `font-outline-repair` * | Audit and repair a weight family's UFO masters, and re-derive Thin and Black from them (Python venv, `font-outline-reviewer` subagent) | Claude Code |
 
 Runs on:
@@ -49,8 +50,12 @@ Runs on:
 \* In `freek-local-skills`, which installs in Claude Code only. `handoff` and `token-audit` run as slash commands, such as
 `/freek-local-skills:handoff`. Claude Code enforces `seo-audit`'s read-only rule (`disallowed-tools`); another agent
 may only read it as an instruction. `font-outline-repair` runs its Python scripts in a venv it sets up
-(`~/.venvs/fontrepair`) and hands its renders to the plugin's `font-outline-reviewer` subagent.
+(`~/.venvs/fontrepair`) and hands its renders to the plugin's `font-outline-reviewer` subagent. `ui-review` runs its
+check script with Node and Playwright (from the app's repo, or installed in the scratchpad) and needs the Playwright
+plugin for its `ui-reviewer` subagent.
 
 ## License
 
 [MIT](LICENSE). `plugins/freek-skills/skills/angular-developer/` is Angular's, under its own MIT license (see its `NOTICE`).
+`plugins/freek-local-skills/skills/ui-review/references/guidelines.md` is an edited copy of Vercel's Web Interface
+Guidelines, MIT, with its notice in the file.
