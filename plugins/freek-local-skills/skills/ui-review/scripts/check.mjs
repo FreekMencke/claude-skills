@@ -12,7 +12,7 @@ import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']; // without wcag22aa, target-size never runs
-const HEIGHTS = { 1440: 900, 768: 1024, 375: 812, 320: 640 };
+const HEIGHTS = { 1440: 900, 1100: 900, 820: 1180, 390: 844, 320: 640 }; // 820×1180 iPad Air, 390×844 iPhone
 const MAX_STOPS = 40;
 const MAX_LIST = 8;
 const USAGE = 'Usage: node check.mjs <plan.json> --out <dir> [--modules <dir>]';
@@ -47,7 +47,7 @@ try {
 }
 
 mkdirSync(out, { recursive: true });
-const widths = plan.widths ?? [1440, 768, 375, 320];
+const widths = plan.widths ?? [1440, 1100, 820, 390, 320];
 const colorScheme = plan.colorScheme ?? 'light';
 const url = (path) => new URL(path, plan.base).href;
 const slug = (path) => path.replace(/^\/|\/$/g, '').replace(/[^\w-]+/g, '-') || 'home';

@@ -6,7 +6,7 @@
 {
   "base": "http://localhost:4200",
   "pages": ["/", "/items", "/items/1"],
-  "widths": [1440, 768, 375, 320],
+  "widths": [1440, 1100, 820, 390, 320],
   "colorScheme": "dark",
   "views": [
     {
@@ -30,7 +30,7 @@
 |---|---|---|
 | `base` | Origin the paths resolve against: a local production build where the repo can serve one | required |
 | `pages` | Paths for the page checks, keyboard walks and motion check | `[]` |
-| `widths` | Viewport widths, CSS px; heights 900, 1024, 812, 640 for the defaults, else 900 | `[1440, 768, 375, 320]` |
+| `widths` | Viewport widths, CSS px; heights 900, 900, 1180, 844, 640 for the defaults, else 900 | `[1440, 1100, 820, 390, 320]` |
 | `colorScheme` | `light` or `dark`; for an app with both, run the plan once per scheme into separate `--out` folders | `light` |
 | `dismiss` | Selectors clicked after each load when visible, such as a consent banner's decline button. Without it, the walks show what a first visit gets: a banner pinned to the bottom covers focus at phone widths | none |
 | `views[].page` | Page holding the data view | required |
@@ -41,6 +41,16 @@
 | `views[].refetch` | A control in the loaded view that requests the API again (refresh, a filter); clicked while offline | offline state skipped |
 | `views[].bodies.empty`, `.partial`, `.long` | JSON bodies for those states, in the API's real shape (fetch one real response first). `partial` stays within the API's contract: optional fields left out or the nulls the API really sends, not a required field dropped, which can crash the view in a way the real API can't | that state skipped |
 | `forms[].page`, `forms[].form` | Page and form selector | form: `form` |
+
+Why the default widths (keep 320: it's the reflow width WCAG 1.4.10 names, so don't swap it for 360):
+
+| Width | Band | Why |
+|---|---|---|
+| 1440 | `xl` and up | Content is usually capped below it, so wider shows the same layout with bigger margins |
+| 1100 | `lg` (1024 to 1279) | Layouts often change inside this band |
+| 820 | `md` (768 to 1023) | Clear of the 768 breakpoint, where a design canvas artboard can show either side of it |
+| 390 | phones | The common iPhone width; 375 would duplicate it |
+| 320 | smallest phones | WCAG 1.4.10 reflow width; catches overflow and long names |
 
 States per view: `loaded`, `loading` (the response held for 1.5 s), `empty`, `error` (500, and the retry succeeds),
 `network` (`connectionrefused`), `partial`, `long` (at the narrowest width), `offline` (no mock, so the browser's
