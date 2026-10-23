@@ -35,6 +35,10 @@ Not this skill:
   in small print, but judging an option must never need them.
 - **Different and tailored.** The options in a batch differ clearly from each other and fit this subject, audience and
   page; none is a generic page with the name swapped in.
+- **The neighbour test.** Before showing a batch, ask of each option: would a neighbouring subject in the same category
+  (another bakery, another developer tool) get this exact combination? Replace each one that would with a new option,
+  rather than adding a rule against it: a ban only moves the output to the next default. A banned list can back this
+  up, never stand in for it.
 - **Real content.** Use the brief's real names, prices and facts, never lorem ipsum. No images: Claude can't make them
   and artifacts block external ones, so use plain shapes or labelled grey boxes.
 - **Stop after each step** and ask which options to keep: several is fine, and so is "3, but warmer". Record each pick
@@ -42,11 +46,32 @@ Not this skill:
 
 ## Start
 
-Get the subject, the page's one job (sign up, book, buy, learn) and its real facts. Ask only what is missing, at most
-three questions at once. For a whole site, run the workshop on its main page; the brief then covers the rest.
+Get the subject, the page's one job (sign up, book, buy, learn) and its real facts, and ask where the person keeps
+their log of past looks (below). Ask only what is missing, at most three questions at once. For a whole site, run the
+workshop on its main page; the brief then covers the rest.
 
 For an existing site or app, or a repo that already has a design, start with "Existing site" below. When the brief
 already settles a step (fixed brand colours, a named audience), lock it: say so and use it as given.
+
+## Past looks
+
+Without a record of earlier workshops, the next project lands on the same palettes and fonts. Keep a log of past looks,
+one row per finished workshop, newest last:
+
+```markdown
+| Date | Subject and page | Feel | Palette (background first) | Fonts (headline + body) | Layout |
+|---|---|---|---|---|---|
+| 2026-10-23 | Spoke & Chain, home page | workshop-plain | #EDEFEA #1D1F1C #5E625B #D8432B | Archivo + Source Serif 4 | hours and address first, services list, map last |
+```
+
+- **Where.** A file at a path the person names, outside any one repo (such as their home folder), so it covers every
+  project. Without a file that lasts between sessions (claude.ai chat), ask them to paste the last rows. With no log
+  yet, offer to start one at the hand-over.
+- **Read it at the start.** Keep each step's options off the last five rows: no feel word, palette, font pair or
+  section order that repeats one of them. Say in one line which were avoided. Locked steps and an existing site's
+  current choice stay as they are; the log steers options, never the person's picks.
+- **Append at the hand-over** the picked variant's row, after showing it. Without a file, give the row for the person
+  to keep.
 
 ## The steps
 
@@ -118,7 +143,8 @@ Two or three lines on the voice, then the prototype's headline, paragraph, butto
 | Border | | |
 
 ## Type
-Each typeface and its role (headlines, body), its weights, and where it loads from.
+Each typeface and its role (headlines, body), its weights, where it loads from, and its licence: OFL or Apache for
+Google Fonts; for the brand's own fonts, its licence terms, which may not allow web embedding (say if unknown).
 The figure style per role (for example tabular for prices and stats, default elsewhere), and any OpenType feature the
 design relies on (`case` on all-caps labels, `slashed-zero` for codes): the Google Fonts API keeps `tnum` and `frac`
 but strips those, so say if one needs a self-hosted file. Name `opsz` in the load URL when the family has the axis
@@ -133,19 +159,27 @@ prototype.
 
 ## Not decided
 What the workshop left open, such as dark mode, motion, images or other pages.
+Images: record each photo's author, licence and source link when chosen, and for CC BY-SA, that adaptations share
+alike.
 ```
 
 Check each text colour against the colour behind it (WCAG AA: 4.5:1 for body text, 3:1 for large text and UI parts),
 and note any pair that fails in the Colour table, with the nearest shade that passes.
 
+Then append the look to the log of past looks.
+
 **Where it goes:**
 
-- No repo: a `design-brief.md` (or an artifact), with the picked variant saved next to it.
+- No repo: a `design-brief.md` (or an artifact), with the picked variant saved next to it. Tell the person to name it
+  in the build prompt ("build from design-brief.md"): a later session uses a file it is pointed at.
 - A repo: the colours by role, fonts, spacing and corner values go into its token file (theme CSS custom properties, a
   Tailwind theme, a tokens JSON); the rest of the brief goes into its design skill, or wherever its agent instructions
-  keep design rules, with the picked variant saved next to it. Later sessions then build from these instead of
-  deciding again. Changing a token file restyles the running site, so show the change and write it after a go-ahead.
-  If the repo has neither, propose where they go and wait.
+  keep design rules, with the picked variant saved next to it. Changing a token file restyles the running site, so
+  show the change and write it after a go-ahead. If the repo has neither, propose where they go and wait.
+- **Make it load.** A file in the repo is not enough: a later session builds from it only when it is loaded. Propose
+  one line, and write it after a go-ahead: an import in the repo's CLAUDE.md (`@path/to/brief.md`), or, when the repo
+  has a design skill, a line in it naming the token file and brief. An import loads in every session, so import the
+  short brief, not a long design document.
 
 ## Existing site
 
