@@ -183,7 +183,8 @@ Then append the look to the log of past looks.
 - A repo: the colours by role, fonts, spacing, corner values and shadow tokens go into its token file (theme CSS
   custom properties, a Tailwind theme, a tokens JSON); the rest of the brief goes into its design skill, or wherever
   its agent instructions keep design rules, with the picked variant saved next to it. Changing a token file restyles
-  the running site, so show the change and write it after a go-ahead. If the repo has neither, propose where they go and wait.
+  the running site, so show the change and write it after a go-ahead. If the repo has neither, propose where they go
+  and wait.
 - **Make it load.** A file in the repo is not enough: a later session builds from it only when it is loaded. Propose
   one line, and write it after a go-ahead: an import in the repo's CLAUDE.md (`@path/to/brief.md`), or, when the repo
   has a design skill, a line in it naming the token file and brief. An import loads in every session, so import the
