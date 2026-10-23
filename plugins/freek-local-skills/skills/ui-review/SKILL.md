@@ -63,8 +63,9 @@ One JSON plan in the scratchpad, written with a heredoc; `references/plan.md` ha
   others. The app's default colour scheme; a second run for the other one when the app has both and the change
   touches theming.
 - **Views** (UIPAT-001, UIPAT-013): every data view on those pages, with its API glob. Fetch one real response first
-  (`curl -s <api> | head -c 2000`) and shape `empty`, `partial` and `long` from it. `retry` for the error state's
-  control; `refetch` for a control that loads again, for the offline state.
+  (`curl -s <api> | head -c 2000`) and shape `empty`, `partial` and `long` from it. `root` for the view's own
+  element (plain CSS), not `main`, when the page has a hero or several views. `retry` for the error state's control;
+  `refetch` for a control that loads again, for the offline state.
 - **Forms** (UIPAT-008, UIPAT-009): every form on those pages. Non-`GET` requests are aborted, so nothing is sent.
 
 ## 4. Run the checks
@@ -81,12 +82,13 @@ The caller runs it, not the reviewer, which has no Bash. It prints one JSON repo
 | `pages[]` | per page and width: axe on `wcag2a` to `wcag22aa` (violations and `incomplete`), horizontal `overflow`, `transitionAll`, `imagesWithoutSize`, console errors and failed requests, a screenshot |
 | `keyboard[]` | per page and width: Tab stops from the top with the focus indicator (compared with the element at rest) and how much of it is uncovered; then `partlyOrFullyCoveredWhenScrolled`, the same stops reached with the target first scrolled under any sticky header (UIREV-007) |
 | `motion[]` | animations running at load under `no-preference` and under `reduce`, and smooth scrolling under `reduce` |
-| `states[]` | per view and state: the view's text, status and alert regions, axe inside the view, a screenshot; `emptyMessageWhileLoading`; focus after Retry; overflow with long content |
+| `states[]` | per view and state: the view's text, status and alert regions, axe inside the view, a screenshot; `emptyMessageWhileLoading`; focus after Retry; overflow with long content; `rootGone` when the state replaced `root`, so text and overflow are the page's |
 | `forms[]` | submit disabled before a submit, an error after leaving an empty field, focus and each field's error after an empty submit, requests blocked |
 | `notRun` | what the script couldn't do, and why |
 
 Check `notRun` first: fix the plan and rerun for anything that is the plan's fault (a wrong selector, a missing body).
-On a test page (two pages at two widths, one view, two forms) it took 15 seconds.
+On a test page (two pages at two widths, one view, two forms) it took 15 seconds; a client-routed view (`from` and
+`link`) adds a few seconds per state, as the script waits for the view to settle.
 
 ## 5. Hand over to `ui-reviewer`
 

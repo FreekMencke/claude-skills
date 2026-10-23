@@ -74,11 +74,15 @@ const helpers = () => {
       text: `text ${s.color} ${s.textDecorationLine}`,
     };
   };
-  // How many of the corners and the centre show the element on top: 0/5 is fully covered (WCAG 2.4.11)
+  // How many of the corners and the centre show the element on top: 0/5 is fully covered (WCAG 2.4.11). A cover names
+  // what lies on top, so a sticky header tells apart from a stray tooltip
   const uncovered = (el) => {
     const r = el.getBoundingClientRect();
     const points = [[r.left + 1, r.top + 1], [r.right - 1, r.top + 1], [r.left + 1, r.bottom - 1], [r.right - 1, r.bottom - 1], [r.left + r.width / 2, r.top + r.height / 2]];
-    return points.filter(([x, y]) => { const hit = document.elementFromPoint(x, y); return hit && (el.contains(hit) || hit.contains(el)); }).length;
+    const covers = points.map(([x, y]) => document.elementFromPoint(x, y)).filter((hit) => !(hit && (el.contains(hit) || hit.contains(el))));
+    if (!covers.length) return '5/5';
+    const top = covers.find(Boolean);
+    return `${5 - covers.length}/5 under ${top ? describe(top) : 'the viewport edge'}`;
   };
   // Elements sticking out past the viewport's right edge, outermost only
   const overflow = (root = document.body) => {
@@ -86,8 +90,9 @@ const helpers = () => {
     const outermost = offenders.filter((el) => !offenders.includes(el.parentElement));
     return { page: document.documentElement.scrollWidth - document.documentElement.clientWidth, count: outermost.length, elements: outermost.slice(0, 8).map(describe) };
   };
+  const text = (root) => (document.querySelector(root) ?? document.body).innerText.trim().replace(/\n{2,}/g, '\n');
   const statusText = () => [...document.querySelectorAll('[role=status], [role=alert], [aria-live]')].map((el) => `${describe(el).split(' ')[0]}: ${el.textContent.trim().slice(0, 80)}`);
-  window.__ui = { describe, look, uncovered, overflow, statusText, stops: [] };
+  window.__ui = { describe, look, uncovered, overflow, text, statusText, stops: [] };
 };
 
 const dismissed = new Set();
@@ -121,11 +126,24 @@ const axe = async (page, root) => {
     incomplete: incomplete.map(({ id, nodes }) => `${id} ${nodes.length}`),
   };
 };
-const text = (page, root) => page.evaluate((root) => (document.querySelector(root) ?? document.body).innerText.trim().replace(/\n{2,}/g, '\n').slice(0, 600), root);
+const text = (page, root) => page.evaluate((root) => window.__ui.text(root), root);
+// Until the text holds still for 1 s, at most 10 s. After a client-side navigation, waitForLoadState('networkidle')
+// returns at once: the page reached it before, and the view's own request starts after the URL changes.
+const still = async (page, root) => {
+  let last = await text(page, root), since = Date.now();
+  for (const end = since + 10000; Date.now() < end && Date.now() - since < 1000; ) {
+    await page.waitForTimeout(250);
+    const now = await text(page, root);
+    if (now !== last) [last, since] = [now, Date.now()];
+  }
+};
+// Ends a view's states: its plan can't work, so each state would fail the same way, slowly
+class SkipView extends Error {}
 const lines = (s) => new Set(s.split('\n').map((l) => l.trim()).filter(Boolean));
 
 // Tab from the top, then again with each target first scrolled to the top of the viewport (under any sticky header)
 const walk = async (page) => {
+  await page.mouse.move(0, 0); // a hover tooltip under the resting pointer would cover stops
   await page.evaluate(() => { document.activeElement?.blur(); scrollTo(0, 0); });
   for (let i = 0; i < MAX_STOPS; i++) {
     await page.keyboard.press('Tab');
@@ -142,7 +160,7 @@ const walk = async (page) => {
     return window.__ui.stops.map(({ el, focused, visible, uncovered }) => {
       const rest = window.__ui.look(el);
       const changed = Object.keys(focused).filter((k) => focused[k] && focused[k] !== rest[k]).map((k) => focused[k]);
-      return `${window.__ui.describe(el)} | ${changed.join('; ') || 'NO INDICATOR'}${visible ? '' : ' (not :focus-visible)'} | ${uncovered}/5`;
+      return `${window.__ui.describe(el)} | ${changed.join('; ') || 'NO INDICATOR'}${visible ? '' : ' (not :focus-visible)'} | ${uncovered}`;
     });
   });
   const scrolled = [];
@@ -156,8 +174,8 @@ const walk = async (page) => {
     const row = await page.evaluate((i) => {
       const el = document.activeElement;
       if (el !== window.__ui.stops[i].el) return null;
-      const n = window.__ui.uncovered(el);
-      return n < 5 ? `${window.__ui.describe(el)} | ${n}/5` : null;
+      const uncovered = window.__ui.uncovered(el);
+      return uncovered === '5/5' ? null : `${window.__ui.describe(el)} | ${uncovered}`;
     }, i);
     if (row) scrolled.push(row);
   }
@@ -237,24 +255,25 @@ try {
   }
 
   // Data views: each state forced on the view's API route, axe on the view in each
-  for (const view of plan.views ?? []) {
+  for (const [i, view] of (plan.views ?? []).entries()) {
+    const name = `${view.page} v${i + 1}`; // a page can hold several views
     const root = view.root ?? 'main';
     const bodies = view.bodies ?? {};
-    const results = {};
+    const results = {}, texts = {};
     const states = ['loaded', 'loading', 'empty', 'error', 'network', 'partial', 'long', 'offline'];
     for (const state of states) {
       if (['empty', 'partial', 'long'].includes(state) && !bodies[state]) {
-        report.notRun.push(`${view.page} ${state}: no bodies.${state} in the plan`);
+        report.notRun.push(`${name} ${state}: no bodies.${state} in the plan`);
         continue;
       }
       if (state === 'offline' && !view.refetch) {
-        report.notRun.push(`${view.page} offline: no refetch selector in the plan`);
+        report.notRun.push(`${name} offline: no refetch selector in the plan`);
         continue;
       }
       const width = state === 'long' ? Math.min(...widths) : widths[0];
       const context = await newContext(browser, width);
       await context.addInitScript(helpers);
-      let release, failing = true;
+      let release, failing = true, skip = false;
       const held = new Promise((r) => (release = r));
       const handlers = {
         loading: async (route) => { await held; await route.fallback(); },
@@ -265,14 +284,26 @@ try {
         network: (route) => route.abort('connectionrefused'),
       };
       if (handlers[state]) await context.route(view.api, handlers[state]);
-      const row = { view: view.page, state, width };
+      const row = { view: view.page, api: view.api, state, width };
       try {
         // A server-rendered page gets its data on the server, out of page.route's reach: start on `from` and follow
         // `link`, so the view loads its data in the browser
         const { page, console: errors } = await open(context, view.from ?? view.page, { wait: state !== 'loading' || !!view.from });
+        // root also goes to document.querySelector, which throws on Playwright-only selectors such as :has-text
+        if (!(await page.evaluate((root) => { try { document.querySelector(root); return true; } catch { return false; } }, root)))
+          throw new SkipView(`root ${root} isn't plain CSS (no :has-text or other Playwright-only selectors)`);
         if (view.from) {
-          await page.locator(view.link).first().click();
-          if (state !== 'loading') await settle(page);
+          const links = page.locator(view.link);
+          const link = links.filter({ visible: true }).first();
+          if (!(await link.count()))
+            throw new SkipView(`link ${view.link} matches ${(await links.count()) ? 'only hidden elements (inside a closed menu?)' : 'nothing'} on ${view.from}`);
+          await link.click({ timeout: 5000 }).catch((error) => { throw new SkipView(`link ${view.link} can't be clicked: ${error.message.split('\n')[0]}`); });
+          // A resolver may hold the navigation on the held request, so loading doesn't wait for the URL
+          if (state !== 'loading') {
+            const path = new URL(url(view.page)).pathname;
+            await page.waitForURL((u) => u.pathname === path, { timeout: 15000 }).catch(() => { throw new SkipView(`link ${view.link} leads to ${new URL(page.url()).pathname}, not ${path}`); });
+            await still(page, root);
+          }
         }
         if (state === 'loading') await page.waitForTimeout(1500); // indicators often show after about 1 s
         if (state === 'offline') {
@@ -280,41 +311,47 @@ try {
           await page.locator(view.refetch).first().click();
           await page.waitForTimeout(1000);
         }
-        row.text = await text(page, root);
+        texts[state] = await text(page, root); // compared whole: a hero above the view can fill any slice
+        row.text = texts[state].slice(0, 600);
         row.status = await page.evaluate(() => window.__ui.statusText());
-        row.screenshot = join(out, `${slug(view.page)}-${state}-${width}.png`);
+        row.screenshot = join(out, `${slug(view.page)}-v${i + 1}-${state}-${width}.png`);
         await page.screenshot({ path: row.screenshot });
         if (await page.locator(root).count()) row.axe = await axe(page, root);
+        else row.rootGone = true; // text and overflow are the page's
         if (state === 'long') row.overflow = await page.evaluate((root) => window.__ui.overflow(document.querySelector(root) ?? document.body), root);
         if (state === 'error' && view.retry) {
-          const retry = page.locator(view.retry).first();
+          // Inside root, so another view's retry isn't pressed; page-wide only when the error replaced root
+          const rootGone = !(await page.locator(root).count());
+          const retry = (rootGone ? page : page.locator(root)).locator(view.retry).first();
           if (await retry.count()) {
             failing = false;
             const before = await text(page, root);
             await retry.focus();
             await page.keyboard.press('Enter');
             // Wait for the view to change: Enter does nothing before hydration, and a slow dev server hydrates late
-            const recovered = await page.waitForFunction(([root, before]) => (document.querySelector(root) ?? document.body).innerText.trim().replace(/\n{2,}/g, '\n').slice(0, 600) !== before, [root, before], { timeout: 5000 }).then(() => true, () => false);
-            await settle(page);
-            row.afterRetry = { recovered, focus: await page.evaluate(() => window.__ui.describe(document.activeElement)), text: (await text(page, root)).slice(0, 200) };
-          } else row.afterRetry = `no element matches ${view.retry}`;
+            const recovered = await page.waitForFunction(([root, before]) => window.__ui.text(root) !== before, [root, before], { timeout: 5000 }).then(() => true, () => false);
+            await still(page, root);
+            row.afterRetry = { foundIn: rootGone ? 'page (root gone)' : 'root', recovered, focus: await page.evaluate(() => window.__ui.describe(document.activeElement)), text: (await text(page, root)).slice(0, 200) };
+          } else row.afterRetry = `no element matches ${view.retry} ${rootGone ? 'on the page' : `inside ${root}`}`;
         }
         row.consoleErrors = errors.slice(0, MAX_LIST);
         if (state === 'loading') release();
         results[state] = row;
         report.states.push(row);
       } catch (error) {
-        report.notRun.push(`${view.page} ${state}: ${error.message.split('\n')[0]}`);
+        skip = error instanceof SkipView;
+        report.notRun.push(skip ? `${name}: ${error.message}; its states skipped` : `${name} ${state}: ${error.message.split('\n')[0]}`);
       }
       release();
       await context.close();
+      if (skip) break;
     }
-    if (results.empty && results.loaded && results.empty.text === results.loaded.text)
-      report.notRun.push(`${view.page}: the empty state shows the same text as the loaded one, so either the view draws its data on a canvas (compare the screenshots) or the mock doesn't reach it (data loaded during server rendering? set from and link)`);
+    if (texts.empty !== undefined && texts.empty === texts.loaded)
+      report.notRun.push(`${name}: the empty state shows the same text as the loaded one, so root may be too wide (a hero, another view or a fallback in it: set root to the element only this request feeds), the mock may not reach the view (data loaded during server rendering? set from and link), or the view draws its data on a canvas (compare the screenshots)`);
     // An empty message shown while loading (UIPAT-001): lines only the empty state has, seen in the loading state
     if (results.empty && results.loaded && results.loading) {
-      const loaded = lines(results.loaded.text), loading = lines(results.loading.text);
-      results.loading.emptyMessageWhileLoading = [...lines(results.empty.text)].filter((l) => !loaded.has(l) && loading.has(l));
+      const loaded = lines(texts.loaded), loading = lines(texts.loading);
+      results.loading.emptyMessageWhileLoading = [...lines(texts.empty)].filter((l) => !loaded.has(l) && loading.has(l));
     }
   }
 
