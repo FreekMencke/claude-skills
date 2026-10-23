@@ -1,0 +1,14 @@
+schema_version: "1.1"
+name: skill-workshop-loads-6
+tags: [skill-workshop, should-load]
+description: "Vetting a third-party plugin before install (#103)."
+execution:
+  prompt: "Before I install the plugin from github.com/devtools-co/claude-toolbox, review its hooks, scripts and network calls and tell me what to pin."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?skill-workshop"'
