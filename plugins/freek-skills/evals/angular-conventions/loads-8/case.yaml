@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: angular-conventions-loads-8
+tags: [angular-conventions, should-load]
+execution:
+  prompt: "Review our Angular signup form against our house rules: submit is [disabled] until the form is valid, errors show under each field, and there is no autocomplete."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?angular-conventions"'

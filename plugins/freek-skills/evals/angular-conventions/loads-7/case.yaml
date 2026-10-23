@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: angular-conventions-loads-7
+tags: [angular-conventions, should-load]
+execution:
+  prompt: "Add a fade-in to the cards on our server-rendered Angular home page and a slide-out when one is dismissed, following our house conventions, reduced motion included."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?angular-conventions"'

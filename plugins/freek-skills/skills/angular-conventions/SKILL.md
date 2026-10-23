@@ -1,6 +1,6 @@
 ---
 name: angular-conventions
-description: "House rules for Angular apps, on top of angular-developer: templates, accessibility (native elements, dialogs, focus after navigation), imports and layers, signal stores, failure states, routes and page meta, upgrades (ng update, TypeScript range, migration opt-outs), SSR on a custom Express server (CSP nonce, transfer cache, third-party timeouts), Vitest specs, Tailwind tokens and CSS features. Use when writing, reviewing, refactoring or upgrading code in an Angular app that follows these house rules, or when asked for our Angular conventions. Not for how an Angular API works or for scaffolding: use angular-developer."
+description: "House rules for Angular apps, on top of angular-developer: templates, accessibility (native elements, dialogs, focus after navigation, status messages), forms (submit button, field errors, autocomplete), animation (SSR-safe entrances, reduced motion, libraries), imports and layers, signal stores, loading, empty and failure states, routes, URL state and page meta, upgrades (ng update, TypeScript range, migration opt-outs), SSR on a custom Express server (CSP nonce, transfer cache, third-party timeouts), Vitest specs, Tailwind tokens and CSS features. Use when writing, reviewing, refactoring or upgrading code in an Angular app that follows these house rules, or when asked for our Angular conventions. Not for how an Angular API works, choosing between Angular's forms APIs, or scaffolding: use angular-developer."
 ---
 
 # Angular conventions
@@ -39,7 +39,15 @@ Target WCAG 2.2 AA. No ARIA is better than bad ARIA: a role promises keyboard be
   moves no focus: add the ARIA, put it right after its trigger, and give something in it `autofocus`.
 - Angular leaves focus where it was after a route change, so one place (the one that sets page meta) focuses the page's
   `h1` (`tabindex="-1"`) on `NavigationEnd`, in the browser only and skipping the first, server-rendered load. It also
-  announces the title with `LiveAnnouncer`, since screen readers don't watch title changes.
+  announces the title with `LiveAnnouncer`, since screen readers don't watch title changes. It skips query-only
+  navigations too (a filter, sort or page change, see Routes): focus stays on the control, and the status region
+  announces the result count.
+- Status messages: one `role="status"` element always in the template, changing only its text ("Loading…", "12
+  results", "No results", "Saved"), or CDK's `LiveAnnouncer`: a region added together with its text isn't read. Never a
+  live region around a list or a view, which reads out every re-render. `role="alert"` only for an error that blocks
+  the task.
+- When the focused element goes away (Retry re-renders the view, a row is deleted, a form submits), keep it mounted or
+  move focus to the next item, the list heading or the status text: otherwise it falls to `<body>`.
 - Focus rings use `outline`, never `box-shadow`: forced-colors mode drops shadows. Never `outline: none` without a
   replacement. Targets are at least 24×24 CSS px, icon buttons included, unless 24 px circles around the smaller ones
   don't overlap.
@@ -49,6 +57,69 @@ Target WCAG 2.2 AA. No ARIA is better than bad ARIA: a role promises keyboard be
   keyboard walk: Tab order, visible focus, Enter, Space and Esc, focus after navigation. Scanners miss placeholder-only
   inputs, `alt="image"` and focus problems, so never report "accessible" from a scan alone: list what a person still
   checks (label and alt text meaning, screen-reader output, zoom to 400%, motion).
+
+## Forms
+
+- Submit stays enabled: never `[disabled]="!form().valid()"`, though Angular's signal forms guide shows it. A disabled
+  button doesn't say why and isn't in the tab order; on click, validate and show the errors.
+- While the request runs, mark the button busy, not `disabled` (which drops focus to `<body>`): `aria-disabled="true"`,
+  a guard in the handler (`aria-disabled` blocks nothing by itself) and a label such as "Saving…".
+- A field in error has `aria-invalid="true"` and `aria-describedby` with the hint's id, then the error's. Show errors
+  once a field is touched, and on submit focus the first field in error (signal forms: in `onInvalid`,
+  `errorSummary()[0]?.fieldTree().focusBoundControl()`).
+- `autocomplete` on every field about the user (`name`, `email`, `tel`, `street-address`, `username`,
+  `current-password`, `new-password`, `one-time-code`; WCAG 1.3.5). Not on fields about someone else, or search.
+
+## Animation
+
+Native CSS first, then Angular's `animate.enter` and `animate.leave` for elements it inserts and removes, then a
+library, with its reason in a comment.
+
+- No `@angular/animations` in new code: deprecated since 20.2, "Intent to remove in v23" in its JSDoc, and no
+  `ng update` migration (angular.dev's "Migrating away from Angular's Animations package" maps each API by hand).
+- Server-rendered content enters with `@starting-style` (Tailwind's `starting:`), not `animate.enter`, which replays at
+  hydration: visible content fades out and in again (closed as intended in angular/angular#69180). `animate.enter` only
+  for elements inserted after start-up (a toast, a row the user adds); `animate.leave` for exits. `@starting-style`
+  needs no `@supports` (CSS features, under Tailwind): without it the element just appears.
+- The end state is the base style; animate from something else. Never ship `opacity: 0` or an off-screen transform that
+  waits for a script-added class: without JavaScript, or until hydration, the content stays hidden. Code that touches
+  `window`, `matchMedia` or `element.animate()` runs in `afterNextRender` or an event handler.
+- Animate `transform` and `opacity`: other properties lay out or repaint every frame. No `will-change` up front, only
+  against a measured problem.
+- Durations come from a published scale, not invented: NN/g's 100–400 ms (about 100 ms for a toggle, 200–300 ms for a
+  modal, 400 ms only for large movements across the screen), shorter for frequent motion, exits shorter than entrances.
+  Material 3 and Carbon motion tokens are scales to snap to.
+- Reduced motion (`@media (prefers-reduced-motion: reduce)`, Tailwind's `motion-reduce:`/`motion-safe:`) replaces
+  slides, zooms, parallax and spins with a short fade or nothing, and stops infinite loops (spinners, pulses,
+  skeletons) with `animation: none` or a static state. Angular never checks it. It isn't a pause control: a loop that
+  starts by itself and runs over five seconds beside other content needs one (WCAG 2.2.2), in either branch.
+- Route transitions (`withViewTransitions()`): their CSS goes in global styles, since component styles scope it, even
+  `@keyframes`. The router runs them under reduced motion too: author the animation under `no-preference` only, or call
+  `transition.skipTransition()` in `onViewTransitionCreated` when reduced motion matches. They move no focus (see
+  focus after navigation).
+- Exits: Angular leaves a leaving element focusable. Move focus out first (to the trigger, or the next item or list
+  heading if the trigger goes too), then set `inert` in the `(animate.leave)` callback and call `animationComplete()`. A
+  bound `[inert]` never applies (the view is destroyed in that pass), and `inert` on a subtree that holds focus drops
+  it to `<body>`. A leaving toast's message goes with it: announce through the status region.
+- Tests: under Vitest with jsdom (no `getAnimations`), `animate.enter` adds no class and `animate.leave` removes at
+  once, even with `animationsEnabled: true`, so assert end states and stub `matchMedia` where code reads it. Test motion
+  and the `reducedMotion: 'reduce'` branch in Playwright.
+
+### Animation libraries
+
+- Only for what CSS can't do (sequences, timelines, scrubbing), with the reason and cost in a comment. Gzip added to an
+  empty app: `motion/mini` 3.3 kB, Motion's `animate` 24.6 kB, GSAP 27.6 kB, with ScrollTrigger 45.4 kB.
+- No Lenis: it ignores keys pressed mid-scroll, scrolls the page instead of nested scroll boxes, and its `anchors`
+  option breaks hash links.
+- GSAP's licence (Webflow's own) isn't OSI-approved: record the exception in the comment and the PR that add it.
+- Start it in `afterNextRender`, with `DestroyRef` injected before it (`inject()` fails inside the callback): Motion's
+  `inView` and `new Lenis()` throw on the server. Stop or revert everything in `DestroyRef.onDestroy`.
+- Write the reduced branch yourself, as no library does it by default: `scopeMotion(setup, { matchMedia: 'motion' })`
+  or `gsap.matchMedia()` with `(prefers-reduced-motion: no-preference)`; `scope.stop()` or `mm.revert()` on destroy. A
+  reduce branch plays once or shows the end state, never a loop.
+- Scroll reveals hide content from script only, only under `no-preference`, with `opacity` and `transform`, never
+  `visibility` (which drops it from find-in-page, focus and screen readers). Add a print rule that shows it:
+  `@media print { .reveal { opacity: 1 !important; transform: none !important; } }`.
 
 ## Imports and layers
 
@@ -82,6 +153,9 @@ Before writing a helper, use what's installed, and hand-write only what it can't
   `reload()` to repeat it. If you subscribe instead, reset the loading state in `finalize`.
 - Every failable load shows its failure, with a retry (`reload()`). Never `catchError(() => of(empty))`, or an `error`
   callback that only empties the data.
+- `@switch` on the resource's `status()`, so each state gets its branch: empty is distinct from loading (never "No
+  results" before the data arrives), and `'reloading'` keeps the previous value on screen instead of a skeleton.
+  `hasValue()` guards `value()`, which throws on error.
 - `encodeURIComponent` each path segment; query values go in `params`.
 
 ## Routes and page meta
@@ -92,6 +166,10 @@ Before writing a helper, use what's installed, and hand-write only what it can't
 - Page meta (title, description, canonical, social tags) is set in one place, once per navigation, from the deepest
   route's `data`. The data may be a function of the route's resolved data, so the resolver stays the only fetch. Never
   set meta from components or resolvers.
+- Filters, sort, tabs and paging live in query params, so reload, shared links and Back keep them: one history entry
+  per applied change (`replaceUrl: true` per keystroke of a live search). Navigate with `queryParamsHandling: 'merge'`:
+  the default replaces the query string, so setting `sort` drops `filter`. A filter or sort change resets the page,
+  and an unknown value (`?page=abc`) reads as the default.
 
 ## Code navigation
 

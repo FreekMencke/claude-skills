@@ -14,4 +14,4 @@ Latest run per skill, for the cases in `plugins/*/evals/`: runs that loaded the 
 | `font-outline-repair` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-20 |
 | `tech-debt-audit` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-15 |
 | `research` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-15 |
-| `angular-conventions` | 6 + 6 | 18/18 | 18/18 | 2.1.296 | 2026-10-18 |
+| `angular-conventions` | 8 + 7 | 24/24 | 21/21 | 2.1.296 | 2026-10-23 |
