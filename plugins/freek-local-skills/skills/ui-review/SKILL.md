@@ -1,6 +1,6 @@
 ---
 name: ui-review
-description: "Reviews a running web page's UI, design and craft read-only: layout at four widths, focus and the keyboard, reduced motion, the loading, empty, error and offline states of each data view forced in Playwright, form behaviour, and the interface rules a script can't check, judged by a reviewer subagent. Use to review, critique or QA a page's UI or UX, its states, responsiveness or polish, or a front end before shipping. Reports likely issues with evidence; doesn't fix them. Not for SEO and crawlers (seo-audit), docs (refresh-md-files), a diff's code (code-review) or building a design (frontend-design)."
+description: "Reviews a running web page's UI, design and craft read-only: layout at five widths, focus and the keyboard, reduced motion, the loading, empty, error and offline states of each data view forced in Playwright, form behaviour, and the interface rules a script can't check, judged by a reviewer subagent. Use to review, critique or QA a page's UI or UX, its states, responsiveness or polish, or a front end before shipping. Reports likely issues with evidence; doesn't fix them. Not for SEO and crawlers (seo-audit), docs (refresh-md-files), a diff's code (code-review) or building a design (frontend-design)."
 disallowed-tools: Edit, Write, NotebookEdit
 argument-hint: "[URL or pages] [what to focus on]"
 ---
@@ -33,7 +33,8 @@ its tokens (the theme CSS or Tailwind config), any style guide and decisions doc
 - whether a view's data is fetched during server rendering (then the plan needs `from` and `link`, step 3);
 - how to build and serve a production build locally;
 - deliberate trade-offs: they aren't findings;
-- side effects of a visit (analytics, counters) and controls never to press.
+- side effects of a visit (analytics, counters) and controls never to press;
+- the widths it reviews at, if it names them.
 
 Record the commit: `git rev-parse --short HEAD`.
 
@@ -59,9 +60,9 @@ its, once.
 
 One JSON plan in the scratchpad, written with a heredoc; `references/plan.md` has every key. In it:
 
-- **Pages:** one or two per template, most important first. Widths 1440, 768, 375 and 320 unless the user names
-  others. The app's default colour scheme; a second run for the other one when the app has both and the change
-  touches theming.
+- **Pages:** one or two per template, most important first. Widths 1440, 1100, 820, 390 and 320 (why each:
+  `references/plan.md`), unless the user or the repo's design skill (step 1) names others. The app's default colour
+  scheme; a second run for the other one when the app has both and the change touches theming.
 - **Views** (UIPAT-001, UIPAT-013): every data view on those pages, with its API glob. Fetch one real response first
   (`curl -s <api> | head -c 2000`) and shape `empty`, `partial` and `long` from it. `root` for the view's own
   element (plain CSS), not `main`, when the page has a hero or several views. `retry` for the error state's control;
@@ -87,8 +88,9 @@ The caller runs it, not the reviewer, which has no Bash. It prints one JSON repo
 | `notRun` | what the script couldn't do, and why |
 
 Check `notRun` first: fix the plan and rerun for anything that is the plan's fault (a wrong selector, a missing body).
-On a test page (two pages at two widths, one view, two forms) it took 15 seconds; a client-routed view (`from` and
-`link`) adds a few seconds per state, as the script waits for the view to settle.
+On a test page (two pages at the five default widths, one view, two forms) it took about 23 seconds, 3 more than at
+four widths: the states and forms take most of the time, and they don't run per width. A client-routed view (`from`
+and `link`) adds a few seconds per state, as the script waits for the view to settle.
 
 ## 5. Hand over to `ui-reviewer`
 
