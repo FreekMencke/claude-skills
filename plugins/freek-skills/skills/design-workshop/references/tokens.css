@@ -1,0 +1,58 @@
+/*
+ * design-workshop starter tokens: grid and spacing, as plain CSS custom properties.
+ * The defaults in SKILL.md, "Build on tokens"; keep the two in step.
+ * Each variant opens with this block, changed only where the person or the site set a value,
+ * and uses nothing else for grid and spacing. The hand-over copies it, with the picked values,
+ * into a repo that has no token file yet.
+ * Sources (claude-kb): LAYOUT-002, LAYOUT-003, LAYOUT-004, SPACE-002, SPACE-003, SPACE-021.
+ */
+
+:root {
+  /* Scale (SPACE-002): every spacing value is one of these. Rem, so spacing follows the
+     reader's text size. */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+
+  /* By role (SPACE-021): each level at least two steps above the one inside it. A denser or
+     airier variant picks other steps, never values off the scale. */
+  --space-icon: var(--space-2); /* icon to label */
+  --space-inside: var(--space-4); /* inside a group */
+  --space-between: var(--space-8); /* between groups */
+  --space-section: var(--space-12); /* between sections: one step smaller on phones (SPACE-003) */
+
+  /* Grid and widths (LAYOUT-003, LAYOUT-004) */
+  --grid-columns: 1;
+  --gutter: var(--space-4);
+  --page-margin: var(--space-4);
+  --page-max: 80rem; /* 1280px; centred above it, header and footer bands may run full width */
+  --text-max: 70ch;
+}
+
+/* Breakpoints (LAYOUT-002): 640px and 1024px. A custom property can't be used in a media
+   query, so the numbers are written out here and in each query that needs them. */
+@media (width >= 40rem) {
+  :root {
+    --space-section: var(--space-16);
+  }
+}
+
+@media (width >= 64rem) {
+  :root {
+    --grid-columns: 12;
+    --gutter: var(--space-6);
+    --page-margin: var(--space-8);
+  }
+}
+
+/*
+ * Using them:
+ *   .page { max-inline-size: var(--page-max); margin-inline: auto; padding-inline: var(--page-margin); }
+ *   .grid { display: grid; grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr)); gap: var(--gutter); }
+ *   .prose { max-inline-size: var(--text-max); }
+ */

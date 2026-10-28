@@ -6,9 +6,9 @@ description: "Works out the look of a new page, site or redesign with the person
 # Design workshop
 
 Asked for a whole page, Claude converges on one look per subject, and a banned list or a set of proposed directions
-only moves it to another one. A person picking from small visual options, one choice at a time, gets past that. This
-skill runs those choices with the person and ends with a design brief. It builds nothing: the five pages it makes at
-the end are throwaway prototypes for choosing.
+only moves it to another one. A person picking from small visual options, one choice at a time, gets past that
+(DESIGN-027, DESIGN-029, DESIGN-030; IDs here are claude-kb entries). This skill runs those choices with the person and
+ends with a design brief. It builds nothing: the five pages it makes at the end are throwaway prototypes for choosing.
 
 Not this skill:
 
@@ -37,8 +37,8 @@ Not this skill:
   page; none is a generic page with the name swapped in.
 - **The neighbour test.** Before showing a batch, ask of each option: would a neighbouring subject in the same category
   (another bakery, another developer tool) get this exact combination? Replace each one that would with a new option,
-  rather than adding a rule against it: a ban only moves the output to the next default. A banned list can back this
-  up, never stand in for it.
+  rather than adding a rule against it: a ban only moves the output to the next default (DSKILL-014, DESIGN-027). A
+  banned list can back this up, never stand in for it.
 - **Real content.** Use the brief's real names, prices and facts, never lorem ipsum. No images: Claude can't make them
   and artifacts block external ones, so use plain shapes or labelled grey boxes.
 - **Stop after each step** and ask which options to keep: several is fine, and so is "3, but warmer". Record each pick
@@ -55,8 +55,8 @@ already settles a step (fixed brand colours, a named audience), lock it: say so 
 
 ## Past looks
 
-Without a record of earlier workshops, the next project lands on the same palettes and fonts. Keep a log of past looks,
-one row per finished workshop, newest last:
+Without a record of earlier workshops, the next project lands on the same palettes and fonts. Keep a log of past looks
+(DSKILL-014), one row per finished workshop, newest last:
 
 ```markdown
 | Date | Subject and page | Feel | Palette (background first) | Fonts (headline + body) | Layout |
@@ -81,7 +81,7 @@ one row per finished workshop, newest last:
 | 2. Feel | A word (fancy, sporty, artisanal, calm), one line on what it means here, and a small hint made of plain shapes, in the system font |
 | 3. Tone of voice | The same content written in that voice: a headline, a short paragraph, a button label and one key fact such as a price. System font and no colour, so only the words differ |
 | 4. Colour | A palette of 4 to 8 colours as a row of plain squares, background first, with only its number and a plain-words name: no mock-up, sample text or labels |
-| 5. Type | A font pairing (Google Fonts, or the brand's own fonts) in the picked colours, with the picked tone's headline, paragraph, key fact and button, and a plain-words line on its character. The key fact is a number in a short aligned column (two or three prices or stats) set with `tabular-nums`, so a pairing without tabular figures shows it |
+| 5. Type | A font pairing (Google Fonts, or the brand's own fonts) in the picked colours, with the picked tone's headline, paragraph, key fact and button, and a plain-words line on its character. The key fact is a number in a short aligned column (two or three prices or stats) set with `tabular-nums`, so a pairing without tabular figures shows it (DESIGN-034) |
 | 6. Layout | A grey wireframe of the whole page, top to bottom, every section labelled. The five differ in structure and section order, not only in the top section. No colour or fonts from earlier steps, so only the structure differs |
 | 7. Combine | Five variants of the full page: see "The final step" |
 
@@ -95,7 +95,8 @@ set in the picked colours.
   new batch, say that the ones already kept can be enough.
 - **At most five per step.** Past 5, ask which to drop.
 - **Spread the picks, don't blend them.** Each later option and each variant uses one kept option per step: never two
-  kept tones, palettes or feels inside one page. When a step kept several, spread them over the next step's options.
+  kept tones, palettes or feels inside one page (DESIGN-030). When a step kept several, spread them over the next
+  step's options.
 
 ## The final step
 
@@ -105,15 +106,16 @@ the brief's real facts.
 - Use every kept option in at least one variant, paired so each variant hangs together.
 - Keep the picks; vary the details: spacing and density, corner shapes, how the accent is used, decoration, and the
   headline treatment. On an existing site, vary only the details its locked steps leave open.
-- **Build on tokens.** Each variant opens with one block of CSS custom properties for its grid and spacing and uses
-  only those, so the brief can copy what the person saw. Unless the person or the site set them: a 12-column grid from
-  1024 px and one column on phones; gutters 16 px on phones, 24 px from 1024 px; page max-width 1280 px, centred
-  above it, with header and footer bands free to run full width; text columns at most `70ch`; page margins 16 px on
-  phones, 32 px from 1024 px; breakpoints at 640 and 1024 px. Spacing from the scale 4, 8, 12, 16, 24, 32, 48, 64 px,
-  fixed across widths except section gaps, one step smaller on phones. By role, start at: icon to label 8, inside a
-  group 16, between groups 32, between sections 64, each level at least two steps above the one inside it. Variants
-  vary spacing and density by which steps they use, never by values off the scale. On an existing site, use its own
-  tokens.
+- **Build on tokens.** Each variant opens with the CSS custom properties in `references/tokens.css`, changed only where
+  the person or the site set a value, and uses only those for grid and spacing, so the brief can copy what the person
+  saw. Its defaults: a 12-column grid from 1024 px and one column on phones; gutters 16 px on phones, 24 px from
+  1024 px (LAYOUT-003); page max-width 1280 px, centred above it, with header and footer bands free to run full width;
+  text columns at most `70ch` (LAYOUT-004); page margins 16 px on phones, 32 px from 1024 px (LAYOUT-003);
+  breakpoints at 640 and 1024 px (LAYOUT-002). Spacing from the scale 4, 8, 12, 16, 24, 32, 48, 64 px (SPACE-002),
+  fixed across widths except section gaps, one step smaller on phones (SPACE-003). By role, start at: icon to label 8,
+  inside a group 16, between groups 32, between sections 64, each level at least two steps above the one inside it
+  (SPACE-021, SPACE-005). Variants vary spacing and density by which steps they use, never by values off the scale.
+  On an existing site, use its own tokens.
 - One self-contained HTML file each, CSS inline, fonts from Google Fonts or the brand's own fonts inlined. They are
   prototypes for choosing: no framework, nothing in the source tree.
 
@@ -192,6 +194,11 @@ Images: record each photo's author, licence and source link when chosen, and for
 alike.
 ```
 
+Behind the sections' defaults, kept out of the brief itself: figure style (DESIGN-034) and what the Google Fonts API
+strips (DESIGN-035); grid and breakpoints (LAYOUT-003, LAYOUT-002); spacing roles (SPACE-021) and density (LAYOUT-005);
+shadows by kind of surface (DESIGN-041), as tokens (DESIGN-042), in dark mode (DESIGN-043) and with an edge that stays
+in forced colours (DESIGN-044).
+
 Check each text colour against the colour behind it (WCAG AA: 4.5:1 for body text, 3:1 for large text and UI parts),
 and note any pair that fails in the Colour table, with the nearest shade that passes.
 
@@ -204,12 +211,14 @@ Then append the look to the log of past looks.
 - A repo: the colours by role, fonts, grid, spacing, corner values and shadow tokens go into its token file (theme CSS
   custom properties, a Tailwind theme, a tokens JSON); the rest of the brief goes into its design skill, or wherever
   its agent instructions keep design rules, with the picked variant saved next to it. Changing a token file restyles
-  the running site, so show the change and write it after a go-ahead. If the repo has neither, propose where they go
-  and wait.
-- **Make it load.** A file in the repo is not enough: a later session builds from it only when it is loaded. Propose
-  one line, and write it after a go-ahead: an import in the repo's CLAUDE.md (`@path/to/brief.md`), or, when the repo
-  has a design skill, a line in it naming the token file and brief. An import loads in every session, so import the
-  short brief, not a long design document.
+  the running site, so show the change and write it after a go-ahead. With no token file yet, propose one from
+  `references/tokens.css`, or `references/tailwind-theme.css` in a Tailwind 4 repo, with the picked values filled in
+  and the colours, fonts, corners and shadows added; with no design skill either, propose where the rest goes. Then
+  wait.
+- **Make it load.** A file in the repo is not enough: a later session builds from it only when it is loaded
+  (DESIGN-037). Propose one line, and write it after a go-ahead: an import in the repo's CLAUDE.md
+  (`@path/to/brief.md`), or, when the repo has a design skill, a line in it naming the token file and brief. An import
+  loads in every session, so import the short brief, not a long design document.
 
 ## Existing site
 
