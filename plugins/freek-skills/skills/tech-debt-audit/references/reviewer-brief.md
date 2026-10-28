@@ -28,6 +28,8 @@ Earlier reports: <absolute paths, or "none">
    than "refactor X" or a rewrite.
 6. Deliberate choices: no finding contradicts a trade-off recorded in the repo's agent instructions (CLAUDE.md,
    AGENTS.md) or decisions doc.
+7. Versions: every version, release date or end-of-life date in a finding names the registry or schedule command
+   behind it (`npm view`, `npm outdated`, Node's release schedule). One without is a problem.
 
 ## Checks: roadmap
 1. Every high and medium finding in the phase reports appears, with its effort.
