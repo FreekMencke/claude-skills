@@ -152,16 +152,56 @@ The repo's style guide wins on all of these.
 - `autofocus` sparingly: desktop only, one primary input. **judge**
 - Hover gives feedback; hover, active and focus states are more prominent than rest. **judge**
 
+## Spacing and alignment
+
+A spacing finding is severity 1 or 2, a craft issue, unless groups read wrongly: that changes what people take as
+related, and can rank higher.
+
+- Gaps, padding and margins are steps of the repo's spacing scale; without one, 4, 8, 12, 16, 24, 32, 48 and 64 px
+  (Tailwind 1, 2, 3, 4, 6, 8, 12, 16). Not arbitrary values (`mt-[13px]`) or fractions the scale doesn't name
+  (`pt-1.75`). **source** (Grep templates and styles)
+- Less space inside a group than between groups: a label sits closer to its field, and items in a card closer to each
+  other, than to the next group; the next level is at least two steps larger. Equal gaps everywhere group nothing.
+  **judge** (screenshots; `browser_evaluate` for the gaps)
+- Groups are made with space before borders, dividers and cards; a boundary only where a wider gap can't do it
+  (variable-height cards in a grid, dense tables). **judge**
+- Icons line up with their label by `align-items: center` and a `gap`, not by margin or padding nudges, least of all
+  per breakpoint (`mt-0.75 sm:mt-2.25`). **source** (Grep for top margins or padding on icons beside labels) and
+  **judge** (screenshots: an icon visibly above or below the label's middle)
+
 ## Layout and theming
 
 - Full-bleed layouts use `env(safe-area-inset-*)`. **judge**
 - No unwanted scrollbars: fix the overflow rather than hiding it. **script** (`pages[].overflow`) and **judge**
-- Layout from flex and grid, not JS measurement. **source**
+- Layout from CSS (flex, grid, media and container queries), not JS measurement, and not picked in a component by
+  `BreakpointObserver` or `isPlatformBrowser`: under SSR the server renders the no-match branch and phones shift after
+  hydration (claude-kb LAYOUT-015). `BreakpointObserver` for behaviour after render, such as closing a menu, is fine.
+  **source**
+- Page margins of 15–16 px on phones: no text closer than 15 px to either edge at 390 and 320. **script**
+  (`pages[].gutter`: `left` or `right` under 15 at those widths is a finding; a large `right` only means no text
+  reaches that side)
+- Components placed in more than one region respond to their container (container queries); the page responds to the
+  viewport. A card that breaks in a sidebar at a width where it fits in the main column is a finding. **judge**
 - Dark themes set `color-scheme: dark` on `<html>`; `<meta name="theme-color">` matches the background; native
   `<select>` gets an explicit `background-color` and `color`. **judge** (`browser_evaluate`)
 - Dates and numbers through `Intl.DateTimeFormat` and `Intl.NumberFormat`; brand names and code in
   `translate="no"`. **judge**
 - Server-rendered dates and times match what the client renders (no hydration flash). **judge**
+
+## Charts
+
+- The title states the finding ("Prices fell after the update"), in HTML rather than in the image; a subtitle says what
+  the data is and the period. **judge**
+- The takeaway in visible text, and the data in a `<table>` with a `<caption>`, beside the chart or behind
+  `<details>`, unless the title and text already carry everything. Ask: what's the takeaway, and where is the table?
+  **judge**
+- One `role="img"` with a name on the `<svg>`, `<canvas>` or its wrapper when nothing inside is focusable (with
+  focusable points, a labelled `role="group"` or `<figure>`), or `aria-hidden="true"` when visible text carries the
+  description. **judge** (snapshot)
+- Chart animation stops under `prefers-reduced-motion: reduce`: no tested library honours it (ECharts, Chart.js and
+  ngx-charts animate by default), so the app passes it in. **judge** (the reduced-motion pass; a canvas chart animates
+  in script, outside `motion[]`, so compare the first render under `browser_emulate_media` reduce) or **source** (the
+  chart's animation option reads the preference)
 
 ## Changes from upstream
 
@@ -180,6 +220,10 @@ The repo's style guide wins on all of these.
   prefer APCA); 24×24 targets as the AA floor, 44px as a goal; 16px inputs instead of `maximum-scale` (UIREV-003);
   focus must not fall to `<body>`; the "States of a data view" section (UIPAT-001, UIPAT-005, UIPAT-013); reflow at
   320 px (WCAG 1.4.10).
+- **Added** (claude-kb, 2026-10-28): the "Spacing and alignment" section (SPACE-002, SPACE-005, SPACE-006,
+  SPACE-012, SPACE-021); no layout from `BreakpointObserver` (LAYOUT-015), phone page margins (LAYOUT-003) and
+  container queries for components (LAYOUT-009) in Layout and theming; the "Charts" section (VIZ-005, VIZ-014,
+  VIZ-027).
 - **Regrouped**: "Hover & Interactive States" into Touch and interaction; "Safe Areas", "Dark Mode" and "Locale" into
   Layout and theming; the anti-patterns list merged into the rules it repeats; upstream's review prompt and
   `file:line` output format dropped (the skill's report replaces them).
