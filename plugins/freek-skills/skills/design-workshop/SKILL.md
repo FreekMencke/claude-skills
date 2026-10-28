@@ -105,6 +105,15 @@ the brief's real facts.
 - Use every kept option in at least one variant, paired so each variant hangs together.
 - Keep the picks; vary the details: spacing and density, corner shapes, how the accent is used, decoration, and the
   headline treatment. On an existing site, vary only the details its locked steps leave open.
+- **Build on tokens.** Each variant opens with one block of CSS custom properties for its grid and spacing and uses
+  only those, so the brief can copy what the person saw. Unless the person or the site set them: a 12-column grid from
+  1024 px and one column on phones; gutters 16 px on phones, 24 px from 1024 px; page max-width 1280 px, centred
+  above it, with header and footer bands free to run full width; text columns at most `70ch`; page margins 16 px on
+  phones, 32 px from 1024 px; breakpoints at 640 and 1024 px. Spacing from the scale 4, 8, 12, 16, 24, 32, 48, 64 px,
+  fixed across widths except section gaps, one step smaller on phones. By role, start at: icon to label 8, inside a
+  group 16, between groups 32, between sections 64, each level at least two steps above the one inside it. Variants
+  vary spacing and density by which steps they use, never by values off the scale. On an existing site, use its own
+  tokens.
 - One self-contained HTML file each, CSS inline, fonts from Google Fonts or the brand's own fonts inlined. They are
   prototypes for choosing: no framework, nothing in the source tree.
 
@@ -151,11 +160,23 @@ but strips those, so say if one needs a self-hosted file. Name `opsz` in the loa
 and the design uses both small and large sizes: the API serves only the axes the URL names.
 
 ## Layout
-The sections from top to bottom, one line each on what it holds.
+The sections from top to bottom, one line each on what it holds. Then the grid, as in the prototype:
+
+| Grid | Value |
+|---|---|
+| Columns | |
+| Gutter | Phones / large screens |
+| Page max-width | |
+| Reading width | |
+| Page margins | Phones / large screens |
+| Above the max width | Centred (fixed) or full width (fluid), and what runs full bleed |
+| Breakpoints | The framework's tokens nearest the prototype's |
 
 ## Details
-Spacing and density, corner shapes, how the accent is used, decoration, and the headline treatment, as in the
-prototype.
+Spacing, as in the prototype: the scale as tokens, fixed or fluid across widths (and what shrinks on phones), and the
+value per role: icon to label, inside a group, between groups, between sections. Density: default, compact, or a
+setting the person changes; compact only for tables, lists and dashboards, never menus, dialogs or forms. Then corner
+shapes, how the accent is used, decoration, and the headline treatment.
 
 ## Depth
 One line per kind of surface on the page (cards, menus and popovers, dialogs, overlapping images, a sticky header):
@@ -180,7 +201,7 @@ Then append the look to the log of past looks.
 
 - No repo: a `design-brief.md` (or an artifact), with the picked variant saved next to it. Tell the person to name it
   in the build prompt ("build from design-brief.md"): a later session uses a file it is pointed at.
-- A repo: the colours by role, fonts, spacing, corner values and shadow tokens go into its token file (theme CSS
+- A repo: the colours by role, fonts, grid, spacing, corner values and shadow tokens go into its token file (theme CSS
   custom properties, a Tailwind theme, a tokens JSON); the rest of the brief goes into its design skill, or wherever
   its agent instructions keep design rules, with the picked variant saved next to it. Changing a token file restyles
   the running site, so show the change and write it after a go-ahead. If the repo has neither, propose where they go
