@@ -1,8 +1,8 @@
 // Measures what a script can check on a running UI and prints one JSON report: axe (WCAG 2.2 AA tags), horizontal
-// overflow, `transition: all`, images without dimensions, the text's gutter, console errors and failed requests per page
-// and width; motion left running under reduced motion; a keyboard walk from the top and one that starts scrolled (focus
-// under a sticky header shows only then); the states of each data view forced with page.route; and form checks. It
-// never fails a run: it reports, and the ui-review skill judges.
+// overflow and text clipped in its own box, `transition: all`, images without dimensions, the text's gutter, console
+// errors and failed requests per page and width; motion left running under reduced motion; a keyboard walk from the top
+// and one that starts scrolled (focus under a sticky header shows only then); the states of each data view forced with
+// page.route; and form checks. It never fails a run: it reports, and the ui-review skill judges.
 //   node check.mjs <plan.json> --out <dir> [--modules <dir>]
 // The plan's shape is in ../references/plan.md. Viewport screenshots go to --out. Playwright and @axe-core/playwright
 // load from --modules (default: the current folder, so run it from the app's repo when it has them).
@@ -90,9 +90,45 @@ const helpers = () => {
     const outermost = offenders.filter((el) => !offenders.includes(el.parentElement));
     return { page: document.documentElement.scrollWidth - document.documentElement.clientWidth, count: outermost.length, elements: outermost.slice(0, 8).map(describe) };
   };
+  // Text cut off inside its own box (overflow-x other than visible, ellipsis), which never crosses the viewport edge.
+  // Only text past the padding box counts: a scaled image or a decoration in an overflow: hidden card is meant to clip.
+  // A scroller (auto, scroll) is listed apart, as 1.4.10 lets two-dimensional content scroll; so is a cut whose full
+  // text is in a title, aria-label or aria-describedby (a tooltip) on it or an ancestor, for the reviewer to judge.
+  const textPast = (el) => {
+    const box = el.getBoundingClientRect(), left = box.left + el.clientLeft, right = left + el.clientWidth;
+    const range = document.createRange();
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    for (let node; (node = walker.nextNode()); ) {
+      if (!node.textContent.trim()) continue;
+      range.selectNodeContents(node);
+      if ([...range.getClientRects()].some((r) => r.width && (r.right > right + 1 || r.left < left - 1))) return true;
+    }
+    return false;
+  };
+  const reachableVia = (el) => {
+    const full = el.textContent.trim().replace(/\s+/g, ' ');
+    for (let node = el; full && node !== document.body; node = node.parentElement) {
+      const described = (node.getAttribute('aria-describedby') ?? '').split(/\s+/).map((id) => document.getElementById(id)?.textContent);
+      const via = [['title', node.getAttribute('title')], ['aria-label', node.getAttribute('aria-label')], ...described.map((d) => ['aria-describedby', d])].find(([, v]) => v?.includes(full));
+      if (via) return via[0];
+    }
+    return null;
+  };
+  const clipped = (root = document.body) => {
+    const cut = [...root.querySelectorAll('*')].filter((el) => el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 1 && el.checkVisibility()
+      && getComputedStyle(el).overflowX !== 'visible' && textPast(el)); // clientWidth 1 is an sr-only element
+    const outermost = cut.filter((el) => !cut.includes(el.parentElement));
+    const buckets = { clipped: [], clippedReachable: [], scrollable: [] };
+    for (const el of outermost) {
+      const s = getComputedStyle(el), via = reachableVia(el);
+      const bucket = ['auto', 'scroll'].includes(s.overflowX) ? 'scrollable' : via ? 'clippedReachable' : 'clipped';
+      buckets[bucket].push(`${describe(el)} | ${el.clientWidth} of ${el.scrollWidth} px | overflow-x ${s.overflowX}${s.textOverflow === 'ellipsis' ? ', ellipsis' : ''}${via ? ` | full text in ${via}` : ''}`);
+    }
+    return Object.fromEntries(Object.entries(buckets).map(([k, v]) => [k, { count: v.length, elements: v.slice(0, 8) }]));
+  };
   const text = (root) => (document.querySelector(root) ?? document.body).innerText.trim().replace(/\n{2,}/g, '\n');
   const statusText = () => [...document.querySelectorAll('[role=status], [role=alert], [aria-live]')].map((el) => `${describe(el).split(' ')[0]}: ${el.textContent.trim().slice(0, 80)}`);
-  window.__ui = { describe, look, uncovered, overflow, text, statusText, stops: [] };
+  window.__ui = { describe, look, uncovered, overflow, clipped, text, statusText, stops: [] };
 };
 
 const dismissed = new Set();
@@ -214,6 +250,7 @@ const pageChecks = (page) =>
     return {
       gutter: { ...gutter, left: gutter.left && Math.round(gutter.left), right: gutter.right && Math.round(gutter.right) },
       overflow: window.__ui.overflow(),
+      ...window.__ui.clipped(),
       transitionAll: { count: transitionAll.length, elements: transitionAll.slice(0, 8).map(window.__ui.describe) },
       imagesWithoutSize: { count: images.length, elements: images.slice(0, 8).map((img) => `${window.__ui.describe(img)} ${img.currentSrc.slice(-60)}`) },
     };
@@ -337,7 +374,11 @@ try {
         await page.screenshot({ path: row.screenshot });
         if (await page.locator(root).count()) row.axe = await axe(page, root);
         else row.rootGone = true; // text and overflow are the page's
-        if (state === 'long') row.overflow = await page.evaluate((root) => window.__ui.overflow(document.querySelector(root) ?? document.body), root);
+        if (state === 'long')
+          Object.assign(row, await page.evaluate((root) => {
+            const el = document.querySelector(root) ?? document.body;
+            return { overflow: window.__ui.overflow(el), ...window.__ui.clipped(el) };
+          }, root));
         if (state === 'error' && view.retry) {
           // Inside root, so another view's retry isn't pressed; page-wide only when the error replaced root
           const rootGone = !(await page.locator(root).count());
