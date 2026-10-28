@@ -71,6 +71,41 @@ Then ask the user once, in one message (AskUserQuestion where available), and no
 Without answers (a non-interactive run): no pain points, no fetched tools, no test run. Say so under Not verified.
 Record the answers in `progress.md`.
 
+### Phase 3: versions from the registry, not memory
+
+The model's training data predates recent majors and end-of-life dates, so every version, release date and end-of-life
+date in a finding comes from a command run in this session, named in its Proof. One from memory goes under Not
+verified. Where the session has the claude-kb MCP server, it gives the current release lines and their caveats; the
+command is still the proof.
+
+- Packages: `npm outdated` (it exits 1 when anything is outdated, which isn't a failure), `npm view <pkg> dist-tags`,
+  and `npm view <pkg> 'time[<version>]'` for one date (not `time --json`: thousands of lines).
+- Runtimes: Node's schedule, `curl -s https://raw.githubusercontent.com/nodejs/Release/main/schedule.json | jq '.v<major>'`.
+  A line in Maintenance LTS still gets security fixes: it's a finding only past or near its end of life.
+- Vulnerabilities: `npm audit --omit=dev` and `npm audit`, reported separately. They list published advisories only,
+  without checking whether the code reaches them. Rank a dev-only advisory (a build or test tool) a level below the
+  same advisory in production.
+- Integrity: `npm audit signatures`. An invalid or missing registry signature is a finding; missing provenance isn't.
+- Licences: `npm sbom --omit dev --sbom-format spdx | jq -r '.packages[].licenseDeclared' | sort | uniq -c | sort -rn`
+  (SPDX keeps strings CycloneDX drops). Read the licence file of each package listed as `NOASSERTION`, `SEE LICENSE IN`
+  or `UNLICENSED`. A shipped licence that's unknown or copyleft is a finding for the maintainers to judge, not legal
+  advice.
+
+`npm audit` reads the lockfile; `npm sbom` and `npm audit signatures` read `node_modules`, so without an install they go
+under Not verified.
+
+### Phase 4: CI and build
+
+- Workflows: actions on majors that still declare `runs.using: node20` (the runner annotates them "forced to run on
+  Node.js 24"), majors behind the latest (`gh api repos/<owner>/<action>/releases/latest --jq .tag_name`), and pins by
+  tag rather than full SHA. Run `zizmor` and `actionlint` when available.
+- `node-version` in CI and `FROM` lines on a runtime past end of life, checked against phase 3's schedule.
+- Dockerfiles: a base image without a digest (`FROM <image>:<tag>@sha256:<digest>`), with nothing to bump it.
+- Dependabot or Renovate: no config, or an ecosystem the repo uses (npm, GitHub Actions, Docker) missing from it.
+- Gates: no dependency audit in CI (`npm audit --omit=dev --audit-level=high`; plain `npm audit` fails on dev-only
+  advisories) or no licence gate (such as `actions/dependency-review-action` with `allow-licenses`) is an `INFRA`
+  finding.
+
 ### Large repos
 
 Above about 50,000 lines or five top-level modules, run phases 2 and 4 per module on read-only subagents in
@@ -86,10 +121,11 @@ no tool covers the metric, and say so in the report.
 
 | Stack | Tools |
 |---|---|
-| JavaScript, TypeScript | the package manager's `audit` and `outdated`, `tsc --noEmit`, `knip` (unused files, exports and dependencies), `madge --circular` |
+| JavaScript, TypeScript | the package manager's `audit` and `outdated`, `npm audit signatures`, `npm sbom` (licences), `tsc --noEmit`, `knip` (unused files, exports and dependencies; check `npm view knip engines` against the repo's Node), `madge --circular` |
 | Python | `pip-audit`, `ruff check`, `mypy`, `vulture` (dead code), `radon cc` (complexity) |
 | Go | `govulncheck`, `go vet`, `staticcheck` |
 | Rust | `cargo audit`, `cargo clippy`, `cargo machete` (unused dependencies) |
+| GitHub Actions | `zizmor` (pinning, injection, permissions, triggers), `actionlint` (syntax, ShellCheck on `run:`) |
 | Any | `lizard` (complexity, many languages), `jscpd` (duplication), `rg` and `git log` |
 
 An analyser that isn't available goes under Not verified, never replaced by an estimate.
