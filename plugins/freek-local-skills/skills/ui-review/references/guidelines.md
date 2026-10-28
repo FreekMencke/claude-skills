@@ -87,7 +87,7 @@ The repo's own rules (its design skill, tokens, style guide) win over any rule h
 - A loader shows only after a short delay and stays long enough not to flash. **judge**
 - An error never lives only in a toast that hides itself. **judge**
 - Long content wraps or truncates with the full text reachable; flex and grid children get `min-width: 0`. **script**
-  (`states[]` long: `overflow`) and **judge**
+  (`states[]` long: `overflow`, `clipped`) and **judge** (whether truncation suits `clippedReachable`)
 
 ## Animation
 
@@ -115,7 +115,10 @@ The repo's style guide wins on all of these.
 - No overflow at any width: nothing past the viewport at 320 CSS px except content that needs two dimensions (1.4.10).
   **script** (`pages[].overflow`)
 - Text containers handle long content (`overflow-wrap: anywhere`, truncation, line clamps); flex children need
-  `min-width: 0` to truncate. **script** (long state) and **judge**
+  `min-width: 0` to truncate. Text cut inside its own box with no other way to read it is a finding; truncation with
+  the full text in a `title`, `aria-label` or tooltip is judged, and a scroller is fine for two-dimensional content
+  (1.4.10). **script** (`pages[].clipped`, `clippedReachable`, `scrollable`, and the same in the long state) and
+  **judge**
 - Empty strings and arrays don't render broken UI. **script** (empty state) and **judge**
 - Button labels are specific ("Save key", not "Continue"); error messages say what to do next; active voice. **judge**
 

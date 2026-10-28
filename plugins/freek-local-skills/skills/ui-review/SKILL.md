@@ -80,10 +80,10 @@ The caller runs it, not the reviewer, which has no Bash. It prints one JSON repo
 
 | Key | What it measured |
 |---|---|
-| `pages[]` | per page and width: axe on `wcag2a` to `wcag22aa` (violations and `incomplete`), horizontal `overflow`, `gutter` (least space from text to each side in the first viewport), `transitionAll`, `imagesWithoutSize`, console errors and failed requests, a screenshot |
+| `pages[]` | per page and width: axe on `wcag2a` to `wcag22aa` (violations and `incomplete`), horizontal `overflow`, `clipped` (text cut inside its own box; `clippedReachable` when a `title`, `aria-label` or tooltip holds the full text; `scrollable` for scrollers, which aren't faults), `gutter` (least space from text to each side in the first viewport), `transitionAll`, `imagesWithoutSize`, console errors and failed requests, a screenshot |
 | `keyboard[]` | per page and width: Tab stops from the top with the focus indicator (compared with the element at rest) and how much of it is uncovered; then `partlyOrFullyCoveredWhenScrolled`, the same stops reached with the target first scrolled under any sticky header (UIREV-007) |
 | `motion[]` | animations running at load under `no-preference` and under `reduce`, and smooth scrolling under `reduce` |
-| `states[]` | per view and state: the view's text, status and alert regions, axe inside the view, a screenshot; `emptyMessageWhileLoading`; focus after Retry; overflow with long content; `rootGone` when the state replaced `root`, so text and overflow are the page's |
+| `states[]` | per view and state: the view's text, status and alert regions, axe inside the view, a screenshot; `emptyMessageWhileLoading`; focus after Retry; `overflow`, `clipped`, `clippedReachable` and `scrollable` with long content; `rootGone` when the state replaced `root`, so text and overflow are the page's |
 | `forms[]` | submit disabled before a submit, an error after leaving an empty field, focus and each field's error after an empty submit, requests blocked |
 | `notRun` | what the script couldn't do, and why |
 
