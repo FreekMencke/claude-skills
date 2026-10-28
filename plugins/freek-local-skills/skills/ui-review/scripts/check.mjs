@@ -1,8 +1,8 @@
 // Measures what a script can check on a running UI and prints one JSON report: axe (WCAG 2.2 AA tags), horizontal
-// overflow, `transition: all`, images without dimensions, console errors and failed requests per page and width; motion
-// left running under reduced motion; a keyboard walk from the top and one that starts scrolled (focus under a sticky
-// header shows only then); the states of each data view forced with page.route; and form checks. It never fails a run:
-// it reports, and the ui-review skill judges.
+// overflow, `transition: all`, images without dimensions, the text's gutter, console errors and failed requests per page
+// and width; motion left running under reduced motion; a keyboard walk from the top and one that starts scrolled (focus
+// under a sticky header shows only then); the states of each data view forced with page.route; and form checks. It
+// never fails a run: it reports, and the ui-review skill judges.
 //   node check.mjs <plan.json> --out <dir> [--modules <dir>]
 // The plan's shape is in ../references/plan.md. Viewport screenshots go to --out. Playwright and @axe-core/playwright
 // load from --modules (default: the current folder, so run it from the app's repo when it has them).
@@ -193,7 +193,26 @@ const pageChecks = (page) =>
     // CSS reserves its box. One sized by CSS classes is drawn at another size, and passes.
     const images = [...document.images].filter((img) => img.checkVisibility() && !(img.getAttribute('width') && img.getAttribute('height')) && getComputedStyle(img).aspectRatio === 'auto'
       && img.width === img.naturalWidth && img.height === img.naturalHeight);
+    // The page margin a reader sees: the least space between text in the first viewport and each side. Text past an
+    // edge is overflow or a scroller, so it doesn't count; the hit test drops text that's clipped (sr-only) or covered.
+    const width = document.documentElement.clientWidth;
+    const range = document.createRange();
+    const gutter = { left: null, right: null, leftmost: null, rightmost: null };
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let node; (node = walker.nextNode()); ) {
+      if (!node.textContent.trim()) continue;
+      range.selectNodeContents(node);
+      for (const r of range.getClientRects()) {
+        const x = r.left + r.width / 2, y = r.top + r.height / 2;
+        if (!r.width || r.left < 0 || r.right > width || y < 0 || y > innerHeight) continue;
+        const hit = document.elementFromPoint(x, y);
+        if (!hit || !node.parentElement.contains(hit)) continue;
+        if (gutter.left === null || r.left < gutter.left) Object.assign(gutter, { left: r.left, leftmost: window.__ui.describe(node.parentElement) });
+        if (gutter.right === null || width - r.right < gutter.right) Object.assign(gutter, { right: width - r.right, rightmost: window.__ui.describe(node.parentElement) });
+      }
+    }
     return {
+      gutter: { ...gutter, left: gutter.left && Math.round(gutter.left), right: gutter.right && Math.round(gutter.right) },
       overflow: window.__ui.overflow(),
       transitionAll: { count: transitionAll.length, elements: transitionAll.slice(0, 8).map(window.__ui.describe) },
       imagesWithoutSize: { count: images.length, elements: images.slice(0, 8).map((img) => `${window.__ui.describe(img)} ${img.currentSrc.slice(-60)}`) },

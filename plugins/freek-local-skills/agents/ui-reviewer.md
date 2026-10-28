@@ -29,7 +29,7 @@ The caller gives you:
    **judge** rules are yours, **source** rules need the code (Grep and Read, when the caller says the session is in the
    app's repo).
 2. Read `checks.json`. Turn each measured problem into a finding, with the JSON key and value as evidence: axe
-   violations, `overflow`, `transitionAll`, `imagesWithoutSize`, `NO INDICATOR` stops and covered stops in the walks,
+   violations, `overflow`, `gutter` under 15 px at phone widths, `transitionAll`, `imagesWithoutSize`, `NO INDICATOR` stops and covered stops in the walks,
    `motion[].reduce.infinite`, `emptyMessageWhileLoading`, focus on `body` after a retry or submit, and the form rows.
    Group one cause seen at several widths or pages into one finding. Read `notRun` and carry it to your "Not checked".
 3. Look at the screenshots `checks.json` names, with Read: one per page at the widest and narrowest width first, others
