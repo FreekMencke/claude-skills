@@ -1,0 +1,47 @@
+/*
+ * design-workshop starter tokens for a Tailwind 4 repo: the grid and spacing defaults of
+ * tokens.css as an @theme block. Copy it into the CSS file that imports Tailwind, with the
+ * picked values filled in. Keep it in step with tokens.css.
+ * Sources (claude-kb): LAYOUT-002, LAYOUT-003, LAYOUT-004, SPACE-002, SPACE-003, SPACE-019, SPACE-021.
+ */
+
+@theme {
+  /* Scale (SPACE-002, SPACE-019). Clearing the multiplier keeps only the named steps: an
+     unnamed one such as p-5 or p-0.75 compiles to nothing, so it shows in review. Arbitrary
+     values (m-[13px]) and mt-px still compile. Sizes, inset and translate share these steps:
+     name the size steps the design uses, or keep sizes in their own tokens. */
+  --spacing: initial;
+  --spacing-0: 0;
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-2: 0.5rem; /* 8px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-8: 2rem; /* 32px */
+  --spacing-12: 3rem; /* 48px */
+  --spacing-16: 4rem; /* 64px */
+
+  /* By role (SPACE-021): gap-icon, gap-inside, gap-between, py-section. Each level at least two
+     steps above the one inside it. */
+  --spacing-icon: 0.5rem; /* 8px, icon to label */
+  --spacing-inside: 1rem; /* 16px, inside a group */
+  --spacing-between: 2rem; /* 32px, between groups */
+  --spacing-section: 3rem; /* 48px on phones, 64px from sm (below; SPACE-003) */
+
+  /* Widths (LAYOUT-004): max-w-page (centred with mx-auto; header and footer bands may run full
+     width) and max-w-text. */
+  --container-page: 80rem; /* 1280px */
+  --container-text: 70ch;
+
+  /* Breakpoints (LAYOUT-002): Tailwind's own sm (40rem, 640px) and lg (64rem, 1024px), so none
+     are set here. Grid (LAYOUT-003): grid-cols-1 lg:grid-cols-12, gutters gap-4 lg:gap-6, page
+     margins px-4 lg:px-8. */
+}
+
+@layer base {
+  @media (width >= 40rem) {
+    :root {
+      --spacing-section: 4rem; /* 64px */
+    }
+  }
+}
