@@ -1,6 +1,6 @@
 ---
 name: angular-conventions
-description: "House rules for Angular apps, on top of angular-developer: templates, accessibility (native elements, dialogs, focus after navigation, status messages), forms (submit button, field errors, autocomplete), animation (SSR-safe entrances, reduced motion, libraries), imports and layers, signal stores, loading, empty and failure states, routes, URL state and page meta, upgrades (ng update, TypeScript range, migration opt-outs), SSR on a custom Express server (CSP nonce, transfer cache, third-party timeouts), Vitest specs, Tailwind tokens and CSS features. Use when writing, reviewing, refactoring or upgrading code in an Angular app that follows these house rules, or when asked for our Angular conventions. Not for how an Angular API works, choosing between Angular's forms APIs, or scaffolding: use angular-developer."
+description: "House rules for Angular apps, on top of angular-developer: templates, accessibility (native elements, dialogs, focus after navigation, status messages), forms (submit button, field errors, autocomplete), animation (SSR-safe entrances, reduced motion, libraries), imports and layers, signal stores, loading, empty and failure states, routes, URL state and page meta, upgrades (ng update, TypeScript range, migration opt-outs), SSR on a custom Express server (CSP nonce, transfer cache, third-party timeouts), Vitest specs, charts, layout and spacing in CSS, Tailwind tokens and CSS features. Use when writing, reviewing, refactoring or upgrading code in an Angular app that follows these house rules, or when asked for our Angular conventions. Not for how an Angular API works, choosing between Angular's forms APIs, or scaffolding: use angular-developer."
 ---
 
 # Angular conventions
@@ -147,6 +147,23 @@ Before writing a helper, use what's installed, and hand-write only what it can't
 - Dates: Angular's `formatDate(value, format, locale, 'UTC')` for UTC dates (date-fns' `format` is local time only),
   date-fns for local ones. `Intl` for numbers.
 
+## Charts
+
+IDs in parentheses here and under Layout and spacing are claude-kb entries, which hold the evidence.
+
+- Pick in this order, going on only when a step can't do the chart: no library (a stat tile with `Intl`, a `<meter>`,
+  CSS-width bars in a table); a table or hand-written SVG in the template; `d3-scale`/`d3-shape` for scales, ticks and
+  curves, with Angular still rendering the SVG (no `d3-selection`); then a library, with its reason in a comment. No
+  ngx-charts: it relies on `@angular/animations`, leaves the chart unnamed and adds a Tab stop per bar (VIZ-012).
+- Every chart states its takeaway in visible text (a title that gives the finding, not "Players online"), and has a
+  `<table>` with a `<caption>` of its data, beside it or in a `<details>` (VIZ-005, VIZ-014).
+- One `role="img"` with an `aria-label`, on the `<svg>`, the `<canvas>` or its wrapper, when nothing inside is
+  focusable. A chart with focusable points is a labelled `<figure>` or `role="group"` instead (VIZ-014).
+- No chart library reads `prefers-reduced-motion`: pass it in (`animation: false` under reduce), read in the browser
+  and kept in a signal so a change updates the chart (VIZ-027).
+- A library chart below the fold goes in `@defer (on viewport)` with a placeholder that carries the takeaway: some
+  libraries throw during SSR, and it keeps them out of the initial bundle (VIZ-010).
+
 ## Async data and failures
 
 - `httpResource` or `rxResource`, also for a request a user action starts: a signal of the submitted input as `params`,
@@ -221,6 +238,24 @@ Before writing a helper, use what's installed, and hand-write only what it can't
 - `vi.mock` works for packages only: the unit-test builder rejects it for relative imports. Swap those through TestBed
   providers.
 - App specs: `HttpTestingController` for HTTP, and clear `localStorage` in `afterEach`.
+
+## Layout and spacing
+
+- Layout is CSS, never an `@if` on `BreakpointObserver` or `isPlatformBrowser`: nothing matches on the server, so every
+  visitor gets the no-match HTML and phones shift after hydration (LAYOUT-015). `BreakpointObserver` stays fine for
+  behaviour after render, such as closing a menu or reduced motion in a chart.
+- Per region, in this order: intrinsic CSS (`repeat(auto-fit, minmax(min(100%, 16rem), 1fr))`, a wrapping flex row);
+  container queries for components; viewport breakpoints (`md`, `lg`) for page structure only (LAYOUT-003, LAYOUT-009,
+  LAYOUT-011, LAYOUT-012).
+- Spacing steps come from the scale only. Less space inside a group than between groups, at least two steps apart: 16
+  against 20 doesn't read as a new group (SPACE-005, SPACE-021).
+- Start from the role: icon to label 4–8 px, inside a group 8–16, between groups 24–32, between sections 48–80
+  (SPACE-021).
+- Group with space before borders, dividers or cards: widen the gap between groups first, and add a boundary only if the
+  grouping still isn't clear, as with variable-height cards in a grid or a dense table (SPACE-006).
+- Align an icon with its label with `items-center` and a `gap`, never per-breakpoint margin nudges (`mt-0.75
+  sm:mt-2.25`). If a font still sits a pixel off, trim the label element (not the flex container) with `text-box:
+  trim-both cap alphabetic`, as an enhancement only: it isn't Baseline (SPACE-012, SPACE-013, SPACE-014).
 
 ## Tailwind
 
