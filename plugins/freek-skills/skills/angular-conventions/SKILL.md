@@ -149,7 +149,8 @@ Before writing a helper, use what's installed, and hand-write only what it can't
 
 ## Charts
 
-IDs in parentheses here and under Layout and spacing are claude-kb entries, which hold the evidence.
+IDs in parentheses here, under Async data and failures and under Layout and spacing are claude-kb entries, which hold
+the evidence.
 
 - Pick in this order, going on only when a step can't do the chart: no library (a stat tile with `Intl`, a `<meter>`,
   CSS-width bars in a table); a table or hand-written SVG in the template; `d3-scale`/`d3-shape` for scales, ticks and
@@ -169,10 +170,12 @@ IDs in parentheses here and under Layout and spacing are claude-kb entries, whic
 - `httpResource` or `rxResource`, also for a request a user action starts: a signal of the submitted input as `params`,
   `reload()` to repeat it. If you subscribe instead, reset the loading state in `finalize`.
 - Every failable load shows its failure, with a retry (`reload()`). Never `catchError(() => of(empty))`, or an `error`
-  callback that only empties the data.
+  callback that only empties the data. The retry's busy label ("Checking…") comes from `status() === 'reloading'` or a
+  signal set on click, never `isLoading()`, which is true on the first load too (NG-019).
 - `@switch` on the resource's `status()`, so each state gets its branch: empty is distinct from loading (never "No
-  results" before the data arrives), and `'reloading'` keeps the previous value on screen instead of a skeleton.
-  `hasValue()` guards `value()`, which throws on error.
+  results" before the data arrives), and `'reloading'` keeps the previous value on screen when `hasValue()`, instead of
+  a skeleton. A reload after an error has no value, so it gets the loading state; `error()` stays set until it settles,
+  so never test `error()` before `status()` (NG-019). `hasValue()` guards `value()`, which throws on error.
 - `encodeURIComponent` each path segment; query values go in `params`.
 
 ## Routes and page meta
