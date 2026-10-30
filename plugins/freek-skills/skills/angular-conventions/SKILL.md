@@ -234,6 +234,8 @@ the evidence.
 ## Tests
 
 - Only for complex or important logic, never for coverage. Break the protected code once to see the test fail.
+- Write expected values as literals, never recomputed the way the code computes them: `expect(total(items)).toBe(
+  items.reduce(...))` passes by construction and catches nothing.
 - Specs sit next to the code and import from `vitest`.
 - Server specs start with `// @vitest-environment node`. Run them as a quoted folder glob
   (`ng test --include 'src/server/**/*.spec.ts'`), not one by one: when `tsconfig.spec.json` leaves out Node's types,

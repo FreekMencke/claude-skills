@@ -19,7 +19,7 @@ Keep going without checking in, except for the cases in "When to stop and ask".
 |---|---|---|
 | Scouting, searching, read-only sweeps: the Explore agent | Haiku: pass `model: haiku` unless `~/.claude/agents/explore.md` exists and pins it | `medium`, never `low` (Haiku at `low` skips checks) |
 | The repo's reviewer agent | Unset, so the pin in its file applies | Unset if its file pins one, else `high` |
-| Issue-check runs | Sonnet | `high` |
+| Spec-check runs | Sonnet | `high` |
 | Mechanical units with a tight brief: renames, repeated edits, tests for existing code, docs | Sonnet | `medium` |
 | Units needing design judgment, or defining a shared contract | Session model | `high` |
 | Extremely complex coding or analysis the session model at `high` has already failed at, or clearly would: a novel algorithm, deep numeric or geometric work, a subtle multi-file bug hunt | Fable | `high`, never above |
@@ -29,7 +29,7 @@ If you can state exactly which files change and how, the unit is mechanical. A c
 
 **Escalate effort before tier.** A unit too hard for its row: first the same model one effort level up (to `xhigh` at most), then one tier up (Sonnet to the session model), then Fable only for a unit that fits its row.
 
-**Fable is the exception, not the tier above the session model.** Opus 5.5 scores higher than Fable 5.1 on Anthropic's published coding benchmarks (Terminal-Bench 4.0, FrontierCode, CursorBench; Anthropic says the real gap is narrower than the scores suggest), while Fable is slower, costs 2.5× Opus per token, and on Max may use at most 50% of the weekly limits (as of 2026-10-12; re-check when a model ships). So use it only for units that fit its row: never for reviewers, issue checks, scouting, docs or mechanical units, even when escalating. Fable units share the session's rate limit, so run at most two at a time. Set `model` on every spawn so nothing inherits Fable from the session. When the session itself runs on Fable, use Opus for the session-model rows; Explore then runs on Opus unless you pass `model: haiku`.
+**Fable is the exception, not the tier above the session model.** Opus 5.5 scores higher than Fable 5.1 on Anthropic's published coding benchmarks (Terminal-Bench 4.0, FrontierCode, CursorBench; Anthropic says the real gap is narrower than the scores suggest), while Fable is slower, costs 2.5× Opus per token, and on Max may use at most 50% of the weekly limits (as of 2026-10-12; re-check when a model ships). So use it only for units that fit its row: never for reviewers, spec checks, scouting, docs or mechanical units, even when escalating. Fable units share the session's rate limit, so run at most two at a time. Set `model` on every spawn so nothing inherits Fable from the session. When the session itself runs on Fable, use Opus for the session-model rows; Explore then runs on Opus unless you pass `model: haiku`.
 
 ## When to stop and ask
 
@@ -120,7 +120,9 @@ Last, check the result against the original goal, not only the units: exercise t
 
 ## 8. Review
 
-Run these in parallel on the integrated result, then fix and rerun until clean.
+Run these in parallel on the integrated result, then fix what holds and rerun until no finding that affects correctness
+is left. A reviewer asked to find problems always finds something; fixing every finding adds abstraction layers and
+tests for cases that can't happen.
 
 **The reviews the repo prescribes**, as its skill or `CLAUDE.md` describes them: its reviewer agent (`.claude/agents/`, e.g. `conventions-reviewer`), and any other review it names, such as `/code-review` run in a subagent. Check another review's findings against the code before fixing them, as for the reviewer agent below. For the reviewer agent:
 
@@ -130,7 +132,7 @@ Run these in parallel on the integrated result, then fix and rerun until clean.
 - Check each **breaks** and **violates** finding against the code before fixing it; drop the ones that don't hold and say so in the report. Fix the rest. Pass **check** findings to the user as written.
 - Run it on the whole integrated diff, not per unit: its rules span files.
 
-**An issue check**, for roadmap children: one fresh subagent per child (Sonnet, `high`) compares that child's diff with the issue text and reports what is missing, extra or different. You wrote the brief, so you are a poor judge of whether it matched the issue.
+**A spec check**: for roadmap children, one fresh subagent per child (Sonnet, `high`) compares that child's diff with the issue text; for other work, one compares the integrated diff with the user's spec (a `SPEC.md`, an issue) or, without one, the task as the user stated it. It reads without editing and lists what is missing, extra or different as tasks, and only gaps that affect correctness: tell it to skip style. You wrote the briefs, so you are a poor judge of whether they matched.
 
 None of these replaces your own diff reading or the verify command.
 
