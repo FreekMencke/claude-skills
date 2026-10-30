@@ -46,9 +46,10 @@ Not this skill:
 
 ## Start
 
-Get the subject, the page's one job (sign up, book, buy, learn) and its real facts, and ask where the person keeps
-their log of past looks (below). Ask only what is missing, at most three questions at once. For a whole site, run the
-workshop on its main page; the brief then covers the rest.
+Get the subject, the page's one job (sign up, book, buy, learn) and its real facts, and ask where the person keeps their
+log of past looks (below). Ask only what is missing and not already in the repo or the brief: at most three questions at
+once, numbered, each with your best guess so "yes" accepts it. For a whole site, run the workshop on its main page; the
+brief then covers the rest.
 
 For an existing site or app, or a repo that already has a design, start with "Existing site" below. When the brief
 already settles a step (fixed brand colours, a named audience), lock it: say so and use it as given.
