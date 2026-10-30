@@ -89,7 +89,7 @@ A comment on a public repo is public: no secrets, tokens, account, resource or c
 
 End with exactly this, filled in:
 
-> Handoff written to <link or path>. Run `/rename <short name>` so `/resume` can find this session, then `/clear`,
+> Handoff written to <link or path>. Run `/clear <short name>`, which names this session so `/resume` can find it,
 > then start with: `continue from <link or path>`
 
 In the desktop app, which has no `/resume` in WSL sessions, end with this instead:
