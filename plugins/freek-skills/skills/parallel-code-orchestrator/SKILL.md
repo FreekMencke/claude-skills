@@ -37,7 +37,8 @@ If you can state exactly which files change and how, the unit is mechanical. A c
 - Landing, where the repo says to ask (`main` or a PR).
 - A roadmap child or plan that is stale: it no longer matches the code. Stop that unit, keep the rest of the wave going, and say what the issue should say instead.
 - A request that conflicts with the roadmap or a repo's hard rules.
-- For a large or hard-to-undo task: before launching, show the user the plan in a few lines and wait for a go-ahead.
+- Decisions only the user can make (scope, behaviour, trade-offs) on a task with no roadmap child or spec settling them: ask them in one round before planning. Number each question and give your recommended answer, worded so "yes" accepts it; a question that depends on another open one waits for the next round. Facts the code or docs can answer are yours: send Explore for them and never ask. With nobody to answer (`-p`, a routine, `/loop`), take your recommendations, record them in the progress file and list them in the report.
+- For a large or hard-to-undo task: before launching, show the user the plan in a few lines, with that round's answers, and wait for a go-ahead.
 
 Everything else: decide, note the decision in the progress file, and continue.
 
