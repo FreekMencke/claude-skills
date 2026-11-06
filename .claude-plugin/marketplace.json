@@ -3,7 +3,7 @@
   "owner": {
     "name": "Freek Mencke"
   },
-  "description": "Freek Mencke's Claude Code skills, in two plugins",
+  "description": "Freek Mencke's Claude Code skills, in two plugins, and a GDScript language server plugin",
   "plugins": [
     {
       "name": "freek-skills",
@@ -14,6 +14,11 @@
       "name": "freek-local-skills",
       "source": "./plugins/freek-local-skills",
       "description": "Claude Code-only skills: handoff, token audit, SEO audit, font outline repair (with its reviewer subagent). Don't install on claude.ai"
+    },
+    {
+      "name": "gdscript-lsp",
+      "source": "./plugins/gdscript-lsp",
+      "description": "GDScript code intelligence for Claude Code through Godot's built-in language server. Needs Godot 4 and Python 3; Claude Code only"
     }
   ]
 }

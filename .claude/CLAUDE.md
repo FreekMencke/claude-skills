@@ -1,6 +1,7 @@
 # claude-skills
 
-Marketplace with two plugins. README.md is for people installing them; working here is below.
+Marketplace with two skill plugins and a language server plugin. README.md is for people installing them; working here
+is below.
 
 - Each plugin has its own folder under `plugins/`, and the repo root is only the marketplace. Keep it that way: the
   claude.ai marketplace sync skips a plugin whose folder holds another `plugin.json` (it skipped `freek-skills` while
@@ -15,11 +16,15 @@ Marketplace with two plugins. README.md is for people installing them; working h
   `disallowed-tools`, `paths`). Its subagents are in `plugins/freek-local-skills/agents/` (the default folder, so no
   `agents` key in `plugin.json`: that key replaces the folder scan), spawned as `freek-local-skills:<agent>`; a skill
   that falls back to reading one uses `${CLAUDE_PLUGIN_ROOT}/agents/<agent>.md`.
-- No `version` in either `plugin.json`, on purpose (installs track commits); don't add one for the validate warning.
+- `plugins/gdscript-lsp/` (`gdscript-lsp`, Claude Code only): no skills, only an LSP server that runs
+  `scripts/godot-lsp-bridge.py`, which starts a headless Godot editor and relays stdio to its TCP language server. The
+  server is inline in `plugin.json`, not in `.lsp.json`, because `claude plugin validate` doesn't read `.lsp.json`.
+  To test a bridge change without Godot, point `GODOT` at a stand-in that listens on `--lsp-port`.
+- No `version` in any `plugin.json`, on purpose (installs track commits); don't add one for the validate warning.
   It's also why CI doesn't use `--strict`; any other warning fails CI.
 - Don't write `$0` in a skill: Claude Code replaces it with the first argument. In awk, use `$(0)`.
 - Verify (CI runs the same on pushes to `main` and on PRs): `claude plugin validate` on `.` (the marketplace),
-  `plugins/freek-skills` and `plugins/freek-local-skills`, and `python3 scripts/check-frontmatter.py`. After changing a
+  each `plugins/<plugin>`, and `python3 scripts/check-frontmatter.py`. After changing a
   workflow, also `GH_TOKEN=$(gh auth token) uvx zizmor@<version in zizmor.yml> .`: CI's `zizmor` check runs it, and
   every ignore is inline with its reason (`.github/zizmor.yml`).
 - `main` is protected by the repo ruleset `main`, without bypass: changes land through a PR, squash only, once CI's

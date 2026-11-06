@@ -15,6 +15,7 @@
 claude plugin marketplace add FreekMencke/claude-skills
 claude plugin install freek-skills@freek-skills
 claude plugin install freek-local-skills@freek-skills   # Claude Code only
+claude plugin install gdscript-lsp@freek-skills         # Claude Code only, for Godot projects
 ```
 
 On claude.ai: Customize › Plugins › Add marketplace `FreekMencke/claude-skills`, then install `freek-skills`.
@@ -53,6 +54,23 @@ may only read it as an instruction. `font-outline-repair` runs its Python script
 (`~/.venvs/fontrepair`) and hands its renders to the plugin's `font-outline-reviewer` subagent. `ui-review` runs its
 check script with Node and Playwright (from the app's repo, or installed in the scratchpad) and needs the Playwright
 plugin for its `ui-reviewer` subagent.
+
+## Code intelligence
+
+| Plugin | What it does | Needs |
+|---|---|---|
+| `gdscript-lsp` | GDScript for Claude Code's `LSP` tool (definitions, references, hover) and diagnostics after edits, from Godot's built-in language server | Godot 4, Python 3 |
+
+Godot serves GDScript only over TCP from a running editor, so the plugin's bridge script starts a headless editor
+(`godot --headless --editor --lsp-port <free port>`) the first time Claude Code needs the server, relays stdio to it,
+and stops it when the session ends. It finds:
+
+- **Godot**: `$GODOT`, else `godot` on `PATH`.
+- **The project**: `project.godot` in the repository root, else in the one folder directly under it that has one
+  (`addons/` and `spikes/` are skipped). Set `GODOT_PROJECT` (relative to the root, or absolute) to pick another.
+
+The first start in a fresh clone runs Godot's import, which writes the project's `.godot/` folder. Claude Code waits up
+to two minutes for it.
 
 ## License
 
