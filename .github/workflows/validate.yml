@@ -32,7 +32,7 @@ jobs:
         run: |
           claude --version
           status=0
-          for target in . plugins/freek-skills plugins/freek-local-skills; do
+          for target in . plugins/freek-skills plugins/freek-local-skills plugins/gdscript-lsp; do
             echo "== $target"
             claude plugin validate --json "$target" > validate.json || true
             jq -r '[.manifest] + .contents | .[] | (.errors[] | "error   \(.path): \(.message)"), (.warnings[] | "warning \(.path): \(.message)")' validate.json
