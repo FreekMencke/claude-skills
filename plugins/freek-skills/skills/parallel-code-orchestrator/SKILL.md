@@ -74,7 +74,7 @@ Learn the layout, then list what parallel subagents would collide on. The repo's
 
 - **Shared files** every change wants: changelog, data-model or API docs, routes, registries, config, lockfiles, barrel exports
 - **Shared code** every part builds on: common libraries, shared build config
-- **Shared runtime**: dev-server ports, `.env` files, databases, anything with no staging copy
+- **Shared runtime**: dev-server ports, `.env` files, databases, anything with no staging copy. A port or credential other sessions use too is shared with them, not only with your units
 - **Worktree gaps**: whether a worktree has its dependencies installed, an `.env`, and a path to sibling repos (a `.worktreeinclude` file copies gitignored files such as `.env` into new worktrees)
 
 Search a large area with Explore, as the table's first row sets it. Run the repo's verify command now and record what already fails.
@@ -83,9 +83,9 @@ Search a large area with Explore, as the table's first row sets it. Run the repo
 
 Per unit: **goal** (for a roadmap child, the issue reference), **owned files**, **read-only context**, **done-when**, **model and effort** (from the table).
 
-- **No two units own the same file.** Shared files, the changelog above all, are yours during integration; units report what they need added. Compare the files roadmap children touch before putting two in one wave.
+- **No two units own the same file.** A file-ownership list per unit is what keeps parallel PRs conflict-free; in a 30-agent run the only conflicts were the shared changelog. Shared files, the changelog above all, are yours during integration; units report what they need added. Compare the files roadmap children touch before putting two in one wave.
 - **Shared code goes to one unit**, never two, and in an earlier wave than the units that build on it.
-- **Shared runtime stays with you.** Subagents don't start dev servers or write to a shared database; you run such checks once on the integrated result.
+- **Shared runtime stays with you.** Subagents never use the shared dev-server port or write to a shared database; you run such checks once on the integrated result. A unit that needs a browser check builds production and serves it on a free port, since the app's CORS or allowed origins may name only the dev port.
 - **Decide once, share everywhere.** Subagents can't see each other's choices, and mismatched choices are the usual integration failure. Settle whatever two units would each decide for themselves (signatures, types, endpoint shapes, schemas, naming, error handling, which pattern or library, user-facing wording) and paste identical text into every brief that needs it. A unit that still has open design decisions isn't ready to run in parallel.
 - **A feature and its tests are one unit.** Splitting the tests for new code into another unit costs more coordination than it saves. A unit that only adds tests for existing code is fine.
 - **Done-when is a command.** If no test or check can show a unit is done, write that check first or keep the unit yourself.
@@ -99,13 +99,17 @@ Per unit: **goal** (for a roadmap child, the issue reference), **owned files**, 
 
 ## 5. Brief each subagent
 
-A subagent gets `CLAUDE.md` and your brief, and nothing else you can rely on: not the conversation, not the repo skill, not the other units. Its `CLAUDE.md` comes from the main checkout, not its worktree's branch, so when an earlier wave changed `CLAUDE.md` or `.claude/rules/`, the brief must say what changed.
+A subagent gets your brief and, when it starts inside the repo, `CLAUDE.md`; nothing else you can rely on: not the conversation, not the repo skill, not the other units. One started at a parent folder (say `~/repos`) gets neither the repo's `CLAUDE.md` nor its `PreToolUse` hooks (format and lint before push), so its brief must tell it to read `CLAUDE.md` and the repo skill and to run the formatter and the pre-push checks by hand. Its `CLAUDE.md` comes from the main checkout, not its worktree's branch, so when an earlier wave changed `CLAUDE.md` or `.claude/rules/`, the brief must say what changed.
+
+Name the repo's most-often-broken rules in each brief and have the unit check its diff against them before it reports: review keeps catching the same slips (in one run, off-scale spacing classes in three PRs). Take them from `CLAUDE.md` and the findings of earlier waves' reviews.
 
 Read [references/brief-template.md](references/brief-template.md) before writing the first brief, and fill in every section.
 
 ## 6. Launch
 
 Send the whole wave in one message so it runs concurrently. Give each code-writing unit its own worktree by passing `isolation: "worktree"` on the Agent call itself, not only in an agent's frontmatter: with agent teams enabled, a named spawn without it becomes a teammate working in the main checkout.
+
+`isolation: "worktree"` fails when your cwd isn't a git repo. Then create each worktree yourself (`git worktree add <absolute path> -b <branch>`) and have the brief start with `cd` into it.
 
 A subagent's worktree starts from the repo's default branch, not from your branch. From wave 2 on, either the previous wave has landed, or the brief starts by merging your integration branch. Setting `worktree.baseRef` to `"head"` in settings does the same by starting worktrees from your current branch.
 
@@ -121,7 +125,7 @@ Last, check the result against the original goal, not only the units: exercise t
 
 ## 8. Review
 
-Run these in parallel on the integrated result, then fix what holds and rerun until no finding that affects correctness
+Run these in parallel on the integrated result (for roadmap children, on each child's PR), then fix what holds and rerun until no finding that affects correctness
 is left. A reviewer asked to find problems always finds something; fixing every finding adds abstraction layers and
 tests for cases that can't happen.
 
@@ -131,15 +135,20 @@ tests for cases that can't happen.
 - Name the branch or paths; its default diff assumes it runs in the checkout under review.
 - If it is not available as an agent type, spawn a general subagent told to follow that file exactly, read-only, on the model the file pins.
 - Check each **breaks** and **violates** finding against the code before fixing it; drop the ones that don't hold and say so in the report. Fix the rest. Pass **check** findings to the user as written.
-- Run it on the whole integrated diff, not per unit: its rules span files.
+- Run it on the whole integrated diff, not per unit: its rules span files. Roadmap children are the exception: they land as separate PRs, so each PR gets it.
+- Two reviews per PR, the reviewer agent on a cheaper model plus one `/code-review high <n>`, caught real bugs at modest cost.
 
 **A spec check**: for roadmap children, one fresh subagent per child (Sonnet, `high`) compares that child's diff with the issue text; for other work, one compares the integrated diff with the user's spec (a `SPEC.md`, an issue) or, without one, the task as the user stated it. It reads without editing and lists what is missing, extra or different as tasks, and only gaps that affect correctness: tell it to skip style. You wrote the briefs, so you are a poor judge of whether they matched.
+
+A review that runs `/code-review` on a PR checks that PR out in its cwd. Tell the review subagent to `cd` into that PR's own worktree first; one run from the main checkout left it on a detached head.
+
+Fix findings by count: a few, fix them yourself; many, give a fresh subagent the review text and the unit's brief. The author's context is rarely worth resuming (see the size check in triage).
 
 None of these replaces your own diff reading or the verify command.
 
 ## 9. Land and report
 
-Landing follows the repo's rules. Honour every "do not merge or deploy before" note on a roadmap child, even when its code is ready. After a child lands, tick its box in the roadmap checklist (re-read the body right before editing; other sessions edit it too) and add a dated update line if what you learned makes the shared context wrong for the open children. Unassign any child you claimed and did not finish. Remove the integration branch and the worktrees of finished units; a worktree that holds changes is not cleaned up for you.
+Landing follows the repo's rules. Before each merge, rebase on the default branch: changelog entries from parallel PRs fold under one heading, and a claim in an entry ("nothing links to this yet") goes stale as siblings land, so re-read it on rebase. Wait for CI with a background `gh pr checks <n> --watch` and carry on; don't poll. `mergeStateStatus` is `UNKNOWN` for a few seconds after a push and `BLOCKED` while required checks run: neither is a failure; recheck, and rebase only on `DIRTY`. Honour every "do not merge or deploy before" note on a roadmap child, even when its code is ready. After a child lands, tick its box in the roadmap checklist (re-read the body right before editing; other sessions edit it too) and add a dated update line if what you learned makes the shared context wrong for the open children. Unassign any child you claimed and did not finish. Remove the integration branch and the worktrees of finished units; a worktree that holds changes is not cleaned up for you.
 
 If the run changed something the repo's docs describe (layout, commands, env vars, ports, a documented contract), run the `refresh-md-files` skill on a Sonnet subagent at `medium`, scoped to the affected `.md` files, and put its findings in the report. Fixing the docs is a separate, doc-only change.
 
@@ -150,4 +159,17 @@ Report, outcome first:
 - Review result: clean, the open **check** findings, and the findings dropped as not holding
 - Anything unfinished, skipped or assumed
 
-Leave out which subagent or model did what unless asked.
+- Per subagent, token use and wall time from its completion usage line, noted in the progress file as each finishes; flag one far over its budget
+
+Otherwise leave out which subagent or model did what unless asked.
+
+## Leading a session that keeps getting requests
+
+When the user keeps sending feedback while units run, you stay the lead:
+
+- Triage each message. A question or a small fix is yours, inline. A change to files a running unit owns goes to that unit by `SendMessage` (after the size check), not to a second unit. Anything else becomes a new unit, with its owned files checked against the running ones.
+- Keep each brief as a file next to the progress file and append every follow-up to it, so a stopped unit's successor can start from it.
+- Check a request isn't taken before briefing it: other sessions may hold it (open PRs, remote branches, assigned issues).
+- After a merge that changes how everyone works (a helper, a rule), tell the running units to rebase.
+- Answer in a few lines: what started, what you need from the user. Don't predict a unit's result.
+

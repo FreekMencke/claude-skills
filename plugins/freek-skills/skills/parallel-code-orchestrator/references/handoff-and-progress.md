@@ -16,7 +16,7 @@ Lets a fresh subagent or session continue without the old one's context. It live
 
 The orchestrator's own plan and state, in a file outside the repo's tracked files:
 
-- Units: goal, owned files, model and effort, wave, branch and worktree, status
+- Units: goal, owned files, model and effort, wave, branch and worktree, status, token use and wall time from its usage line
 - Decisions: the shared decisions pasted into briefs, and every decision taken instead of asking
 
 Update it as units finish, and re-read it after any context compaction. A session that resumes a stopped run reads it and `git worktree list` first.
