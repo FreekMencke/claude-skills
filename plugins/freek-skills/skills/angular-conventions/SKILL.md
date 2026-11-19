@@ -21,6 +21,10 @@ server), used as-is where a repo has made no choice of its own.
 
 - Inline (`template:`) up to about 80 lines, a `.html` file beside the component (`templateUrl`) above that, so the
   class stays readable. Move it out when a change takes it over.
+- Sibling inline elements whose text must stay separate words (a full and a short label, a value and its unit) get
+  `&ngsp;` between them: Angular drops the whitespace between elements (`preserveWhitespaces: false`), so two spans
+  render as `Full labelShort label` in the server HTML, which crawlers, copy and text-only readers get. Check the server
+  HTML's text, not the rendered page, where CSS hides one of them.
 
 ## Accessibility
 
