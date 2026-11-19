@@ -93,8 +93,8 @@ data for it: small sites usually have none.
 
 ## Lighthouse CLI
 
-Needs Node 22 or later and a local Chrome or Chromium. Run it from the scratchpad, not the repo: under WSL its Chrome
-profile path can land as a folder named `C:\…` in the current directory.
+Needs Node 22 or later and a local Chrome or Chromium. Run it from the scratchpad (`cd` to its absolute path), not the
+repo: under WSL its Chrome profile path can land as a folder named `C:\…` in the current directory.
 
 ```bash
 npx -y lighthouse@13 "<page URL>" --only-categories=performance,seo --output=json --output-path=stdout --quiet \
