@@ -15,6 +15,14 @@ Load the repo's skill (<name>) before writing anything.
 path to sibling repos>
 <when an earlier wave changed CLAUDE.md or .claude/rules/: "Your CLAUDE.md
 is loaded from the main checkout and is out of date: <what changed>.">
+<started outside the repo, or unsure: "Read CLAUDE.md first; its hooks don't
+run for you, so run the formatter and the pre-push checks by hand.">
+Rules most often broken here: <3 to 5 house rules from CLAUDE.md or earlier
+reviews>. Check your diff against them before you report.
+<browser check: "Use a production build on a free port, not the dev port.
+A headless browser may be treated as a bot (<which feature, e.g. visit
+tracking, is gated on a human-visitor check>): <how to get past it, or
+skip that check and say so>.">
 
 ## Scope
 You may edit: <owned files>
@@ -35,7 +43,7 @@ Fix failures you caused. Already failing, ignore: <list>
 
 ## Limits
 Commit on your worktree branch with normal signing. No push, deploy,
-publish, dev server, issue edits, or anything that changes remote state.
+publish, shared dev server, issue edits, or anything that changes remote state.
 Don't spawn subagents except read-only Explore searches.
 Context budget: about <N>k tokens. When you get close, stop at a clean
 point: commit, write <scratchpad>/<unit>/HANDOFF.md, outside your
