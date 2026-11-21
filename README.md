@@ -31,6 +31,7 @@ On claude.ai: Customize › Plugins › Add marketplace `FreekMencke/claude-skil
 | `design-workshop` | Choose a page's look one small visual choice at a time, ending in a design brief | Any agent |
 | `research` | Answer a question with exact quotes, re-checked sources and tested claims | Best in Claude Code |
 | `tech-debt-audit` | Ranked technical-debt audit of a codebase | Best in Claude Code |
+| `session-lessons` | Turn a session's lessons into tightened rules, hooks or issues, without duplicates | Best in Claude Code |
 | `angular-conventions` | Opinionated Angular rules on top of `angular-developer` | Any agent |
 | `angular-developer` | Angular's official skill, mirrored weekly | Any agent |
 | `handoff` * | Save the session's state, `/clear`, and continue from it | Claude Code |

@@ -1,0 +1,13 @@
+schema_version: "1.1"
+name: session-lessons-loads-2
+tags: [session-lessons, should-load]
+execution:
+  prompt: "Retro time: what did this session teach us, and where should each lesson go?"
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?session-lessons"'
