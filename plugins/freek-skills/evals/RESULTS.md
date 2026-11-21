@@ -7,12 +7,13 @@ Latest run per skill, for the cases in `plugins/*/evals/`: runs that loaded the 
 |---|---|---|---|---|---|
 | `roadmap-issues` | 5 + 5 | 15/15 | 15/15 | 2.1.296 | 2026-10-15 |
 | `parallel-code-orchestrator` | 3 + 3 | 9/9 | 9/9 | 2.1.296 | 2026-10-12 |
-| `refresh-md-files` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-12; `skips-5` 2026-10-14 |
-| `skill-workshop` | 6 + 7 | 18/18 | 21/21 | 2.1.296 | 2026-10-23 |
+| `refresh-md-files` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-11-21 |
+| `skill-workshop` | 6 + 7 | 17/18 | 21/21 | 2.1.296 | 2026-11-21; `loads-4` 2/3, the same on `main` (5/6 over two runs): a run that loads no skill |
 | `design-workshop` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-16 |
 | `seo-audit` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-13; `skips-4` 2026-10-15 |
 | `ui-review` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-23 |
 | `font-outline-repair` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-20 |
 | `tech-debt-audit` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-10-15 |
 | `research` | 4 + 4 | 12/12 | 12/12 | 2.1.296 | 2026-10-15 |
+| `session-lessons` | 4 + 5 | 12/12 | 15/15 | 2.1.296 | 2026-11-21 |
 | `angular-conventions` | 10 + 7 | 30/30 | 21/21 | 2.1.296 | 2026-10-28 |
