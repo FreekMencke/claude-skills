@@ -8,7 +8,7 @@
     {
       "name": "freek-skills",
       "source": "./plugins/freek-skills",
-      "description": "Skills for every surface, claude.ai included: roadmap issues, parallel orchestration, doc and tech-debt audits, skill writing, opinionated Angular rules, and Angular's official angular-developer skill"
+      "description": "Skills for every surface, claude.ai included: roadmap issues, parallel orchestration, doc and tech-debt audits, skill writing, session lessons, opinionated Angular rules, and Angular's official angular-developer skill"
     },
     {
       "name": "freek-local-skills",

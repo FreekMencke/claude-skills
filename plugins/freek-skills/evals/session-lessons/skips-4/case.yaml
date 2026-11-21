@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: session-lessons-skips-4
+tags: [session-lessons, near-miss]
+description: "Near miss: handoff (not in this plugin, so this tests the description's own exclusion)."
+execution:
+  prompt: "My context is almost full. Write up where we are so I can clear and pick this up in a new session."
+  max_turns: 3
+  timeout_seconds: 180
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - name: skill-not-fired
+    type: tool_used
+    tool: Skill
+    input_match: '"skill"\s*:\s*"(?:[\w-]+:)?session-lessons"'
+    min: 0
+    max: 0
+    arm: both
